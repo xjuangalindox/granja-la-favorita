@@ -81,7 +81,7 @@ public class ConejoRepositoryTest {
 
     @Test
     void testExistsByNombre(){
-
+        // Verifica que el repositorio encuentra un conejo existente por nombre
         boolean existe = conejoRepository.existsByNombre("Marino");
 
         assertNotNull(existe);
