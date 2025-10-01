@@ -1,0 +1,274 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.carousel-container {
+    position: relative;
+    margin: 50px auto;
+    width: 1000px;
+    height: 600px;
+    background: #f5f5f5;
+    box-shadow: 0 30px 50px #dbdbdb;
+    overflow: hidden;
+}
+
+.carousel-container .slide .item{
+    width: 200px;
+    height: 300px;
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+    border-radius: 20px;
+    box-shadow: 0 30px 50px #505050;
+    background-position: 50% 50%;
+    background-size: cover;
+    display: inline-block;
+    transition: 0.5s;
+}
+
+.carousel-container .slide .item:nth-child(1),
+.carousel-container .slide .item:nth-child(2){
+    top: 0;
+    left: 0;
+    transform: translate(0, 0);
+    border-radius: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Miniaturas más a la izquierda */
+.carousel-container .slide .item:nth-child(3){
+    left: 68%;
+}
+.carousel-container .slide .item:nth-child(4){
+    left: calc(68% + 120px);
+}
+.carousel-container .slide .item:nth-child(5){
+    left: calc(68% + 240px);
+}
+
+.carousel-container .slide .item:nth-child(n + 6){
+    left: calc(50% + 660px);
+    opacity: 0;
+}
+
+.carousel-container .item .content{
+    position: absolute;
+    top: 50%;
+    left: 100px;
+    width: 300px;
+    text-align: left;
+    color: #eee;
+    transform: translate(0, -50%);
+    font-family: system-ui;
+    display: none;
+}
+
+.carousel-container .slide .item:nth-child(2) .content{
+    display: block;
+}
+
+.carousel-container .content .name{
+    font-size: 40px;
+    text-transform: uppercase;
+    font-weight: bold;
+    opacity: 0;
+    animation: animate 1s ease-in-out 1 forwards;
+}
+
+.carousel-container .content .des{
+    margin-top: 10px;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: animate 1s ease-in-out 0.3s 1 forwards;
+}
+
+.carousel-container .content button{
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    animation: animate 1s ease-in-out 0.6s 1 forwards;
+}
+
+@keyframes animate {
+    from{
+        opacity: 0;
+        transform: translate(0, 100px);
+        filter: blur(33px);
+    }
+    to{
+        opacity: 1;
+        transform: translate(0);
+        filter: blur(0);
+    }
+}
+
+/* BOTONERA CARROUSEL */
+.carousel-container .button{
+    position: absolute;
+    top: 90%;
+    width: 100%;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none;
+}
+
+.carousel-container .button button{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    border: 1px solid #fff;
+    transition: 0.3s;
+    pointer-events: all;
+}
+
+.carousel-container .button button:hover{
+    background: rgba(255, 255, 255, 0.8);
+    color: #000;
+}
+/* FIN BOTONERA CARROUSEL */
+
+body {
+    background: #eaeaea;
+    overflow-x: hidden;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Hero-title y botones */
+.hero-title h1,
+.hero-title p,
+.hero-title .btn {
+    font-family: inherit;
+    font-weight: 500;
+}
+
+/* Secciones hero y beneficios */
+.hero, .hero-title, .hero p, .hero-title p, .hero h1, .hero-title h1,
+section h2, section h5, section p {
+    font-family: inherit;
+}
+
+/* Responsividad para carrusel */
+@media (max-width: 1200px) {
+    .carousel-container {
+        width: 90vw;
+        height: 50vw;
+        max-width: 700px;
+        max-height: 400px;
+    }
+    .carousel-container .slide .item {
+        width: 140px;
+        height: 200px;
+        left: unset;
+    }
+    .carousel-container .slide .item:nth-child(3) {
+        left: 75%;
+    }
+    .carousel-container .slide .item:nth-child(4) {
+        left: calc(75% + 80px);
+    }
+    .carousel-container .slide .item:nth-child(5) {
+        left: calc(75% + 160px);
+    }
+}
+
+@media (max-width: 768px) {
+    .carousel-container {
+        width: 98vw;
+        /* height: 300px; */
+        height: 400px;
+        max-width: 98vw;
+        /* max-height: 300px; */
+        max-height: 400px;
+    }
+    .carousel-container .slide .item {
+        width: 90px;
+        height: 120px;
+        left: unset;
+    }
+    .carousel-container .slide .item:nth-child(1),
+    .carousel-container .slide .item:nth-child(2) {
+        width: 100%;
+        height: 100%;
+    }
+    .carousel-container .slide .item:nth-child(3) {
+        left: 75%;
+    }
+    .carousel-container .slide .item:nth-child(4) {
+        left: calc(75% + 60px);
+    }
+    .carousel-container .slide .item:nth-child(5) {
+        left: calc(75% + 120px);
+    }
+    .carousel-container .item .content {
+        left: 20px;
+        width: 80vw;
+        font-size: 14px;
+    }
+    .carousel-container .button button {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-container {
+        width: 100vw;
+        /* height: 200px; */
+        height: 400px;
+        max-width: 100vw;
+        /* max-height: 200px; */
+        max-height: 400px;
+    }
+    .carousel-container .slide .item {
+        width: 60px;
+        height: 80px;
+        left: unset;
+    }
+    .carousel-container .slide .item:nth-child(1),
+    .carousel-container .slide .item:nth-child(2) {
+        width: 100%;
+        height: 100%;
+    }
+    .carousel-container .slide .item:nth-child(3) {
+        left: 75%;
+    }
+    .carousel-container .slide .item:nth-child(4) {
+        left: calc(75% + 40px);
+    }
+    .carousel-container .slide .item:nth-child(5) {
+        left: calc(75% + 80px);
+    }
+    .carousel-container .item .content {
+        left: 10px;
+        width: 90vw;
+        font-size: 12px;
+    }
+    .carousel-container .button button {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+}
+
+/* Solución espacio vacío a la derecha en móviles */
+html, body {
+    width: 100vw;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+.carousel-container {
+    overflow: hidden;
+}

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ejemplares Disponibles</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f0f8ff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding-bottom: 3rem;
+    }
+    h2 {
+      color: #00796b;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-weight: 700;
+    }
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+    .card-img-top {
+      height: 180px;
+      object-fit: cover;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      cursor: pointer;
+    }
+    .padres-img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin: 0 auto;
+      display: block;
+      margin-top: 1rem;
+    }
+    .image-modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      padding-top: 60px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+    }
+    .image-modal-content {
+      margin: auto;
+      display: block;
+      max-width: 90%;
+      max-height: 80%;
+      border-radius: 12px;
+    }
+    .image-modal:hover {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div th:if="${isAuthenticated}" th:include="fragments/navbar :: layoutNavbarPrivate"></div>
+  <div th:if="${!isAuthenticated}" th:include="fragments/navbar :: layoutNavbarPublic"></div>
+
+<!-- ------------------------------------------------------------------ -->
+  <div class="container py-5">
+    <h2>Ejemplares Disponibles</h2>
+
+    <!-- NACIMIENTO -->
+    <div th:each="nacimiento : ${listaNacimientos}" class="mb-5">
+      <!-- Padre -->
+      <div class="row justify-content-center mb-4">
+        <div class="col-6 col-sm-6 col-md-4 d-flex justify-content-center mb-3">
+          <div class="card text-center" style="width: 14rem;">
+            <img th:src="${nacimiento.monta.macho.secureUrl}" 
+              th:alt="'Macho ' + ${nacimiento.monta.macho.nombre}" 
+              class="padres-img" onclick="mostrarImagen(this)">
+            <div class="card-body">
+              <h5 class="card-title fw-bold text-primary" th:text="'Padre: ' + ${nacimiento.monta.macho.raza.nombre}">Raza</h5>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Madre -->
+        <div class="col-6 col-sm-6 col-md-4 d-flex justify-content-center mb-3">
+          <div class="card text-center" style="width: 14rem;">
+            <img th:src="${nacimiento.monta.hembra.secureUrl}" 
+              th:alt="'Hembra ' + ${nacimiento.monta.hembra.nombre}" 
+              class="padres-img" onclick="mostrarImagen(this)">
+            <div class="card-body">
+              <h5 class="card-title fw-bold text-danger" th:text="'Madre: ' + ${nacimiento.monta.hembra.raza.nombre}">Raza</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ejemplares -->
+      <div class="row justify-content-center g-4">
+
+        <div class="col-6 col-sm-6 col-md-4 col-lg-3 d-flex justify-content-center" th:each="ejemplar : ${nacimiento.ejemplares}">
+
+            <div class="card h-100" style="width: 16rem;">
+              <!-- <img th:src="${ejemplar.secureUrl}" class="card-img-top" th:alt="'Ejemplar ' + ${ejemplar.id}" onclick="mostrarImagen(this)"> -->
+
+<!-- CARROUSEL EJEMPLAR -->
+<div class="carousel slide"
+     th:id="|carousel-ejemplar-${ejemplar.id}|"
+     data-bs-ride="carousel">
+
+  <div class="carousel-inner">
+    <div class="carousel-item"
+         th:each="foto, iterStat : ${ejemplar.fotos}"
+         th:classappend="${iterStat.index == 0} ? ' active'">
+      <img th:src="${foto.secureUrl}"
+        class="d-block w-100 card-img-top"
+        th:alt="'Imagen de ejemplar ' + ${ejemplar.id}"
+        style="height: 180px; object-fit: cover; cursor: pointer;"
+        
+        th:attr="data-fotos=${ejemplar.fotos.![secureUrl]}, data-index=${iterStat.index}"
+        onclick="abrirCarrusel(this)">
+    </div>
+    <!-- th:data-fotos="${ejemplar.fotos.![secureUrl]}" -->
+    <!-- th:attr="data-fotos=${ejemplar.fotos.![secureUrl]}, data-index=${iterStat.index}" -->
+    <!-- th:attr="data-fotos=${ejemplar.fotos.![secureUrl]}, data-index=${iterStat.index}" -->
+    <!-- th:attr="data-fotos=${ejemplar.fotos.![secureUrl]}" -->
+    <!-- onclick="mostrarImagen(this)"> -->
+  </div>
+
+  <!-- Controles (solo si hay > 1 foto) -->
+  <button class="carousel-control-prev" type="button"
+          th:if="${#lists.size(ejemplar.fotos) > 1}"
+          th:attr="data-bs-target=|#carousel-ejemplar-${ejemplar.id}|"
+          data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Anterior</span>
+  </button>
+
+  <button class="carousel-control-next" type="button"
+          th:if="${#lists.size(ejemplar.fotos) > 1}"
+          th:attr="data-bs-target=|#carousel-ejemplar-${ejemplar.id}|"
+          data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Siguiente</span>
+  </button>
+</div>
+<!-- FIN CARROUSEL EJEMPLAR -->
+
+              <div class="card-body text-center">
+                <h5 class="card-title" th:text="${ejemplar.sexo}">Sexo</h5>
+                <p class="card-text text-muted" th:text="'Nacimiento: ' + ${#temporals.format(nacimiento.fechaNacimiento, 'dd/MMMM/yyyy')}">Nacimiento: 01/Agosto/2025</p>
+                
+                <!-- Precio normal -->
+                <p class="card-text text-muted" th:text="${ejemplar.precio != null ? 
+                    'Precio: $' + #numbers.formatDecimal(ejemplar.precio, 1, 'COMMA', 2, 'POINT') + ' MXM'
+                    : 
+                    'Precio: no establecido'}">Precio: $3,000 MXM
+                </p>
+                
+                <!-- Precio de oferta -->
+                <p class="card-text text-danger fw-bold fs-5" th:if="${ejemplar.precio != null && ejemplar.precioOferta != null}"
+                  th:text="|¡Oferta! Solo paga $${#numbers.formatDecimal(ejemplar.precioOferta, 1, 'COMMA', 2, 'POINT')} MXM (Ahorra $${#numbers.formatDecimal(ejemplar.precio - ejemplar.precioOferta, 1, 'COMMA', 2, 'POINT')} MXM)|">
+                </p>
+
+              </div>
+            </div>
+
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+ <!-- --------------------------------------------------------------------- -->
+
+  <!-- Modal flotante -->
+  <div id="visorImagen" class="image-modal" onclick="cerrarImagen()">
+    <img class="image-modal-content" id="imagenGrande">
+  </div>
+
+<!-- Modal con carrusel -->
+<div class="modal fade" id="modalCarrusel" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark">
+      <div class="modal-body p-0">
+        <div id="carouselModalEjemplar" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner" id="carouselModalInner"></div>
+
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselModalEjemplar" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselModalEjemplar" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- <script>
+    function mostrarImagen(imgElement) {
+      var modal = document.getElementById("visorImagen");
+      var imagenGrande = document.getElementById("imagenGrande");
+      imagenGrande.src = imgElement.src;
+      modal.style.display = "block";
+    }
+    function cerrarImagen() {
+      document.getElementById("visorImagen").style.display = "none";
+    }
+    document.addEventListener('keydown', function(event) {
+      if (event.key === "Escape") {
+        cerrarImagen();
+      }
+    });
+  </script> -->
+
+<script>
+function mostrarImagen(imgElement) {
+    var modal = document.getElementById("visorImagen");
+    var imagenGrande = document.getElementById("imagenGrande");
+    imagenGrande.src = imgElement.src;
+    modal.style.display = "block";
+}
+
+function cerrarImagen() {
+    document.getElementById("visorImagen").style.display = "none";
+}
+
+// Cerrar con Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === "Escape") {
+        cerrarImagen();
+    }
+});
+
+function abrirCarrusel(imgElement) {
+  const fotosAttr = imgElement.getAttribute("data-fotos");
+  console.log("Fotos crudas:", fotosAttr); // 👈 para ver qué llega realmente
+  if (!fotosAttr) return;
+
+  // 1️⃣ Quitar corchetes inicial y final
+  let limpio = fotosAttr.substring(1, fotosAttr.length - 1);
+  console.log("Limio: ",limpio);
+
+  // 2️⃣ Separar las URLs usando coma + espacio como separador
+  let fotos = limpio.split(", ");
+  console.log("Array de fotos separadas:", fotos);
+
+  // 3️⃣ Obtener el índice de la imagen clickeada
+  const indexActivo = parseInt(imgElement.getAttribute("data-index")) || 0;
+  console.log("Índice activo:", indexActivo);
+
+  const carouselInner = document.getElementById("carouselModalInner");
+  carouselInner.innerHTML = "";
+
+  fotos.forEach((url, index) => {
+    const div = document.createElement("div");
+    div.className = `carousel-item ${index === indexActivo  ? "active" : ""}`;
+    div.innerHTML = `<img src="${url}" class="d-block w-100" style="max-height: 80vh; object-fit: contain;">`;
+    carouselInner.appendChild(div);
+  });
+
+  new bootstrap.Modal(document.getElementById("modalCarrusel")).show();
+}
+</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

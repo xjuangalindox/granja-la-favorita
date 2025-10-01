@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- BOOTSTRAP CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- BOOTSTRAP ICONOS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <title>Ventas</title>
+    <style>
+      @media (max-width: 767.98px) {
+        .col-hide-mobile {
+          display: none;
+        }
+        .table-responsive {
+          font-size: 0.95rem;
+        }
+        .table th, .table td {
+          padding: 0.4rem;
+        }
+      }
+    </style>
+</head>
+<body>
+  <div th:replace="fragments/navbar :: layoutNavbarPrivate"></div>
+
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div th:if="${ok}" class="alert alert-success text-center" role="alert">
+        <span th:text="${ok}"></span>
+      </div>
+      <div th:if="${error}" class="alert alert-danger text-center" role="alert">
+        <span th:text="${error}"></span>
+      </div>
+      <div class="col-12 mb-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+        <h1 class="fs-3">Lista de ventas</h1>
+        <a th:href="@{/ventas/crear}" class="btn btn-success ms-md-3">Nueva Venta</a>
+      </div>
+
+<!-- FILTRADO -->
+<form th:action="@{/ventas}" method="get" class="mb-3">
+  <div class="row g-2 align-items-center">
+    <div class="col-auto">
+      <label for="estatusFiltro" class="form-label mb-0">Filtrar por estatus:</label>
+    </div>
+    <div class="col-auto">
+      <select id="estatusFiltro" name="estatusFiltro" class="form-select form-select-sm" onchange="this.form.submit()">
+        <!-- Todas -->
+        <option value="" th:selected="${estatusFiltro == null or estatusFiltro == ''}">Todas</option>
+        <!-- Sin estatus -->
+        <option value="SIN_ESTADO" th:selected="${estatusFiltro == 'SIN_ESTADO'}">Sin estatus</option>
+        <!-- Opciones dinámicas -->
+        <option th:each="e : ${listaEstatus}" 
+                th:value="${e}"
+                th:text="${#strings.capitalize(#strings.toLowerCase(e.name())) + 's'}"
+                th:selected="${estatusFiltro == e.name()}">
+        </option>
+      </select>
+    </div>
+  </div>
+</form>
+<!-- FIN FILTRADO -->
+
+      <div class="col-12">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle">
+            <thead>
+              <tr class="text-center">
+                <th scope="col">Cliente</th>
+                <th scope="col" class="col-hide-mobile">Contacto</th>
+                <th scope="col" class="col-hide-mobile">Teléfono</th>
+                <th scope="col">Fecha Entrega</th>
+                <th scope="col" class="col-hide-mobile">Lugar Entrega</th>
+                <th scope="col">Total</th>
+                <th scope="col" class="col-hide-mobile">Nota</th>
+                <th scope="col" class="col-hide-mobile">Acciones</th>
+                <th scope="col">Estatus</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="text-center align-middle" th:each="item : ${listaVentas}" 
+                th:classappend="
+                  ${item.estatus != null} ?
+                  (${item.estatus.name == 'PENDIENTE'} ? 'table-danger' : 
+                  (${item.estatus.name == 'APARTADO'} ? 'table-warning' : 
+                  (${item.estatus.name == 'ENTREGADO'} ? 'table-success' : 
+                  (${item.estatus.name == 'REGISTRADO'} ? 'table-secondary' : 'table-light')))) : 
+                  'table-light'">
+
+                <td th:text="${item.nombreCliente}"></td>
+                <td th:text="${item.vinculoContacto}" class="col-hide-mobile"></td>
+                <td th:text="${item.telefono}" class="col-hide-mobile"></td>
+                <!-- Fecha de entrega opcional -->
+                <td th:text="${item.fechaEntrega != null} ? ${#temporals.format(item.fechaEntrega, 'dd/MMMM/yyyy hh:mm a')} : ''"></td>
+                <td th:text="${item.lugarEntrega}" class="col-hide-mobile"></td>
+                <td th:text="${item.totalVenta == null ? '$0.0' : '$' + item.totalVenta}"></td>
+                <td th:text="${item.nota}" class="col-hide-mobile"></td>
+                <!-- Acciones class="col-hide-mobile" -->
+                <td class="col-hide-mobile">
+                  <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
+                    <a th:href="@{/ventas/editar/{id}(id=${item.id})}" class="btn btn-info btn-sm">
+                      <i class="bi bi-pencil"></i> <span class="d-none d-md-inline">Editar</span>
+                    </a>
+                    <a th:href="@{/ventas/eliminar/{id}(id=${item.id}, estatusFiltro=${estatusFiltro})}" class="btn btn-danger btn-sm"
+                      onclick="return confirm('¿Seguro que deseas eliminar esta venta?')">
+                      <i class="bi bi-trash"></i> <span class="d-none d-md-inline">Eliminar</span>
+                    </a>
+                  </div>
+                </td>
+
+<!-- dropdown -->
+<td>
+  <div class="d-flex gap-1 justify-content-center align-items-center">
+
+    <div class="btn-group">
+      <button type="button" 
+        th:classappend="
+          ${item.estatus != null} ?
+          (${item.estatus.name == 'PENDIENTE'} ? 'btn-danger' : 
+          (${item.estatus.name == 'APARTADO'} ? 'btn-warning' : 
+          (${item.estatus.name == 'ENTREGADO'} ? 'btn-success' : 
+          (${item.estatus.name == 'REGISTRADO'} ? 'btn-secondary' : '')))) : 
+          ''"
+
+        class="btn btn-sm dropdown-toggle" 
+        data-bs-toggle="dropdown" aria-expanded="false">
+        <span th:text="${item.estatus != null} ? ${#strings.capitalize(item.estatus.name().toLowerCase())} : 'Estatus'"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='PENDIENTE', estatusFiltro=${estatusFiltro})}" th:text="'Pendiente'"></a></li>
+        <li><a class="dropdown-item" th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='APARTADO', estatusFiltro=${estatusFiltro})}" th:text="'Apartado'"></a></li>
+        <li><a class="dropdown-item" th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='ENTREGADO', estatusFiltro=${estatusFiltro})}" th:text="'Entregado'"></a></li>
+        <li><a class="dropdown-item" th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='REGISTRADO', estatusFiltro=${estatusFiltro})}" th:text="'Registrado'"></a></li>
+      </ul>
+    </div>
+
+    <!-- Botón para quitar estatus: solo si hay estatus -->
+    <a th:if="${item.estatus != null}" th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='', estatusFiltro=${estatusFiltro})}" 
+      class="btn btn-sm btn-outline-secondary" title="Quitar estatus">
+      <i class="bi bi-x-circle"></i>
+    </a>
+
+  </div>
+</td>
+<!-- FIN dropdown -->
+
+              </tr>
+            </tbody>
+          </table>
+
+<!-- PAGINADOR -->
+<div class="d-flex justify-content-center mt-3" th:if="${totalPaginas > 0}">
+  <nav>
+    <ul class="pagination">
+      <!-- Botón Anterior -->
+      <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+        <a class="page-link" th:href="@{/ventas(pagina=${paginaActual - 1}, estatusFiltro=${estatusFiltro})}">Anterior</a>
+      </li>
+
+      <!-- Números de página -->
+      <li class="page-item" 
+          th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" 
+          th:classappend="${i == paginaActual} ? 'active'">
+        <a class="page-link" th:href="@{/ventas(pagina=${i}, estatusFiltro=${estatusFiltro})}" 
+           th:text="${i + 1}"></a>
+      </li>
+
+      <!-- Botón Siguiente -->
+      <li class="page-item" th:classappend="${paginaActual == totalPaginas - 1} ? 'disabled'">
+        <a class="page-link" th:href="@{/ventas(pagina=${paginaActual + 1}, estatusFiltro=${estatusFiltro})}">Siguiente</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+<!-- FIN PAGINADOR -->
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

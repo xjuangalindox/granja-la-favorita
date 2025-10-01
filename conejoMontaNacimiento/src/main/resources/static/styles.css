@@ -1,0 +1,60 @@
+.nav-link-custom {
+    position: relative;
+    padding-bottom: 5px;
+    transition: all 0.3s ease;
+    color: #333;
+}
+
+.nav-link-custom::after {
+    content: "";
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    background-color: #0d6efd; /* azul Bootstrap */
+    left: 0;
+    bottom: 0;
+    transition: width 0.3s ease;
+}
+
+.nav-link-custom:hover::after {
+    width: 100%;
+}
+
+.nav-link-custom:hover {
+    color: #0d6efd;
+}
+
+/* FORMATO DE IMG EN EL SELECT2 */
+.select2-container--default .select2-selection--single {
+  height: 50px !important;
+}
+
+.select2-selection__rendered {
+  display: flex !important;
+  align-items: center;
+  height: 50px;
+  padding-left: 5px;
+}
+
+.select2-selection__rendered img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-right: 5px;
+}
+
+.option-wrapper {
+  display: flex;
+  align-items: center;
+  height: 50px;
+}
+
+.option-wrapper img.img-select {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  margin-right: 5px;
+  border-radius: 5px;
+  border: 2px solid #ccc;
+}

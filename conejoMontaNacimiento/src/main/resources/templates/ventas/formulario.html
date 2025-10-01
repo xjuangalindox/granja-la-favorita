@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--Estilos Bootstrap-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <!--Iconos Bootstrap-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <!-- jQuery y Select2 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <title>Formulario</title>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center">
+                <h2 class="text-center mb-4" th:text="${titulo}">Titulo</h2>
+
+                <!-- Mensaje Danger -->
+                <div th:if="${error}" class="alert alert-danger text-center" role="alert">
+                    <span th:text="${error}"></span>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <form id="formVenta" th:action="@{${accion}}" th:object="${ventaDTO}" method="post">
+                    <div class="row">
+
+                        <!-- COLUMNA IZQUIERDA: Datos de la venta -->
+                        <div class="col-md-4 border-end pe-4">
+                        <!-- <div class="col-md-4"> -->
+                            <div class="mb-3">
+                                <label class="form-label">Cliente<span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{nombreCliente}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Teléfono</label>
+                                <input type="text" th:field="*{telefono}" class="form-control">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="precio" class="form-label">Contacto<span class="text-danger">*</span></label>
+                                <select class="form-select" th:field="*{vinculoContacto}" required>
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="FACEBOOK">FACEBOOK</option>
+                                    <option value="WHATSAPP">WHATSAPP</option>
+                                    <option value="FACEBOOK Y WHATSAPP">FACEBOOK Y WHATSAPP</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Fecha Entrega</label>
+                                <input class="form-control" type="datetime-local" th:field="*{fechaEntrega}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Lugar Entrega</label>
+                                <input class="form-control" type="text" th:field="*{lugarEntrega}">
+                            </div>
+
+                            <!-- <div class="mb-3">
+                                <label class="form-label">Total</label>
+                                <input class="form-control" type="number" th:field="*{totalVenta}" readonly>
+                            </div> -->
+
+                            <div class="mb-3">
+                                <label class="form-label">Nota</label>
+                                <!-- <input class="form-control" type="text" th:field="*{nota}"> -->
+                                <textArea class="form-control" th:field="*{nota}" rows="3" maxlength="500"></textArea>
+                            </div>
+
+                            <!-- Botón para enviar el formulario al controller -->
+                            <div class="d-grid mt-4">
+                            <!-- <div class="d-grid"> -->
+                                <button type="submit" class="btn btn-primary">Guardar Venta</button>
+                            </div>                            
+
+                            <!-- <div class="mb-3">
+                                <label class="form-label">Estatus</label>
+                                <select class="form-select" th:field="*{estatus}" required>
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="PENDIENTE">PENDIENTE</option>
+                                    <option value="APARTADO">APARTADO</option>
+                                    <option value="ENTREGADO">ENTREGADO</option>
+                                </select>
+                            </div> -->
+                        </div>
+                        
+                        <!-- COLUMNA DERECHA: Artículos y ejemplares -->
+                        <div class="col-md-8 ps-4">
+                        <!-- <div class="col-md-8"> -->
+
+                            <!-- Total y Status arriba -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Total</label>
+                                        <input class="form-control" type="number" th:field="*{totalVenta}" readonly>
+                                    </div>                                    
+                                    <!-- <h6>Total</h6>
+                                    <p id="totalValor" class="fs-4 fw-bold">$0.00</p> -->
+                                </div>
+                                <!-- <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Estatus</label>
+                                        <select class="form-select" th:field="*{estatus}" required>
+                                            <option value="">Selecciona una opción</option>
+                                            <option value="PENDIENTE">PENDIENTE</option>
+                                            <option value="APARTADO">APARTADO</option>
+                                            <option value="ENTREGADO">ENTREGADO</option>
+                                        </select>
+                                    </div>                                    
+                                </div> -->
+                            </div>
+
+                            <!--ARTICULOS DISPONIBLES-->
+                            <h5>Artículos disponibles</h5>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Artículo</th> <!-- ArticuloDTO -->
+                                        <th style="width: 100px;">Cantidad</th>
+                                        <th style="width: 100px;">Subtotal</th>
+                                        <th style="width: 50px;"></th> <!--Boton Eliminar-->
+                                    </tr>
+                                </thead>
+                                <tbody id="articulosContainer">
+                                    <!-- Filas dinámicas aqui -->
+                                </tbody>
+                            </table>
+
+                            <!--Boton Agregar Articulo-->
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-success" onclick="agregarArticulo()">Agregar artículo</button>
+                            </div>
+
+                            <hr class="border border-primary border-3 opacity-75">
+
+                            <!-- ********** EJEMPLARES ********** -->
+                            <h5>Ejemplares disponibles</h5>
+                            <div id="nacimientosContainer">
+                                <!-- Aqui van los nacimientos dinámicamente -->
+                            </div>
+
+                            <!-- Boton Agregar Nacimiento -->
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-success" onclick="agregarNacimiento()">Agregar nacimiento</button>
+                            </div>
+
+                            <!-- Botón para enviar el formulario al controller -->
+                            <!-- <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Guardar Venta</button>
+                            </div> -->
+                        </div>
+
+                    </div>    
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- primero definimos la variable con los datos -->
+    <script th:inline="javascript">
+        let listaArticulos = /*[[${listaArticulos}]]*/ [];
+        let listaNacimientos = /*[[${listaNacimientos}]]*/ [];
+
+        let articulosVenta = /*[[${ventaDTO.articulosVenta}]]*/ [];
+        let ejemplaresVenta = /*[[${ventaDTO.ejemplaresVenta}]]*/ [];
+
+        let idsNacimientosUtilizados = /*[[${idsNacimientosUtilizados}]]*/ [];
+    </script>
+
+    <!-- luego cargamos el archivo que la usa -->
+    <script th:src="@{/js/venta-formulario.js}"></script>
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Artículos Disponibles</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f0f8ff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding-bottom: 3rem;
+    }
+    h2 {
+      color: #00796b;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-weight: 700;
+    }
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+    .card-img-top {
+      height: 180px;
+      object-fit: cover;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      cursor: pointer;
+    }
+    .card-img-top:hover {
+      opacity: 0.85;
+      transform: scale(1.05);
+    }
+    .card-title {
+      color: #004d40;
+      font-weight: 600;
+    }
+    .card-text {
+      color: #388e3c;
+      font-weight: 500;
+    }
+    .image-modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      padding-top: 60px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+    }
+    .image-modal-content {
+      margin: auto;
+      display: block;
+      max-width: 90%;
+      max-height: 80%;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    }
+    .image-modal:hover {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+    <div th:if="${isAuthenticated}" th:include="fragments/navbar :: layoutNavbarPrivate"></div>
+    <div th:if="${!isAuthenticated}" th:include="fragments/navbar :: layoutNavbarPublic"></div>
+
+<!-- ----------------------------------------------------------------------------------- -->
+    <div class="container py-5">
+        <h2>Artículos Disponibles</h2>
+        <div class="row justify-content-center g-4">
+            
+            <div class="col-6 col-sm-6 col-md-4 col-lg-3 d-flex justify-content-center" th:each="articulo : ${listaArticulos}">
+
+                  <div class="card h-100" style="width: 16rem;">
+                      <img th:src="${articulo.secureUrl}" class="card-img-top" th:alt="'Articulo ' + ${articulo.id}"  onclick="mostrarImagen(this)">
+                      <div class="card-body text-center">
+                          <h5 class="card-title" th:text="${articulo.nombre}">Nombre</h5>
+                          <p class="card-text text-muted" th:text="'Descripción: ' + ${articulo.descripcion}">Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.</p>
+                          <p class="card-text text-muted" th:text="'Presentación: ' + ${articulo.presentacion} +' - $'+ ${#numbers.formatDecimal(articulo.precio, 1, 'COMMA', 2, 'POINT')} + ' MXM'">Presentación: 5kg - $350.00 MXM</p>
+                      </div>
+                  </div>
+
+            </div>
+            
+        </div>
+    </div>
+<!-- ----------------------------------------------------------------------------------- -->
+  <!-- <div class="container pt-5">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+
+        <div class="col" th:each="articulo : ${listaArticulos}">
+            <div class="card h-100">
+                <img th:src="${articulo.secureUrl}" 
+                    class="card-img-top" 
+                    th:alt="'Articulo ' + ${articulo.id}" 
+                    onclick="mostrarImagen(this)">
+                
+                <div class="card-body text-center">
+                    <h5 class="card-title" th:text="${articulo.nombre}">Nombre</h5>
+                    <p class="card-text text-muted" th:text="${articulo.presentacion} +': $'+ ${#numbers.formatDecimal(articulo.precio, 1, 'COMMA', 2, 'POINT')} + ' MXM'"></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+  </div> -->
+
+  <!-- Modal flotante -->
+  <div id="visorImagen" class="image-modal" onclick="cerrarImagen()">
+    <img class="image-modal-content" id="imagenGrande">
+  </div>
+
+  <script>
+    function mostrarImagen(imgElement) {
+      var modal = document.getElementById("visorImagen");
+      var imagenGrande = document.getElementById("imagenGrande");
+      imagenGrande.src = imgElement.src;
+      modal.style.display = "block";
+    }
+    function cerrarImagen() {
+      document.getElementById("visorImagen").style.display = "none";
+    }
+    document.addEventListener('keydown', function(event) {
+      if (event.key === "Escape") {
+        cerrarImagen();
+      }
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
