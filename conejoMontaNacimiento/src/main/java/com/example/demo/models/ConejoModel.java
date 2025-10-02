@@ -1,6 +1,7 @@
 package com.example.demo.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CollectionId;
 
@@ -29,6 +30,9 @@ public class ConejoModel {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	private LocalDateTime inicioRecreo;
+	private LocalDateTime finRecreo;
 
 	private String nombre;
 	private String sexo;
