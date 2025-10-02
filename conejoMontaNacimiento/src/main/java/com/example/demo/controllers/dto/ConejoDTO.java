@@ -1,6 +1,7 @@
 package com.example.demo.controllers.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +18,9 @@ import lombok.NoArgsConstructor;
 public class ConejoDTO {
 
 	private Long id;
+
+	private LocalDateTime inicioRecreo;
+	private LocalDateTime finRecreo;
 
 	@JsonIgnore // Ignorar al crear el JSON, solo para recibir desde el frontend
 	private MultipartFile imagen;
