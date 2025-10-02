@@ -64,12 +64,12 @@
                             <div th:if="*{id != null}" class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="inicioRecreo" class="form-label">Inicio recreo:</label>
-                                    <input type="date" th:field="*{inicioRecreo}" class="form-control" id="inicioRecreo">
+                                    <input type="datetime-local" th:field="*{inicioRecreo}" class="form-control" id="inicioRecreo">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label for="finRecreo" class="form-label">Fin recreo:</label>
-                                    <input type="date" th:field="*{finRecreo}" class="form-control" id="finRecreo">
+                                    <input type="datetime-local" th:field="*{finRecreo}" class="form-control" id="finRecreo">
                                 </div>
                             </div>
 
