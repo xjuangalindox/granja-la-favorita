@@ -68,15 +68,26 @@ public class ConejoRepositoryTest {
     @Test
     void testFindBySexoIgnoreCaseAndActivoTrue(){
         // given
+        // Actualmente: 3 machos activos y 2 hembras activas
+
         // when
-        List<ConejoModel> activos = conejoRepository.findBySexoIgnoreCaseAndActivoTrue("Macho");
+        List<ConejoModel> machos = conejoRepository.findBySexoIgnoreCaseAndActivoTrue("Macho");
+        List<ConejoModel> hembras = conejoRepository.findBySexoIgnoreCaseAndActivoTrue("hembra");
 
         // then
-        assertNotNull(activos);
-        assertEquals(3, activos.size());
-        assertEquals("Rocko", activos.get(0).getNombre());
-        assertEquals("Trueno", activos.get(1).getNombre());
-        assertEquals("Marino", activos.get(2).getNombre());
+
+        // machos
+        assertNotNull(machos);
+        assertEquals(3, machos.size());
+        assertEquals("Rocko", machos.get(0).getNombre());
+        assertEquals("Trueno", machos.get(1).getNombre());
+        assertEquals("Marino", machos.get(2).getNombre());
+
+        // hembras
+        assertNotNull(hembras);
+        assertEquals(2, hembras.size());
+        assertEquals("Mexicana", hembras.get(0).getNombre());
+        assertEquals("Enojona", hembras.get(1).getNombre());
     }
 
     @Test
