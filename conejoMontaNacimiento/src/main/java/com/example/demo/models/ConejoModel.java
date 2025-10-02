@@ -32,7 +32,9 @@ public class ConejoModel {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name = "inicio_recreo")
 	private LocalDateTime inicioRecreo;
+	@Column(name = "fin_recreo")
 	private LocalDateTime finRecreo;
 
 	private String nombre;
