@@ -50,11 +50,24 @@ public class ConejoRepositoryTest {
         conejoRepository.saveAll(lista);
     }
 
+    private List<ConejoModel> findBySexoIgnoreCase(String sexo){
+        return conejoRepository.findBySexoIgnoreCase(sexo);
+    }
+
     @Test
     void testFindBySexoIgnoreCase(){
+        // Verificar que devuelve conejos por sexo, sin importar mayúsculas/minúsculas.
+        // Casos: "macho", "MACho", "hembra", etc.
+
         // given
+        String mayus = "MACHO", minus = "macho", female = "hEmBrA";
+        assertEquals(4, findBySexoIgnoreCase("MACHO").size());
+        assertEquals(4, findBySexoIgnoreCase("macho").size());
+        assertEquals(4, findBySexoIgnoreCase("mAcHo").size());
+
         // when
         List<ConejoModel> machos = conejoRepository.findBySexoIgnoreCase("Macho");
+
         
         // then
         assertNotNull(machos);
