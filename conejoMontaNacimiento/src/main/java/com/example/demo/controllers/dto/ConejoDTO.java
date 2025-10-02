@@ -22,7 +22,9 @@ public class ConejoDTO {
 	private Long id;
 
 	@PastOrPresent(message = "La fecha de inicio del recreo no puede ser futura")
+	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
 	private LocalDateTime inicioRecreo;
+	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
 	private LocalDateTime finRecreo;
 
 	// Validacion personalizada: fin > inicio
