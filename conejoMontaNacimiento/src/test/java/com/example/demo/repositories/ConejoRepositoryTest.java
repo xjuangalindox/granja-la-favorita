@@ -1,6 +1,7 @@
 package com.example.demo.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -96,15 +97,17 @@ public class ConejoRepositoryTest {
 
         // when
         boolean existe = conejoRepository.existsById(princesa.getId());
+        boolean noExiste = conejoRepository.existsById(123L);
 
         // then
-        // assertNotNull(existe);
         assertTrue(existe);
-
         Optional<ConejoModel> opt = conejoRepository.findById(princesa.getId());
-
         assertTrue(opt.isPresent());
-        assertEquals("Cariñosa", opt.get().getNota());
+        assertEquals("Princesa", opt.get().getNombre());
+
+        assertFalse(noExiste);
+        Optional<ConejoModel> optFalse = conejoRepository.findById(123L);
+        assertFalse(opt.isEmpty());
     }
 
     @Test
