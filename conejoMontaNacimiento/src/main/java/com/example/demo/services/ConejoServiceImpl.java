@@ -51,11 +51,11 @@ public class ConejoServiceImpl implements IConejoService{
         
         switch (ordenarPor) {
             case "nombre":
-                pageable = PageRequest.of(pagina, cantidad, Sort.by("nombre").ascending());
+                pageable = PageRequest.of(pagina, cantidad, Sort.by(ordenarPor).ascending());
                 break;
 
             case "inicioRecreo":
-                pageable = PageRequest.of(pagina, cantidad, Sort.by("inicioRecreo").descending());
+                pageable = PageRequest.of(pagina, cantidad, Sort.by(ordenarPor).ascending());
                 break;
         
             default:

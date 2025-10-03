@@ -302,4 +302,6 @@ services:
 
 volumes:
   mysql_data:
+    external: true
   grafana_data:
+    external: true
