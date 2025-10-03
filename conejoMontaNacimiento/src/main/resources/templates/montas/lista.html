@@ -84,8 +84,8 @@
                 <!-- <th scope="col" class="col-hide-mobile">Fecha Monta</th> -->
                 <th scope="col" class="col-hide-mobile">Cantidad Montas</th>
                 <th scope="col" class="col-hide-mobile">Nota</th>
-                <th scope="col">Acciones</th>
                 <th scope="col">Nacimiento</th>
+                <th scope="col">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -148,10 +148,16 @@
                     </div>
                   </div>
                 </td>
+                
                 <td th:text="${#temporals.format(item.fechaMonta, 'dd/MMMM/yyyy')}"></td>
-                <!-- <td th:text="${#temporals.format(item.fechaMonta, 'dd/MMMM/yyyy')}" class="col-hide-mobile"></td> -->
                 <td th:text="${item.cantidadMontas}" class="col-hide-mobile"></td>
                 <td th:text="${item.nota}" class="col-hide-mobile"></td>
+                
+                <td>
+                  <a th:if="${item.tieneNacimiento == false}" th:href="@{/nacimientos/crear(idMonta=${item.id})}" class="btn btn-success btn-sm">Registrar</a>
+                  <a th:if="${item.tieneNacimiento == true}" th:href="@{/nacimientos/editar/por-monta/{idMonta}(idMonta=${item.id})}" class="btn btn-secondary btn-sm">Mostrar</a>
+                </td>
+                
                 <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
                     <a th:href="@{/montas/editar/{id}(id=${item.id})}" class="btn btn-info btn-sm">
@@ -163,10 +169,7 @@
                     </a>
                   </div>
                 </td>
-                <td>
-                  <a th:if="${item.tieneNacimiento == false}" th:href="@{/nacimientos/crear(idMonta=${item.id})}" class="btn btn-success btn-sm">Registrar</a>
-                  <a th:if="${item.tieneNacimiento == true}" th:href="@{/nacimientos/editar/por-monta/{idMonta}(idMonta=${item.id})}" class="btn btn-secondary btn-sm">Mostrar</a>
-                </td>
+                
               </tr>
             </tbody>
           </table>
