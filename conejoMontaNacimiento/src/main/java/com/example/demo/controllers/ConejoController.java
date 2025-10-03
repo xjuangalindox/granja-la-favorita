@@ -42,6 +42,7 @@ public class ConejoController {
 	@GetMapping
 	public String obtenerConejos(@RequestParam(defaultValue = "0") int pagina, 
 								 @RequestParam(required = false) String sexo, 
+								 @RequestParam(required = false, defaultValue = "nombre") String ordenarPor, 
 								 Model model){
 
 		int cantidad = 10; // Cantidad de conejos por pagina
@@ -49,9 +50,10 @@ public class ConejoController {
 
 		// Condificional simplificado: si hay sexo, buscar por sexo, de lo contrario buscar todos los conejos
 		pageConejos = sexo != null && !sexo.isEmpty() ? 
-			conejoService.findBySexo(pagina, cantidad, sexo) : conejoService.findAll(pagina, cantidad); 
+			conejoService.findBySexo(pagina, cantidad, sexo, ordenarPor) : conejoService.findAll(pagina, cantidad, ordenarPor); 
 
 		model.addAttribute("sexo", sexo);
+		model.addAttribute("ordenarPor", ordenarPor);
 		model.addAttribute("listaConejos", pageConejos.getContent());
 		model.addAttribute("paginaActual", pagina);
 		model.addAttribute("totalPaginas", pageConejos.getTotalPages());
