@@ -303,5 +303,7 @@ services:
 volumes:
   mysql_data:
     external: true
+    name: granja-la-favorita_mysql_data
   grafana_data:
     external: true
+    name: workspace-spring-tool-suite-4-4291release_grafana_data
