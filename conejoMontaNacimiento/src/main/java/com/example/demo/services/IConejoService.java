@@ -9,8 +9,8 @@ import com.example.demo.controllers.dto.ConejoDTO;
 
 public interface IConejoService {
 
-    public Page<ConejoDTO> findAll(int pagina, int cantidad);
-    public Page<ConejoDTO> findBySexo(int pagina, int cantidad, String sexo);
+    public Page<ConejoDTO> findAll(int pagina, int cantidad, String ordenarPor);
+    public Page<ConejoDTO> findBySexo(int pagina, int cantidad, String sexo, String ordenarPor);
 
     // Obtener conejo por id
     public Optional<ConejoDTO> obtenerConejoById(Long id);

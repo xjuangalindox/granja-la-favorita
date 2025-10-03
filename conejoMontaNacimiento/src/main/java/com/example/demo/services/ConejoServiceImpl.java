@@ -46,11 +46,32 @@ public class ConejoServiceImpl implements IConejoService{
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private Pageable orderBy(int pagina, int cantidad, String ordenarPor){
+        Pageable pageable;
+        
+        switch (ordenarPor) {
+            case "nombre":
+                pageable = PageRequest.of(pagina, cantidad, Sort.by("nombre").ascending());
+                break;
+
+            case "inicioRecreo":
+                pageable = PageRequest.of(pagina, cantidad, Sort.by("inicioRecreo").descending());
+                break;
+        
+            default:
+                pageable = PageRequest.of(pagina, cantidad, Sort.by(ordenarPor).ascending());
+                break;
+        }
+
+        return pageable;
+    }
+
     @Override
-    public Page<ConejoDTO> findAll(int pagina, int cantidad) {
-        Pageable pageable = PageRequest.of(pagina, cantidad, Sort.by("nombre").ascending());
-        Page<ConejoModel> pageConejos = conejoRepository.findAll(pageable);
-        // Page<ConejoModel> pageConejos = conejoRepository.findAll(PageRequest.of(pagina, cantidad));
+    public Page<ConejoDTO> findAll(int pagina, int cantidad, String ordenarPor) {
+        Page<ConejoModel> pageConejos = conejoRepository.findAll(orderBy(pagina, cantidad, ordenarPor));
+
+        // Pageable pageable = PageRequest.of(pagina, cantidad, Sort.by("nombre").ascending());
+        // Page<ConejoModel> pageConejos = conejoRepository.findAll(pageable);
 
         return pageConejos.map(conejoModel -> {
             RazaDTO razaDTO = razaClient.obtenerRazaPorId(conejoModel.getRazaId());
@@ -62,10 +83,11 @@ public class ConejoServiceImpl implements IConejoService{
     }
 
     @Override
-    public Page<ConejoDTO> findBySexo(int pagina, int cantidad, String sexo) {
-        Pageable pageable = PageRequest.of(pagina, cantidad, Sort.by("nombre").ascending());
-        Page<ConejoModel> pageConejos = conejoRepository.findBySexo(pageable, sexo);
-        // Page<ConejoModel> pageConejos = conejoRepository.findBySexo(PageRequest.of(pagina, cantidad), sexo);
+    public Page<ConejoDTO> findBySexo(int pagina, int cantidad, String sexo, String ordenarPor) {
+        Page<ConejoModel> pageConejos = conejoRepository.findBySexo(orderBy(pagina, cantidad, ordenarPor), sexo);
+
+        // Pageable pageable = PageRequest.of(pagina, cantidad, Sort.by("nombre").ascending());
+        // Page<ConejoModel> pageConejos = conejoRepository.findBySexo(pageable, sexo);
 
         return pageConejos.map(conejoModel -> {
             RazaDTO razaDTO = razaClient.obtenerRazaPorId(conejoModel.getRazaId());
