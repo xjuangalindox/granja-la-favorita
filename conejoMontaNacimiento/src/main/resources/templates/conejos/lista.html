@@ -46,7 +46,9 @@
 
 <!-- FILTRADO -->
 <form th:action="@{/conejos}" method="get" class="mb-3">
-  <div class="row g-2 align-items-center">
+  
+  <!-- Filtro sexo -->
+  <div class="row g-2 align-items-center mb-2">
     <div class="col-auto">
       <label for="sexo" class="form-label mb-0">Filtrar por sexo:</label>
     </div>
@@ -57,10 +59,13 @@
         <option value="Hembra" th:selected="${sexo == 'Hembra'}">Hembras</option>
       </select>
     </div>
+  </div>
+  <!-- Fin Filtro sexo -->
 
-    <!-- Order -->
+  <!-- Order -->
+  <div class="row g-2 align-items-center">
     <div class="col-auto">
-      <label for="sexo" class="form-label mb-0">Ordenar por:</label>
+      <label class="form-label mb-0">Ordenar por:</label>
     </div>
     <div class="col-auto">
       <div>
@@ -74,9 +79,9 @@
         <label for="ordenRecreo">Último recreo</label>
       </div>
     </div>
-    <!-- Fin Order -->
-
   </div>
+  <!-- Fin Order -->
+
 </form>
 <!-- FIN FILTRADO -->
 
