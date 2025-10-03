@@ -57,6 +57,25 @@
         <option value="Hembra" th:selected="${sexo == 'Hembra'}">Hembras</option>
       </select>
     </div>
+
+    <!-- Order -->
+    <div class="col-auto">
+      <label for="sexo" class="form-label mb-0">Ordenar por:</label>
+    </div>
+    <div class="col-auto">
+      <div>
+        <input type="radio" id="ordenNombre" name="ordenarPor" value="nombre" 
+          th:checked="${ordenarPor == null or ordenarPor == 'nombre'}" onchange="this.form.submit()">
+        <label for="ordenNombre">Nombre (A-Z)</label>
+      </div>
+      <div>
+        <input type="radio" id="ordenRecreo" name="ordenarPor" value="inicioRecreo" 
+          th:checked="${ordenarPor == 'inicioRecreo'}" onchange="this.form.submit()">
+        <label for="ordenRecreo">Último recreo</label>
+      </div>
+    </div>
+    <!-- Fin Order -->
+
   </div>
 </form>
 <!-- FIN FILTRADO -->
@@ -68,12 +87,14 @@
               <tr class="text-center">
                 <th scope="col">Nombre</th>
                 <th scope="col">Imagen</th>
+                <th scope="col">Recreo</th>
+                <th scope="col" class="col-hide-mobile">Fin Recreo</th>
                 <th scope="col" class="col-hide-mobile">Raza</th>
                 <th scope="col" class="col-hide-mobile">Peso</th>
                 <th scope="col" class="col-hide-mobile">Fecha Nacimiento</th>
                 <th scope="col" class="col-hide-mobile">Total Nacimientos</th>
                 <th scope="col" class="col-hide-mobile">Total Gazapos</th>
-                <th scope="col">Activo</th>
+                <th scope="col" class="col-hide-mobile">Activo</th>
                 <th scope="col">Acciones</th>
               </tr>
             </thead>
@@ -105,12 +126,18 @@
                     </div>
                   </div>
                 </td>
+
+                <!-- Recreo -->
+                <td th:text="${item.inicioRecreo != null} ? ${#temporals.format(item.inicioRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''"></td>
+                <td th:text="${item.finRecreo != null} ? ${#temporals.format(item.finRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''" class="col-hide-mobile"></td>
+                <!-- Fin Recreo -->
+
                 <td th:text="${item.raza.nombre}" class="col-hide-mobile"></td>
                 <td th:text="${item.peso}" class="col-hide-mobile"></td>
                 <td th:text="${#temporals.format(item.fechaNacimiento, 'dd/MMMM/yyyy')}" class="col-hide-mobile"></td>
                 <td th:text="${item.totalNacimientos}" class="col-hide-mobile"></td>
                 <td th:text="${item.totalGazapos}" class="col-hide-mobile"></td>
-                <td th:text="${item.activo}"></td>
+                <td th:text="${item.activo}" class="col-hide-mobile"></td>
                 <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
                     <a th:href="@{/conejos/editar/{id}(id=${item.id})}" class="btn btn-info btn-sm">

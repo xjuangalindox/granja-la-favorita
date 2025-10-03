@@ -142,7 +142,7 @@ public class ConejoServiceTest {
         // });
 
         // then
-        Page<ConejoDTO> pagina = conejoService.findAll(0, 10);
+        Page<ConejoDTO> pagina = conejoService.findAll(0, 10, "nombre");
         assertNotNull(pagina);
         assertEquals(7, pagina.getSize()); // Tamaño de la pagina actual porque hay 7 conejos y 3 vacios
         assertEquals(1, pagina.getTotalPages()); // solo una pigina porque hay 7 conejos en total
@@ -173,7 +173,7 @@ public class ConejoServiceTest {
         when(modelMapper.map(any(ConejoModel.class), eq(ConejoDTO.class))).thenAnswer(invocation -> mapModeltoDto(invocation.getArgument(0)));
 
         // then
-        Page<ConejoDTO> pageConejos = conejoService.findBySexo(0, 5, "Hembra");
+        Page<ConejoDTO> pageConejos = conejoService.findBySexo(0, 5, "Hembra", "nombre");
 
         assertNotNull(pageConejos);
         assertEquals(3, pageConejos.getNumberOfElements()); // la pagina contiene 3 hembras y 2 vacios
