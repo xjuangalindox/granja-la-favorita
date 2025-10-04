@@ -70,6 +70,23 @@
                                 <input class="form-control" type="number" th:field="*{totalVenta}" readonly>
                             </div> -->
 
+
+<!-- Total, Adelanto y Restante -->
+<div class="row mb-3">
+  <div class="col">
+    <label for="totalVenta" class="form-label">Total</label>
+    <input type="text" id="totalVenta" th:field="*{totalVenta}" class="form-control" readonly>
+  </div>
+  <div class="col">
+    <label for="adelanto" class="form-label">Adelanto</label>
+    <input type="number" id="adelanto" th:field="*{adelanto}" class="form-control">
+  </div>
+  <div class="col">
+    <label for="restante" class="form-label">Restante</label>
+    <input type="text" id="restante" class="form-control" readonly>
+  </div>
+</div>
+
                             <div class="mb-3">
                                 <label class="form-label">Nota</label>
                                 <!-- <input class="form-control" type="text" th:field="*{nota}"> -->
@@ -80,17 +97,7 @@
                             <div class="d-grid mt-4">
                             <!-- <div class="d-grid"> -->
                                 <button type="submit" class="btn btn-primary">Guardar Venta</button>
-                            </div>                            
-
-                            <!-- <div class="mb-3">
-                                <label class="form-label">Estatus</label>
-                                <select class="form-select" th:field="*{estatus}" required>
-                                    <option value="">Selecciona una opción</option>
-                                    <option value="PENDIENTE">PENDIENTE</option>
-                                    <option value="APARTADO">APARTADO</option>
-                                    <option value="ENTREGADO">ENTREGADO</option>
-                                </select>
-                            </div> -->
+                            </div>
                         </div>
                         
                         <!-- COLUMNA DERECHA: Artículos y ejemplares -->
@@ -98,27 +105,14 @@
                         <!-- <div class="col-md-8"> -->
 
                             <!-- Total y Status arriba -->
-                            <div class="row mb-4">
+                            <!-- <div class="row mb-4">
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">Total</label>
                                         <input class="form-control" type="number" th:field="*{totalVenta}" readonly>
-                                    </div>                                    
-                                    <!-- <h6>Total</h6>
-                                    <p id="totalValor" class="fs-4 fw-bold">$0.00</p> -->
+                                    </div>
                                 </div>
-                                <!-- <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Estatus</label>
-                                        <select class="form-select" th:field="*{estatus}" required>
-                                            <option value="">Selecciona una opción</option>
-                                            <option value="PENDIENTE">PENDIENTE</option>
-                                            <option value="APARTADO">APARTADO</option>
-                                            <option value="ENTREGADO">ENTREGADO</option>
-                                        </select>
-                                    </div>                                    
-                                </div> -->
-                            </div>
+                            </div> -->
 
                             <!--ARTICULOS DISPONIBLES-->
                             <h5>Artículos disponibles</h5>

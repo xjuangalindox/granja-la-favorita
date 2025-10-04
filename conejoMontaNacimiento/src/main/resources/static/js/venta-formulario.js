@@ -914,3 +914,18 @@ function actualizarTotalVenta() {
 
     document.querySelector('input[name="totalVenta"]').value = total.toFixed(2);
 }
+
+// Calcular restante
+function calcularRestante() {
+    const total = parseFloat(document.getElementById('totalVenta').value) || 0;
+    const adelanto = parseFloat(document.getElementById('adelanto').value) || 0;
+    const restante = total - adelanto;
+    document.getElementById('restante').value = restante.toFixed(2);
+}
+
+// Escuchamos cambios en ambos campos
+document.getElementById('totalVenta').addEventListener('input', calcularRestante);
+document.getElementById('adelanto').addEventListener('input', calcularRestante);
+
+// Llamar al cargar el formulario por si hay valores iniciales
+window.addEventListener('DOMContentLoaded', calcularRestante);
