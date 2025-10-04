@@ -96,18 +96,32 @@
 
                 <!-- visible -->
                 <!-- Si tiene teléfono, muestra el nombre con enlace a WhatsApp -->
-                <td th:if="${item.telefono != null}">
+                <!-- <td th:if="${item.telefono != null}">
                   <a th:href="'https://wa.me/52' + ${item.telefono}"
                       target="_blank"
                       class="text-success text-decoration-none">
                       <i class="bi bi-whatsapp"></i>
                       <span th:text="${item.nombreCliente}"></span>
                   </a>
-                </td>
+                </td> -->
 
                 <!-- Si no tiene teléfono, muestra solo el nombre -->
-                <td th:if="${item.telefono == null}" th:text="${item.nombreCliente}"></td>
+                <!-- <td th:if="${item.telefono == null}" th:text="${item.nombreCliente}"></td> -->
                 
+                <td>
+                  <!-- Si tiene teléfono, muestra el nombre con enlace a WhatsApp -->
+                  <a th:if="${item.telefono != null and item.telefono != ''}"
+                      th:href="'https://wa.me/52' + ${item.telefono}"
+                      target="_blank"
+                      class="text-success text-decoration-none">
+                      <i class="bi bi-whatsapp"></i>
+                      <span th:text="${item.nombreCliente}"></span>
+                  </a>
+                  
+                  <!-- Si no tiene teléfono, muestra solo el nombre -->
+                  <span th:unless="${item.telefono != null and item.telefono != ''}" th:text="${item.nombreCliente}"></span>
+                </td>
+
                 <!-- hidden -->
                 <td th:text="${item.vinculoContacto}" class="col-hide-mobile"></td>
                 <td th:text="${item.telefono}" class="col-hide-mobile"></td>
