@@ -78,6 +78,7 @@
                 <th scope="col">Entrega</th>
                 <th scope="col">Lugar</th>
                 <th scope="col">Total</th>
+                <th scope="col">Restante</th>
                 <th scope="col" class="col-hide-mobile">Nota</th>
                 <th scope="col">Acciones</th>
                 <th scope="col">Estatus</th>
@@ -104,7 +105,7 @@
                 <td th:text="${item.fechaEntrega != null} ? ${#temporals.format(item.fechaEntrega, 'dd/MMMM/yyyy hh:mm a')} : ''"></td>
                 <td th:text="${item.lugarEntrega}"></td>
                 <td th:text="${item.totalVenta != null} ? '$'+${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')} : ''"></td>
-                <!-- <td th:text="${item.totalVenta == null ? '$0.0' : '$' + item.totalVenta}"></td> -->
+                <td th:text="${item.totalVenta != null and item.adelanto != null} ? '$'+${#numbers.formatDecimal(item.totalVenta - item.adelanto, 1, 'COMMA', 2, 'POINT')} : ''"></td>
                 
                 <!-- hidden -->
                 <td th:text="${item.nota}" class="col-hide-mobile"></td>
