@@ -885,20 +885,6 @@ function actualizarTotalVenta() {
         total += parseFloat(input.value) || 0;
     });
 
-    // Precios de ejemplares
-    // document.querySelectorAll('#nacimientosContainer input[name$=".precio"]').forEach(input => {
-    //     total += parseFloat(input.value) || 0;
-    // });
-
-    // Sumar precios de ejemplares solo si el checkbox está marcado
-    // document.querySelectorAll('#nacimientosContainer tr').forEach(fila => {
-    //     const checkbox = fila.querySelector('input[type="checkbox"]');
-    //     const precioInput = fila.querySelector('input[name$=".precio"]');
-    //     if (checkbox && checkbox.checked && precioInput) {
-    //         total += parseFloat(precioInput.value) || 0;
-    //     }
-    // });
-
     // Sumar precios solo de ejemplares seleccionados
     const contenedorEjemplares = document.getElementById('nacimientosContainer');
     if (contenedorEjemplares) {
@@ -913,6 +899,9 @@ function actualizarTotalVenta() {
     }
 
     document.querySelector('input[name="totalVenta"]').value = total.toFixed(2);
+
+    // Calcular restante
+    calcularRestante();
 }
 
 // Calcular restante
@@ -924,7 +913,7 @@ function calcularRestante() {
 }
 
 // Escuchamos cambios en ambos campos
-document.getElementById('totalVenta').addEventListener('input', calcularRestante);
+document.getElementById('totalVenta').addEventListener('input', calcularRestante); // sin uso porque input = readonly
 document.getElementById('adelanto').addEventListener('input', calcularRestante);
 
 // Llamar al cargar el formulario por si hay valores iniciales
