@@ -18,8 +18,12 @@
           font-size: 0.95rem;
         }
         .table th, .table td {
-          padding: 0.4rem;
+          padding: 0.25rem;
+          font-size: 0.85rem;
         }
+        /* .table th, .table td {
+          padding: 0.4rem;
+        } */
       }
     </style>
 </head>
@@ -71,11 +75,12 @@
                 <th scope="col">Cliente</th>
                 <th scope="col" class="col-hide-mobile">Contacto</th>
                 <th scope="col" class="col-hide-mobile">Teléfono</th>
-                <th scope="col">Fecha Entrega</th>
-                <th scope="col" class="col-hide-mobile">Lugar Entrega</th>
+                <th scope="col">Entrega</th>
+                <th scope="col">Lugar</th>
                 <th scope="col">Total</th>
+                <th scope="col">Restante</th>
                 <th scope="col" class="col-hide-mobile">Nota</th>
-                <th scope="col" class="col-hide-mobile">Acciones</th>
+                <th scope="col">Acciones</th>
                 <th scope="col">Estatus</th>
               </tr>
             </thead>
@@ -89,16 +94,49 @@
                   (${item.estatus.name == 'REGISTRADO'} ? 'table-secondary' : 'table-light')))) : 
                   'table-light'">
 
-                <td th:text="${item.nombreCliente}"></td>
+                <!-- visible -->
+                <!-- Si tiene teléfono, muestra el nombre con enlace a WhatsApp -->
+                <!-- <td th:if="${item.telefono != null}">
+                  <a th:href="'https://wa.me/52' + ${item.telefono}"
+                      target="_blank"
+                      class="text-success text-decoration-none">
+                      <i class="bi bi-whatsapp"></i>
+                      <span th:text="${item.nombreCliente}"></span>
+                  </a>
+                </td> -->
+
+                <!-- Si no tiene teléfono, muestra solo el nombre -->
+                <!-- <td th:if="${item.telefono == null}" th:text="${item.nombreCliente}"></td> -->
+                
+                <td>
+                  <!-- Si tiene teléfono, muestra el nombre con enlace a WhatsApp -->
+                  <a th:if="${item.telefono != null and item.telefono != ''}"
+                      th:href="'https://wa.me/52' + ${item.telefono}"
+                      target="_blank"
+                      class="text-success text-decoration-none">
+                      <i class="bi bi-whatsapp"></i>
+                      <span th:text="${item.nombreCliente}"></span>
+                  </a>
+                  
+                  <!-- Si no tiene teléfono, muestra solo el nombre -->
+                  <span th:unless="${item.telefono != null and item.telefono != ''}" th:text="${item.nombreCliente}"></span>
+                </td>
+
+                <!-- hidden -->
                 <td th:text="${item.vinculoContacto}" class="col-hide-mobile"></td>
                 <td th:text="${item.telefono}" class="col-hide-mobile"></td>
-                <!-- Fecha de entrega opcional -->
+                
+                <!-- visible -->
                 <td th:text="${item.fechaEntrega != null} ? ${#temporals.format(item.fechaEntrega, 'dd/MMMM/yyyy hh:mm a')} : ''"></td>
-                <td th:text="${item.lugarEntrega}" class="col-hide-mobile"></td>
-                <td th:text="${item.totalVenta == null ? '$0.0' : '$' + item.totalVenta}"></td>
+                <td th:text="${item.lugarEntrega}"></td>
+                <td th:text="${item.totalVenta != null} ? '$'+${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')} : ''"></td>
+                <td th:text="${item.totalVenta != null and item.adelanto != null} ? '$'+${#numbers.formatDecimal(item.totalVenta - item.adelanto, 1, 'COMMA', 2, 'POINT')} : ''"></td>
+                
+                <!-- hidden -->
                 <td th:text="${item.nota}" class="col-hide-mobile"></td>
-                <!-- Acciones class="col-hide-mobile" -->
-                <td class="col-hide-mobile">
+                
+                <!-- visible - acciones -->
+                <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
                     <a th:href="@{/ventas/editar/{id}(id=${item.id})}" class="btn btn-info btn-sm">
                       <i class="bi bi-pencil"></i> <span class="d-none d-md-inline">Editar</span>
@@ -110,6 +148,8 @@
                   </div>
                 </td>
 
+
+<!-- visible - estatus -->
 <!-- dropdown -->
 <td>
   <div class="d-flex gap-1 justify-content-center align-items-center">

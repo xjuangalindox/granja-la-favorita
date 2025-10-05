@@ -81,22 +81,22 @@ public class ConejoServiceTest {
         imagenVacia = new MockMultipartFile("imagen", new byte[0]);
 
         // Conejos inactivos
-        semental = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        semental = new ConejoModel(1L, null, null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, 1L);
-        panda = new ConejoModel(2L, "Panda", "Hembra", null, false, 
+        panda = new ConejoModel(2L, null, null,"Panda", "Hembra", null, false, 
         "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, 1L);
 
         // Conejos activos
-        rocko = new ConejoModel(3L, "Rocko", "Macho", null, true, 
+        rocko = new ConejoModel(3L, null, null,"Rocko", "Macho", null, true, 
         "Tiene malito el ojo", "123abc", "https://cloudinary.com/rocko.png", null, null, null, 1L);
-        trueno = new ConejoModel(4L, "Trueno", "Macho", null, true, 
+        trueno = new ConejoModel(4L, null, null,"Trueno", "Macho", null, true, 
         "Tiene lloroso el ojo", "123abc", "https://cloudinary.com/trueno.png", null, null, null, 1L);
-        marino = new ConejoModel(5L, "Marino", "Macho", null, true, 
+        marino = new ConejoModel(5L, null, null,"Marino", "Macho", null, true, 
         "Tiene gripa", "123abc", "https://cloudinary.com/marino.png", null, null, null, 1L);
 
-        mexicana = new ConejoModel(6L, "Mexicana", "Hembra", null, true, 
+        mexicana = new ConejoModel(6L, null, null,"Mexicana", "Hembra", null, true, 
         "Perfecto estado", "123abc", "https://cloudinary.com/mexicana.png", null, null, null, 1L);
-        enojona = new ConejoModel(7L, "Enojona", "Hembra", null, true, 
+        enojona = new ConejoModel(7L, null, null,"Enojona", "Hembra", null, true, 
         "Perfecto estado", "123abc", "https://cloudinary.com/enojona.png", null, null, null, 1L);
 
         // Razas
@@ -142,7 +142,7 @@ public class ConejoServiceTest {
         // });
 
         // then
-        Page<ConejoDTO> pagina = conejoService.findAll(0, 10);
+        Page<ConejoDTO> pagina = conejoService.findAll(0, 10, "nombre");
         assertNotNull(pagina);
         assertEquals(7, pagina.getSize()); // Tamaño de la pagina actual porque hay 7 conejos y 3 vacios
         assertEquals(1, pagina.getTotalPages()); // solo una pigina porque hay 7 conejos en total
@@ -173,7 +173,7 @@ public class ConejoServiceTest {
         when(modelMapper.map(any(ConejoModel.class), eq(ConejoDTO.class))).thenAnswer(invocation -> mapModeltoDto(invocation.getArgument(0)));
 
         // then
-        Page<ConejoDTO> pageConejos = conejoService.findBySexo(0, 5, "Hembra");
+        Page<ConejoDTO> pageConejos = conejoService.findBySexo(0, 5, "Hembra", "nombre");
 
         assertNotNull(pageConejos);
         assertEquals(3, pageConejos.getNumberOfElements()); // la pagina contiene 3 hembras y 2 vacios
@@ -233,7 +233,7 @@ public class ConejoServiceTest {
     @Test
     void testGuardarConejo_Exception_ExistsByNombre(){
         // given
-        ConejoDTO sementalDTO = new ConejoDTO(null, imagen, "Semental", "Macho", null, false, 
+        ConejoDTO sementalDTO = new ConejoDTO(null, null, null,imagen, "Semental", "Macho", null, false, 
         "Primer semental de la granja", null, null, null, null, null, minilop);
 
         // when
@@ -248,7 +248,7 @@ public class ConejoServiceTest {
     @Test
     void testGuardarConejo_Exception_ResultUpload(){        
         // given
-        ConejoDTO sementalDTO = new ConejoDTO(null, imagen, "Semental", "Macho", null, false, 
+        ConejoDTO sementalDTO = new ConejoDTO(null, null, null,imagen, "Semental", "Macho", null, false, 
         "Primer semental de la granja", null, null, null, null, null, minilop);
 
         // when
@@ -266,14 +266,14 @@ public class ConejoServiceTest {
     @Test
     void testGuardarConejo_Success(){
         // given
-        ConejoDTO sementalDTO = new ConejoDTO(null, imagen, "Semental", "Macho", null, false, 
+        ConejoDTO sementalDTO = new ConejoDTO(null, null, null,imagen, "Semental", "Macho", null, false, 
         "Primer semental de la granja", null, null, null, null, null, minilop);
-        ConejoModel sementalModel = new ConejoModel(null, "Semental", "Macho", null, false, 
+        ConejoModel sementalModel = new ConejoModel(null, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
-        ConejoModel sementalModelPersis = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel sementalModelPersis = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
-        ConejoDTO sementalDTOPersis = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO sementalDTOPersis = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
         
         when(conejoRepository.existsByNombre(anyString())).thenReturn(false);
@@ -303,7 +303,7 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Exception_NotFound(){
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, imagen, "Semental", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,imagen, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -316,15 +316,15 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Exception_DifferentNameConejoExisting(){
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, imagen, "Semental Update", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,imagen, "Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
         
         // MODEL original de la BD
-        ConejoModel sementalModel = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel sementalModel = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original de la BD
-        ConejoDTO sementalDTO = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO sementalDTO = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(sementalModel));
@@ -345,15 +345,15 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Exception_DifferentNameAndImage(){ // DifferentNameAndImage -> exception
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, imagen, "Semental Update", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,imagen, "Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL original de la BD
-        ConejoModel sementalModel = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel sementalModel = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original de la BD
-        ConejoDTO sementalDTO = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO sementalDTO = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // conejoService.obtenerConejoById()
@@ -374,27 +374,27 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Success_DifferentNameAndImage(){ // DifferentNameAndImage -> success
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, imagen, "Semental Update", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,imagen, "Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL original de la BD
-        ConejoModel modelOriginal = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelOriginal = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original
-        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL que viene del fronted
-        ConejoModel frontModel = new ConejoModel(1L, "Semental Update", "Macho", null, false, 
+        ConejoModel frontModel = new ConejoModel(1L, null, null,"Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
         // Model persistido
-        ConejoModel modelPersis = new ConejoModel(1L, "Semental Update", "Macho", null, false, 
+        ConejoModel modelPersis = new ConejoModel(1L, null, null,"Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO persistido
-        ConejoDTO dtoPersis = new ConejoDTO(1L, null, "Semental Update", "Macho", null, false, 
+        ConejoDTO dtoPersis = new ConejoDTO(1L, null, null, null,"Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // obtenerConejoById()
@@ -429,15 +429,15 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Exception_DifferentNameNullImage(){ // DifferentNameNullImage -> image == null
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, null, "Semental Update", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,null, "Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL original de la BD
-        ConejoModel modelOriginal = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelOriginal = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original
-        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(modelOriginal));
@@ -456,15 +456,15 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Exception_DifferentNameEmptyImage(){ // DifferentNameEmptyImage -> image == empty
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, imagenVacia, "Semental Update", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,imagenVacia, "Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL original de la BD
-        ConejoModel modelOriginal = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelOriginal = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original
-        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(modelOriginal));
@@ -483,27 +483,27 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Success_DifferentNameSameImage(){
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, null, "Semental Update", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,null, "Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL original de la BD
-        ConejoModel modelOriginal = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelOriginal = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original
-        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL que viene del frontend
-        ConejoModel frontModel = new ConejoModel(1L, "Semental Update", "Macho", null, false, 
+        ConejoModel frontModel = new ConejoModel(1L, null, null,"Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
         // Model persis
-        ConejoModel modelPersis = new ConejoModel(1L, "Semental Update", "Macho", null, false, 
+        ConejoModel modelPersis = new ConejoModel(1L, null, null,"Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO persis
-        ConejoDTO dtoPersis = new ConejoDTO(1L, null, "Semental Update", "Macho", null, false, 
+        ConejoDTO dtoPersis = new ConejoDTO(1L, null, null,null, "Semental Update", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(modelOriginal));
@@ -536,15 +536,15 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Exception_SameNameDifferentImage(){ // imagen != null -> exception
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, imagen, "Semental", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,imagen, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL original de la BD
-        ConejoModel modelOriginal = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelOriginal = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original
-        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(modelOriginal));
@@ -563,27 +563,27 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Success_SameNameDifferentImage(){ // imagen != null -> success
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, imagen, "Semental", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,imagen, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL original de la BD
-        ConejoModel modelOriginal = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelOriginal = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original
-        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL que viene del frontend
-        ConejoModel frontModel = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel frontModel = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
         // Model persis
-        ConejoModel modelPersis = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelPersis = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // Model persis
-        ConejoDTO dtoPersis = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoPersis = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(modelOriginal));
@@ -610,27 +610,27 @@ public class ConejoServiceTest {
     @Test
     void testEditarConejo_Success_SameNameDifferentImage_nullImage(){ // imagen == null
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL original de la BD
-        ConejoModel modelOriginal = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelOriginal = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original
-        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL que viene del frontend
-        ConejoModel frontModel = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel frontModel = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
         // Model persis
-        ConejoModel modelPersis = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelPersis = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // Model persis
-        ConejoDTO dtoPersis = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoPersis = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(modelOriginal));
@@ -655,27 +655,27 @@ public class ConejoServiceTest {
         MockMultipartFile emptyImage = new MockMultipartFile("image", new byte[0]);
 
         // DTO que viene del frontend
-        ConejoDTO frontDTO = new ConejoDTO(1L, emptyImage, "Semental", "Macho", null, false, 
+        ConejoDTO frontDTO = new ConejoDTO(1L, null, null,emptyImage, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL original de la BD
-        ConejoModel modelOriginal = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelOriginal = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // DTO del model original
-        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoOriginal = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, minilop);
 
         // MODEL que viene del frontend
-        ConejoModel frontModel = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel frontModel = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
         // Model persis
-        ConejoModel modelPersis = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel modelPersis = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // Model persis
-        ConejoDTO dtoPersis = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        ConejoDTO dtoPersis = new ConejoDTO(1L, null, null,null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, null);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(modelOriginal));
@@ -711,7 +711,7 @@ public class ConejoServiceTest {
     @Test
     void testEliminarConejoById_Exception_MachoEnUso(){
         // given
-        ConejoModel semental = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel semental = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // when
@@ -727,7 +727,7 @@ public class ConejoServiceTest {
     @Test
     void testEliminarConejoById_Exception_HembraEnUso(){
         // given
-        ConejoModel enojona = new ConejoModel(1L, "Enojona", "Hembra", null, false, 
+        ConejoModel enojona = new ConejoModel(1L, null, null,"Enojona", "Hembra", null, false, 
         "Única mordelona en la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // when
@@ -743,7 +743,7 @@ public class ConejoServiceTest {
     @Test
     void testEliminarConejoById_Exception_EliminarImagenCloudinary() throws Exception{
         // given
-        ConejoModel semental = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel semental = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         // when
@@ -761,7 +761,7 @@ public class ConejoServiceTest {
 
     @Test
     void testEliminarConejoById_Exception_EliminarConejo(){
-        ConejoModel semental = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel semental = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(semental));
@@ -781,7 +781,7 @@ public class ConejoServiceTest {
 
     @Test
     void testEliminarConejoById_Success(){
-        ConejoModel semental = new ConejoModel(1L, "Semental", "Macho", null, false, 
+        ConejoModel semental = new ConejoModel(1L, null, null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://www.cloudinary.com/imagen.png", null, null, null, 1L);
 
         when(conejoRepository.findById(anyLong())).thenReturn(Optional.of(semental));

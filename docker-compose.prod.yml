@@ -1,0 +1,6 @@
+services:
+
+  nginx:
+    volumes:
+      - ${SSL_CERTIFICATE_FULLCHAIN}
+      - ${SSL_CERTIFICATE_PRIVKEY}

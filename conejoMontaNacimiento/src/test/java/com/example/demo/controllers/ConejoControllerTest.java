@@ -56,19 +56,19 @@ public class ConejoControllerTest {
         leon = new RazaDTO(2L, "Cabeza de León");
 
         // Conejos minilop
-        semental = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
+        semental = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
-        panda = new ConejoDTO(2L, null, "Panda", "Hembra", null, false, 
+        panda = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
         "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop);
-        mexicana = new ConejoDTO(3L, null, "Mexicana", "Hembra", null, true, 
+        mexicana = new ConejoDTO(3L, null, null, null, "Mexicana", "Hembra", null, true, 
         "Primera satinada", "123abc", "https://cloudinary.com/mexicana.png", null, null, null, minilop);
 
         // Conejos leones
-        peluchin = new ConejoDTO(4L, null, "Peluchin", "Macho", null, true, 
+        peluchin = new ConejoDTO(4L, null, null, null, "Peluchin", "Macho", null, true, 
         "Semental de la granja estado", "123abc", "https://cloudinary.com/peluchin.png", null, null, null, leon);
-        pelusa = new ConejoDTO(5L, null, "Pelusa", "Hembra", null, true, 
+        pelusa = new ConejoDTO(5L, null, null, null, "Pelusa", "Hembra", null, true, 
         "Hermana del semental de la granja", "123abc", "https://cloudinary.com/pelusa.png", null, null, null, leon);
-        peluchina = new ConejoDTO(6L, null, "Peluchina", "Hembra", null, true, 
+        peluchina = new ConejoDTO(6L, null, null, null, "Peluchina", "Hembra", null, true, 
         "Hoja del semental de la granja", "123abc", "https://cloudinary.com/peluchina.png", null, null, null, leon);
     }
 
