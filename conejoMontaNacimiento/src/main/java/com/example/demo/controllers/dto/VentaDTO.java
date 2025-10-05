@@ -28,6 +28,7 @@ public class VentaDTO {
     private LocalDateTime fechaEntrega;
     private String lugarEntrega;
     private Double totalVenta;
+    private Double adelanto;
     private String nota;
     
     @Enumerated(EnumType.STRING)

@@ -78,6 +78,7 @@
                 <th scope="col">Entrega</th>
                 <th scope="col">Lugar</th>
                 <th scope="col">Total</th>
+                <th scope="col">Restante</th>
                 <th scope="col" class="col-hide-mobile">Nota</th>
                 <th scope="col">Acciones</th>
                 <th scope="col">Estatus</th>
@@ -94,8 +95,33 @@
                   'table-light'">
 
                 <!-- visible -->
-                <td th:text="${item.nombreCliente}"></td>
+                <!-- Si tiene teléfono, muestra el nombre con enlace a WhatsApp -->
+                <!-- <td th:if="${item.telefono != null}">
+                  <a th:href="'https://wa.me/52' + ${item.telefono}"
+                      target="_blank"
+                      class="text-success text-decoration-none">
+                      <i class="bi bi-whatsapp"></i>
+                      <span th:text="${item.nombreCliente}"></span>
+                  </a>
+                </td> -->
+
+                <!-- Si no tiene teléfono, muestra solo el nombre -->
+                <!-- <td th:if="${item.telefono == null}" th:text="${item.nombreCliente}"></td> -->
                 
+                <td>
+                  <!-- Si tiene teléfono, muestra el nombre con enlace a WhatsApp -->
+                  <a th:if="${item.telefono != null and item.telefono != ''}"
+                      th:href="'https://wa.me/52' + ${item.telefono}"
+                      target="_blank"
+                      class="text-success text-decoration-none">
+                      <i class="bi bi-whatsapp"></i>
+                      <span th:text="${item.nombreCliente}"></span>
+                  </a>
+                  
+                  <!-- Si no tiene teléfono, muestra solo el nombre -->
+                  <span th:unless="${item.telefono != null and item.telefono != ''}" th:text="${item.nombreCliente}"></span>
+                </td>
+
                 <!-- hidden -->
                 <td th:text="${item.vinculoContacto}" class="col-hide-mobile"></td>
                 <td th:text="${item.telefono}" class="col-hide-mobile"></td>
@@ -104,7 +130,7 @@
                 <td th:text="${item.fechaEntrega != null} ? ${#temporals.format(item.fechaEntrega, 'dd/MMMM/yyyy hh:mm a')} : ''"></td>
                 <td th:text="${item.lugarEntrega}"></td>
                 <td th:text="${item.totalVenta != null} ? '$'+${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')} : ''"></td>
-                <!-- <td th:text="${item.totalVenta == null ? '$0.0' : '$' + item.totalVenta}"></td> -->
+                <td th:text="${item.totalVenta != null and item.adelanto != null} ? '$'+${#numbers.formatDecimal(item.totalVenta - item.adelanto, 1, 'COMMA', 2, 'POINT')} : ''"></td>
                 
                 <!-- hidden -->
                 <td th:text="${item.nota}" class="col-hide-mobile"></td>

@@ -44,6 +44,7 @@ public class VentaModel {
     private String lugarEntrega;
     @Column(name = "total_venta")
     private Double totalVenta;
+    private Double adelanto;
     private String nota;
 
     @Enumerated(EnumType.STRING)
