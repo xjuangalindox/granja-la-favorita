@@ -278,11 +278,6 @@ services:
       - "443:443"
     volumes:
       - ./nginx/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
-      # - ${SSL_CERTIFICATE_FULLCHAIN} # Comendar local y descomentar prod
-      # - ${SSL_CERTIFICATE_PRIVKEY} # Comendar local y descomentar prod
-      # - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      # - /etc/letsencrypt/live/granjalafavorita.com/fullchain.pem:/etc/letsencrypt/live/granjalafavorita.com/fullchain.pem:ro
-      # - /etc/letsencrypt/live/granjalafavorita.com/privkey.pem:/etc/letsencrypt/live/granjalafavorita.com/privkey.pem:ro
 
     restart: always
     depends_on:
@@ -303,9 +298,7 @@ services:
 volumes:
   mysql_data:
     external: true
-    # name: granja-la-favorita_mysql_data # new info, only conejos
-    name: workspace-spring-tool-suite-4-4291release_mysql_data # old info
+    name: ${MYSQL_VOLUME_NAME}
   grafana_data:
     external: true
-    # name: granja-la-favorita_grafana_data # new info, empty
-    name: workspace-spring-tool-suite-4-4291release_grafana_data # old info
+    name: ${GRAFANA_VOLUME_NAME}
