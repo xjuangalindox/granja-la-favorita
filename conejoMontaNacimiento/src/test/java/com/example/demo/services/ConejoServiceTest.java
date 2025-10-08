@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.doNothing;
@@ -30,10 +32,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.verification.AtMost;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -122,43 +126,84 @@ public class ConejoServiceTest {
     }
 
     @Test
-    void testFindAll(){
+    void testFindAll_OrderByNombre(){
         // given
-        List<ConejoModel> lista = java.util.Arrays.asList(semental, panda, rocko, trueno, marino, mexicana, enojona);
+        List<ConejoModel> lista = List.of(semental, panda);
         Page<ConejoModel> pageConejos = new PageImpl<>(lista);
 
-        // when: repository
+        // when
         when(conejoRepository.findAll(any(Pageable.class))).thenReturn(pageConejos);
-        
-        // when: razaClient
         when(razaClient.obtenerRazaPorId(anyLong())).thenReturn(minilop);
-
-        // when: modelMapper
+        // En ciclos utilizar invocation.getArgument(index)
         when(modelMapper.map(any(ConejoModel.class), eq(ConejoDTO.class))).thenAnswer(invocation -> mapModeltoDto(invocation.getArgument(0)));
-        // when(modelMapper.map(any(ConejoModel.class), eq(ConejoDTO.class))).thenAnswer(invocation -> {
-        //     ConejoModel conejoModel = invocation.getArgument(0);
-        //     ConejoDTO conejoDTO = mapModeltoDto(conejoModel);
-        //     return conejoDTO;
-        // });
 
         // then
-        Page<ConejoDTO> pagina = conejoService.findAll(0, 10, "nombre");
-        assertNotNull(pagina);
-        assertEquals(7, pagina.getSize()); // Tamaño de la pagina actual porque hay 7 conejos y 3 vacios
-        assertEquals(1, pagina.getTotalPages()); // solo una pigina porque hay 7 conejos en total
-        assertEquals(7, pagina.getNumberOfElements()); // Tamaño de la pagina actual porque hay 7 conejos y 3 vacios
-        assertEquals(7, pagina.getTotalElements()); // Total de conejos en la bd
+        Page<ConejoDTO> pageConejosDTO = conejoService.findAll(0, 5, "nombre");
+        assertNotNull(pageConejosDTO);
+        assertEquals(2, pageConejosDTO.getSize());
+        assertEquals(0, pageConejosDTO.getNumber()); // number of page
+        assertEquals(2, pageConejosDTO.getNumberOfElements()); // size of elements in the page
 
-        List<ConejoDTO> listaConejos = pagina.getContent();
-        assertEquals("Semental", listaConejos.get(0).getNombre());
-        assertEquals("Panda", listaConejos.get(1).getNombre());
-        assertEquals("Rocko", listaConejos.get(2).getNombre());
-        assertEquals("Trueno", listaConejos.get(3).getNombre());
-        assertEquals("Marino", listaConejos.get(4).getNombre());
-        assertEquals("Mexicana", listaConejos.get(5).getNombre());
-        assertEquals("Enojona", listaConejos.get(6).getNombre());
+        List<ConejoDTO> listaDTO = pageConejosDTO.getContent();
+        assertEquals("Semental", listaDTO.get(0).getNombre());
+        assertEquals("Panda", listaDTO.get(1).getNombre());
 
         verify(conejoRepository, times(1)).findAll(any(Pageable.class));
+        verify(razaClient, times(2)).obtenerRazaPorId(anyLong());
+        verify(modelMapper, atLeast(2)).map(any(ConejoModel.class), eq(ConejoDTO.class));
+    }
+
+    @Test
+    void testFindAll_OrderByInicioRecreo(){
+        List<ConejoModel> lista = Arrays.asList(semental, panda);
+        Page<ConejoModel> pageConejos = new PageImpl<>(lista);
+
+        when(conejoRepository.findAll(any(Pageable.class))).thenReturn(pageConejos);
+        when(razaClient.obtenerRazaPorId(anyLong())).thenReturn(minilop);
+        when(modelMapper.map(any(ConejoModel.class), eq(ConejoDTO.class))).thenAnswer(invocation -> mapModeltoDto(invocation.getArgument(0)));
+
+        Page<ConejoDTO> pageConejosDTO = conejoService.findAll(0, 5, "inicioRecreo");
+        assertNotNull(pageConejosDTO);
+        assertEquals(0, pageConejosDTO.getNumber()); // page number
+        assertEquals(2, pageConejosDTO.getNumberOfElements()); // elements total
+        assertEquals(2, pageConejosDTO.getTotalElements()); // elements total in db
+        assertEquals(1, pageConejosDTO.getTotalPages()); // page total in db
+
+        List<ConejoDTO> listaDTO = pageConejosDTO.getContent();
+        assertEquals(2, listaDTO.size());
+        assertEquals("Semental", listaDTO.get(0).getNombre());
+        assertEquals("Panda", listaDTO.get(1).getNombre());
+
+        verify(conejoRepository, atMost(1)).findAll(any(Pageable.class));
+        verify(razaClient, atMost(2)).obtenerRazaPorId(anyLong());
+        verify(modelMapper, atLeast(2)).map(any(ConejoModel.class), eq(ConejoDTO.class));
+    }
+
+    @Test
+    void testFindAll_OrderByDefault(){
+        List<ConejoModel> lista = List.of(semental, panda);
+        Page<ConejoModel> pageConejos = new PageImpl<>(lista);
+
+        when(conejoRepository.findAll(any(Pageable.class))).thenReturn(pageConejos);
+        when(razaClient.obtenerRazaPorId(anyLong())).thenReturn(minilop);
+        when(modelMapper.map(any(ConejoModel.class), eq(ConejoDTO.class))).thenAnswer(inv -> mapModeltoDto(inv.getArgument(0)));
+
+        Page<ConejoDTO> pageConejosDTO = conejoService.findAll(0, 5, "peso");
+        assertNotNull(pageConejosDTO);
+        assertEquals(0, pageConejosDTO.getNumber()); // page number
+        assertEquals(1, pageConejosDTO.getTotalPages()); // total pages in
+        assertEquals(2, pageConejosDTO.getNumberOfElements()); // total de elementos
+        assertEquals(2, pageConejosDTO.getTotalElements()); // total elements in db
+
+        List<ConejoDTO> listaDTO = pageConejosDTO.getContent();
+        assertNotNull(listaDTO);
+        assertEquals(2, listaDTO.size());
+        assertEquals("Semental", listaDTO.get(0).getNombre());
+        assertEquals("Panda", listaDTO.get(1).getNombre());
+
+        verify(conejoRepository, atLeastOnce()).findAll(any(Pageable.class));
+        verify(razaClient, atLeast(2)).obtenerRazaPorId(anyLong());
+        verify(modelMapper, atMost(2)).map(any(ConejoModel.class), eq(ConejoDTO.class));
     }
 
     @Test
