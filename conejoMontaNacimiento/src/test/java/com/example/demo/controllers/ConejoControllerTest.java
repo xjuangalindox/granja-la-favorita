@@ -1,7 +1,11 @@
 package com.example.demo.controllers;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,8 +48,7 @@ public class ConejoControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // @MockitoBean
-    // private ConejoServiceImpl conejoService;
+    ///////////////////////////////////////////////////////////////////////////////////
 
     @MockitoBean
     private ArchivoUtil archivoUtil;
@@ -56,7 +59,8 @@ public class ConejoControllerTest {
     @MockitoBean
     private IConejoService conejoService;
 
-    // 
+    ///////////////////////////////////////////////////////////////////////////////////
+
     RazaDTO minilop;
     ConejoDTO semental, panda, rocko, enojona;
 
@@ -75,7 +79,7 @@ public class ConejoControllerTest {
     }
 
     @Test
-    void testObtenerConejos_filterBySexo() throws Exception{
+    void testObtenerConejos_filterBySexoEmpty() throws Exception{
         // given
         List<ConejoDTO> lista = List.of(semental, rocko);
         Page<ConejoDTO> pageConejos = new PageImpl<>(lista);
@@ -103,7 +107,7 @@ public class ConejoControllerTest {
     }
 
     @Test
-    void testobtenerConejos_filterByDefault() throws Exception{
+    void testobtenerConejos_filterByDefault_EmptySexo() throws Exception{
         List<ConejoDTO> lista = Arrays.asList(enojona, panda, rocko, semental);
         Page<ConejoDTO> pageConejos = new PageImpl<>(lista);
 
@@ -127,18 +131,28 @@ public class ConejoControllerTest {
         verify(conejoService, times(1)).findAll(anyInt(), anyInt(), anyString());
     }
 
-    // @Test
-    // void testObtenerConejos() throws Exception{
-    //     List<ConejoDTO> lista = Arrays.asList(semental, panda, mexicana, peluchin, pelusa, peluchina);
-    //     Page<ConejoDTO> pageConejos = new PageImpl<>(lista);
+    @Test
+    void testObtenerConejos_filterByDefault_NullSexo() throws Exception{
+        List<ConejoDTO> lista = Arrays.asList(enojona, panda, rocko, semental);
+        Page<ConejoDTO> pageConejos = new PageImpl<>(lista);
 
-    //     when(conejoService.findAll(anyInt(), anyInt())).thenReturn(pageConejos);
+        when(conejoService.findAll(anyInt(), anyInt(), anyString())).thenReturn(pageConejos);
 
-    //     ResultActions response = mockMvc.perform(get("/conejos"));
+        ResultActions response = mockMvc.perform(get("/conejos")
+            .param("pagina", "0")
+            // .param("sexo", "")
+            .param("ordenarPor", ""));
 
-    //     response.andExpect(status().isOk())
-    //         .andDo(print())
-    //         .andExpect(view().name("conejos/lista"));
-    //         .andExpect(model().attribute("sexo", response))
-    // }
+        response.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("conejos/lista"))
+            .andExpect(model().attribute("sexo", nullValue()))
+            .andExpect(model().attribute("ordenarPor", "nombre"))
+            .andExpect(model().attribute("listaConejos", pageConejos.getContent()))
+            .andExpect(model().attribute("paginaActual", 0))
+            .andExpect(model().attribute("totalPaginas", pageConejos.getTotalPages()))
+            .andExpect(model().attribute("totalElementos", pageConejos.getTotalElements()))            ;
+
+        verify(conejoService, times(1)).findAll(anyInt(), anyInt(), anyString());
+    }
 }
