@@ -30,7 +30,7 @@ import com.example.demo.models.ConejoModel;
 import com.example.demo.services.ConejoServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WebMvcTest
+@WebMvcTest(ConejoController.class)
 public class ConejoControllerTest {
     
     @Autowired
@@ -39,8 +39,8 @@ public class ConejoControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ConejoController conejoController;
+    // @Autowired
+    // private ConejoController conejoController;
 
     @MockitoBean
     private ConejoServiceImpl conejoService;
