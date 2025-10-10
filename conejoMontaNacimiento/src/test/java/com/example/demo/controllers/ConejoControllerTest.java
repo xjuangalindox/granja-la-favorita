@@ -3,7 +3,9 @@ package com.example.demo.controllers;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
@@ -39,6 +41,8 @@ import com.example.demo.services.IConejoService;
 import com.example.demo.util.ArchivoUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @WebMvcTest(ConejoController.class)
 public class ConejoControllerTest {
     
@@ -61,11 +65,14 @@ public class ConejoControllerTest {
 
     ///////////////////////////////////////////////////////////////////////////////////
 
+    String url;
     RazaDTO minilop;
     ConejoDTO semental, panda, rocko, enojona;
 
     @BeforeEach
     void setup(){
+        url = "http://localhost:8080";
+
         minilop = new RazaDTO(1L, "Minilop");
         
         semental = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
@@ -154,5 +161,55 @@ public class ConejoControllerTest {
             .andExpect(model().attribute("totalElementos", pageConejos.getTotalElements()))            ;
 
         verify(conejoService, times(1)).findAll(anyInt(), anyInt(), anyString());
+    }
+
+    @Test
+    void testEliminarConejo_Error_EmptySexo() throws Exception{
+        when(conejoService.eliminarConejoById(anyLong())).thenThrow(new RuntimeException());
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(url);
+        
+        ResultActions response = mockMvc.perform(get("/conejos/eliminar/{id}", 1L)
+            .param("sexo", "")); // Empty sexo
+
+        response.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(url+"/conejos")); // No se usa "redirect" en tests
+
+        verify(conejoService).eliminarConejoById(anyLong());
+        verify(archivoUtil, times(1)).getBaseUrlNginx(any(HttpServletRequest.class));
+    }
+
+    @Test
+    void testEliminarConejo_Error_NullSexo() throws Exception{
+        when(conejoService.eliminarConejoById(anyLong())).thenThrow(new RuntimeException());
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(url);
+
+        ResultActions response = mockMvc.perform(get("/conejos/eliminar/{id}",1L)
+            // .param("sexo", "Macho") // Null sexo
+            );
+
+        response.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(url+"/conejos"));
+
+        verify(conejoService).eliminarConejoById(anyLong());
+        verify(archivoUtil, times(1)).getBaseUrlNginx(any(HttpServletRequest.class));
+    }
+
+    @Test
+    void testEliminarConejo_Success_WithSexo() throws Exception{
+        String sexo = "Macho";
+        when(conejoService.eliminarConejoById(anyLong())).thenReturn(true);
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(url);
+
+        ResultActions response = mockMvc.perform(get("/conejos/eliminar/{id}", 1L)
+            .param("sexo", sexo));
+
+        response.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(url+"/conejos?sexo="+sexo));
+
+        verify(conejoService, times(1)).eliminarConejoById(anyLong());
+        verify(archivoUtil).getBaseUrlNginx(any(HttpServletRequest.class));
     }
 }
