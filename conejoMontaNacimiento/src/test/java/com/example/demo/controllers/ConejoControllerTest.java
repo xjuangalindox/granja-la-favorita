@@ -377,4 +377,21 @@ public class ConejoControllerTest {
             .andExpect(model().attribute("accion", "/conejos/editar/"+1L));
     }   
 
+    @Test
+    void testMostrarFormularioCrear() throws Exception{
+        List<RazaDTO> lista = Arrays.asList(minilop);
+        when(razaClient.obtenerRazas()).thenReturn(lista);
+
+        ResultActions response = mockMvc.perform(get("/conejos/crear"));
+
+        response.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("conejos/formulario"))
+            .andExpect(model().attributeExists("conejoDTO"))
+            .andExpect(model().attribute("listaRazas", lista))
+            .andExpect(model().attribute("titulo", "Registrar Conejo"))
+            .andExpect(model().attribute("accion", "/conejos/guardar"));
+
+        verify(razaClient).obtenerRazas();
+    }        
 }
