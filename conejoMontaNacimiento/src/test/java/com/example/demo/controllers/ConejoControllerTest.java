@@ -344,4 +344,37 @@ public class ConejoControllerTest {
         verify(razaClient).obtenerRazas();
     }
 
+    @Test
+    void testMostrarFormularioEditar_EmptyConejo() throws Exception{
+        when(conejoService.obtenerConejoById(anyLong())).thenReturn(Optional.empty());
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(url);
+
+        ResultActions response = mockMvc.perform(get("/conejos/editar/{id}", 1L));
+
+        response.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(url+"/conejos"));
+
+        verify(razaClient, never()).obtenerRazas();
+        verify(conejoService, times(1)).obtenerConejoById(anyLong());
+    }     
+    
+    @Test
+    void testMostrarFormularioEditar_WithConejo() throws Exception{
+        List<RazaDTO> lista = List.of(minilop);
+
+        when(conejoService.obtenerConejoById(anyLong())).thenReturn(Optional.of(semental));
+        when(razaClient.obtenerRazas()).thenReturn(lista);
+
+        ResultActions response = mockMvc.perform(get("/conejos/editar/{id}", 1L));
+
+        response.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("conejos/formulario"))
+            .andExpect(model().attribute("conejoDTO", semental))
+            .andExpect(model().attribute("listaRazas", lista))
+            .andExpect(model().attribute("titulo", "Editar Conejo"))
+            .andExpect(model().attribute("accion", "/conejos/editar/"+1L));
+    }   
+
 }
