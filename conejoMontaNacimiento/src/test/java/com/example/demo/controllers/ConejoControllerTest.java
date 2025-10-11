@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -66,12 +69,14 @@ public class ConejoControllerTest {
 
     ///////////////////////////////////////////////////////////////////////////////////
 
+    MockMultipartFile imagen;
     String url;
     RazaDTO minilop;
     ConejoDTO semental, panda, rocko, enojona;
 
     @BeforeEach
     void setup(){
+        imagen = new MockMultipartFile("imagen", "imagen.png", url, new byte[]{1, 2, 3});
         url = "http://localhost:8080";
 
         minilop = new RazaDTO(1L, "Minilop");
@@ -280,4 +285,63 @@ public class ConejoControllerTest {
         verify(conejoService, times(1)).eliminarConejoById(anyLong());
         verify(archivoUtil).getBaseUrlNginx(any(HttpServletRequest.class));
     }
+
+    @Test
+    void tetsGuardarconejo_Success() throws Exception{
+        // DTO sin uso, solo como referencia de informacion
+        ConejoDTO nuevoSemental = new ConejoDTO(null, null, null, imagen, "Semental", "Macho", null, false, 
+            "Primer semental de la granja", null, null, null, null, null, minilop);
+
+        when(conejoService.guardarConejo(any(ConejoDTO.class))).thenReturn(semental);
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(url);
+
+        ResultActions response = mockMvc.perform(multipart("/conejos/guardar")
+            .file(imagen)
+            .param("nombre", "Semental")
+            .param("sexo", "Macho")
+            .param("activo", "false")
+            .param("nota", "Primer semental de la granja")
+            .param("raza.id", "1")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+        );
+
+        response.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(url+"/conejos"));
+
+        verify(conejoService, times(1)).guardarConejo(any(ConejoDTO.class));
+        verify(razaClient, never()).obtenerRazas();
+    }
+
+    @Test
+    void testGuardarConejo_Error() throws Exception{
+        List<RazaDTO> lista = Arrays.asList(minilop);
+
+        when(conejoService.guardarConejo(any(ConejoDTO.class))).thenThrow(new RuntimeException("Ocurrio un error al guardar el ejemplar."));
+        when(razaClient.obtenerRazas()).thenReturn(lista);
+
+        ResultActions response = mockMvc.perform(multipart("/conejos/guardar")
+            .file(imagen)
+            .param("nombre", "Semental")
+            .param("sexo", "Macho")
+            .param("activo", "false")
+            .param("nota", "Primer semental de la granja")
+            .param("raza.id", "1")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+        );
+
+        response.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("conejos/formulario"))
+            .andExpect(model().attributeExists("conejoDTO"))
+            .andExpect(model().attribute("listaRazas", lista))
+            .andExpect(model().attribute("titulo", "Registrar Conejo"))
+            .andExpect(model().attribute("accion", "/conejos/guardar"))
+            .andExpect(model().attribute("error", "Ocurrio un error al guardar el ejemplar."));
+
+        verify(archivoUtil, never()).getBaseUrlNginx(any(HttpServletRequest.class));
+        verify(conejoService, times(1)).guardarConejo(any(ConejoDTO.class));
+        verify(razaClient).obtenerRazas();
+    }
+
 }
