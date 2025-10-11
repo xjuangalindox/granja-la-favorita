@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -162,6 +163,73 @@ public class ConejoControllerTest {
 
         verify(conejoService, times(1)).findAll(anyInt(), anyInt(), anyString());
     }
+
+/////////////////////////////////////////////////////////////////////////////////////
+    
+    @Test
+    void testEditarConejo_Success() throws Exception{
+        ConejoDTO sementalEditado = new ConejoDTO(1L, null, null, imagen, "SementalEdi", "Macho", null, false, 
+            "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+
+        when(conejoService.obtenerConejoById(anyLong())).thenReturn(Optional.of(semental));
+        when(conejoService.editarConejo(anyLong(), any(ConejoDTO.class))).thenReturn(sementalEditado);
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(url);
+
+        ResultActions response = mockMvc.perform(multipart("/conejos/editar/{id}", 1L)
+            .file(imagen)
+            .param("id", "1")
+            .param("nombre", "Semental")
+            .param("sexo", "Macho")
+            .param("activo", "true")
+            .param("nota", "Primer semental de la granja")
+            .param("publicId", "123abc")
+            .param("secureUrl", "https://cloudinary.com/semental.png")
+            .param("raza.id", "1")
+            .contentType(MediaType.MULTIPART_FORM_DATA) // opcional
+            );
+
+        response.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(url+"/conejos"));
+    }
+
+    @Test
+    void testEditarConejo_Error() throws Exception{
+        List<RazaDTO> lista = List.of(minilop);
+        // DTO sin uso, solo como referencia de informacion
+        ConejoDTO sementalEditado = new ConejoDTO(1L, null, null, imagen, "SementalEdi", "Macho", null, false, 
+            "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+        
+        when(conejoService.obtenerConejoById(anyLong())).thenReturn(Optional.of(semental));
+        when(conejoService.editarConejo(anyLong(), any(ConejoDTO.class))).thenThrow(new RuntimeException("Ocurrio un error al editar el ejemplar."));
+        when(razaClient.obtenerRazas()).thenReturn(lista);
+
+        ResultActions response = mockMvc.perform(multipart("/conejos/editar/{id}", 1L)
+            .file(imagen)
+            .param("id", "1")
+            .param("nombre", "Semental")
+            .param("sexo", "Macho")
+            .param("activo", "true")
+            .param("nota", "Primer semental de la granja")
+            .param("publicId", "123abc")
+            .param("secureUrl", "https://cloudinary.com/semental.png")
+            .param("raza.id", "1")
+            .contentType(MediaType.MULTIPART_FORM_DATA) // opcional
+        );
+
+        response.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("conejos/formulario"))
+            .andExpect(model().attributeExists("conejoDTO"))
+            .andExpect(model().attribute("listaRazas", lista))
+            .andExpect(model().attribute("titulo", "Editar Conejo"))
+            .andExpect(model().attribute("accion", "/conejos/editar/"+1L))
+            .andExpect(model().attribute("error", "Ocurrio un error al editar el ejemplar."));
+
+            verify(archivoUtil, never()).getBaseUrlNginx(any(HttpServletRequest.class));
+    }
+    
+    /////////////////////////////////////////////////////////////////////////////////////
 
     @Test
     void testEliminarConejo_Error_EmptySexo() throws Exception{
