@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -30,7 +31,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Transformation;
 import com.cloudinary.Uploader;
+import com.cloudinary.Url;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -42,6 +45,9 @@ public class ArchivoUtilTest {
 
     @Mock
     private Uploader uploader;
+
+    @Mock
+    private Url url;
 
     @InjectMocks
     private ArchivoUtil archivoUtil;
@@ -192,4 +198,17 @@ public class ArchivoUtilTest {
         assertNotNull(urlNginx);
         assertEquals("https://granjalafavorita.com", urlNginx);
     }
+
+    @Test
+    void testGetUrlWithPagina(){
+        when(cloudinary.url()).thenReturn(url);
+        when(url.transformation(any(Transformation.class))).thenReturn(url);
+        when(url.secure(anyBoolean())).thenReturn(url);
+        when(url.generate(anyString())).thenReturn("https://cloudinary.com/granjalafavorita.com/Semental.jpg");
+
+        String urlMarcaAgua = archivoUtil.getUrlWithPagina("Semental");
+
+        assertNotNull(urlMarcaAgua);
+        assertEquals("https://cloudinary.com/granjalafavorita.com/Semental.jpg", urlMarcaAgua);
+    }        
 }
