@@ -24,12 +24,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Uploader;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class ArchivoUtilTest {
@@ -152,5 +155,20 @@ public class ArchivoUtilTest {
         assertEquals("Ocurrio un error al eliminar la imagen en CLOUDINARY", exception.getMessage());
 
         verify(uploader, times(1)).destroy(anyString(), anyMap());
+    }
+
+    @Test
+    void testGetBaseUrlNginx(){
+        // given
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("X-Forwarded-Proto", "https");
+        request.addHeader("X-Forwarded-Host", "granjalafavorita.com");
+
+        // when
+        String urlNginx = archivoUtil.getBaseUrlNginx(request);
+
+        // then
+        assertNotNull(urlNginx);
+        assertEquals("https://granjalafavorita.com", urlNginx);
     }
 }
