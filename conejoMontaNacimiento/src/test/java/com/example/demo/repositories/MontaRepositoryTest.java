@@ -86,4 +86,16 @@ public class MontaRepositoryTest {
         boolean existe = montaRepository.existsByMacho(castor);
         assertFalse(existe);
     }
+
+    @Test
+    void testExistsByHembra_True(){
+        boolean existe = montaRepository.existsByHembra(panda);
+        assertTrue(existe);
+    }
+
+    @Test
+    void testExistsByHembra_False(){
+        boolean existe = montaRepository.existsByHembra(chocolata);
+        assertFalse(existe);
+    }
 }
