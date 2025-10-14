@@ -158,6 +158,27 @@ public class ArchivoUtilTest {
     }
 
     @Test
+    void testRenombrarImagenCloudinary() throws IOException{
+        when(cloudinary.uploader()).thenReturn(uploader);
+        when(uploader.rename(anyString(), anyString(), anyMap())).thenReturn(mapa);
+
+        Map<String, Object> result = archivoUtil.renombrarImagenCloudinary("123abc", "conejos", "Semental");
+        assertNotNull(result);
+        
+        verify(uploader).rename(anyString(), anyString(), anyMap());
+    }
+
+    @Test
+    void testRenombrarImagenCloudinary_Error() throws IOException{
+        when(cloudinary.uploader()).thenReturn(uploader);
+        when(uploader.rename(anyString(), anyString(), anyMap())).thenThrow(new RuntimeException());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> archivoUtil.renombrarImagenCloudinary("123abc", "conejos", "Semental"));
+        assertNotNull(exception);
+        assertEquals("Ocurrio un error renombrar o mover la imagen en CLOUDINARY.", exception.getMessage());
+    }
+
+    @Test
     void testGetBaseUrlNginx(){
         // given
         MockHttpServletRequest request = new MockHttpServletRequest();
