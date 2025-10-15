@@ -129,4 +129,42 @@ public class MontaRepositoryTest {
         assertEquals(EstatusMonta.EFECTIVA, lista.get(1).getEstatus());
         assertEquals(EstatusMonta.PENDIENTE, lista.get(2).getEstatus());
     }
+
+    @Test
+    void testFindByEstatus_PENDIENTE(){
+        Pageable page = PageRequest.of(0, 5);
+        Page<MontaModel> pageMontas = montaRepository.findByEstatus(page, EstatusMonta.PENDIENTE);
+
+        assertNotNull(pageMontas);
+        assertEquals(2, pageMontas.getNumberOfElements());
+        assertEquals(0, pageMontas.getNumber());
+        assertEquals(2, pageMontas.getTotalElements());
+        assertEquals(1, pageMontas.getTotalPages());
+
+        List<MontaModel> lista = pageMontas.getContent();
+        assertNotNull(lista);
+        assertEquals(2, lista.size());
+        assertEquals("Monta de MiniLop", lista.get(0).getNota());
+        assertEquals(EstatusMonta.PENDIENTE, lista.get(0).getEstatus());
+        assertEquals("Monta de FuzzyLop", lista.get(1).getNota());
+        assertEquals(EstatusMonta.PENDIENTE, lista.get(1).getEstatus());
+    }
+
+    @Test
+    void testFindByEstatus_EFECTIVA(){
+        Pageable page = PageRequest.of(0, 5);
+        Page<MontaModel> pageMontas = montaRepository.findByEstatus(page, EstatusMonta.EFECTIVA);
+
+        assertNotNull(pageMontas);
+        assertEquals(1, pageMontas.getNumberOfElements());
+        assertEquals(0, pageMontas.getNumber());
+        assertEquals(1, pageMontas.getTotalElements());
+        assertEquals(1, pageMontas.getTotalPages());
+
+        List<MontaModel> lista = pageMontas.getContent();
+        assertNotNull(lista);
+        assertEquals(1, lista.size());
+        assertEquals("Monta de Leones", lista.get(0).getNota());
+        assertEquals(EstatusMonta.EFECTIVA, lista.get(0).getEstatus());
+    }
 }
