@@ -105,6 +105,19 @@ public class MontaRepositoryTest {
         assertFalse(existe);
     }
 
+    // Task 61 innecesaria, ya que se trabajara con test de integracion.
+    // Se usa BD h2, no es necesario tener valores (given) previos.
+
+    @Test
+    void testFindByNacimientoIsNull(){
+        List<MontaModel> lista = montaRepository.findByNacimientoIsNull();
+        assertNotNull(lista);
+        assertEquals(3, lista.size());
+        assertEquals("Monta de MiniLop", lista.get(0).getNota());
+        assertEquals("Monta de Leones", lista.get(1).getNota());
+        assertEquals("Monta de FuzzyLop", lista.get(2).getNota());
+    }
+
     // No es necesaria la task 64, ya que actualmente existen 3 montas registradas en la BD h2.
     // Dos montas EstatusMonta.PENDIENTE y una EstatusMonta.EFECTIVA
 
