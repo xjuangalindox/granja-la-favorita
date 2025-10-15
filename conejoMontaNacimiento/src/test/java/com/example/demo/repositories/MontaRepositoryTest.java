@@ -1,5 +1,6 @@
 package com.example.demo.repositories;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,5 +99,18 @@ public class MontaRepositoryTest {
     void testExistsByHembra_False(){
         boolean existe = montaRepository.existsByHembra(chocolata);
         assertFalse(existe);
+    }
+
+    // Task 61 innecesaria, ya que se trabajara con test de integracion.
+    // Se usa BD h2, no es necesario tener valores (given) previos.
+
+    @Test
+    void testFindByNacimientoIsNull(){
+        List<MontaModel> lista = montaRepository.findByNacimientoIsNull();
+        assertNotNull(lista);
+        assertEquals(3, lista.size());
+        assertEquals("Monta de MiniLop", lista.get(0).getNota());
+        assertEquals("Monta de Leones", lista.get(1).getNota());
+        assertEquals("Monta de FuzzyLop", lista.get(2).getNota());
     }
 }
