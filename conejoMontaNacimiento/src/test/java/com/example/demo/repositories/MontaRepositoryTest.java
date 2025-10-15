@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,4 +99,7 @@ public class MontaRepositoryTest {
         boolean existe = montaRepository.existsByHembra(chocolata);
         assertFalse(existe);
     }
+
+    // No es necesaria la task 64, ya que actualmente existen 3 montas registradas en la BD h2.
+    // Dos montas EstatusMonta.PENDIENTE y una EstatusMonta.EFECTIVA
 }
