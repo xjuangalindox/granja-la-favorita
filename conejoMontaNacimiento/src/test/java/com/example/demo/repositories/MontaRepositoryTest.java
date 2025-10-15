@@ -98,4 +98,7 @@ public class MontaRepositoryTest {
         boolean existe = montaRepository.existsByHembra(chocolata);
         assertFalse(existe);
     }
+
+    // Task 61 innecesaria, ya que se trabajara con test de integracion.
+    // Se usa BD h2, no es necesario tener valores (given) previos.
 }
