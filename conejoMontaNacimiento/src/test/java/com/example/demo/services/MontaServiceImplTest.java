@@ -2,11 +2,15 @@ package com.example.demo.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,7 +37,9 @@ import com.example.demo.controllers.dto.ConejoDTO;
 import com.example.demo.controllers.dto.MontaDTO;
 import com.example.demo.controllers.dto.NacimientoDTO;
 import com.example.demo.models.ConejoModel;
+import com.example.demo.models.EjemplarModel;
 import com.example.demo.models.MontaModel;
+import com.example.demo.models.NacimientoModel;
 import com.example.demo.models.enums.EstatusMonta;
 import com.example.demo.repositories.MontaRepository;
 import com.example.demo.repositories.NacimientoRepository;
@@ -59,6 +65,10 @@ public class MontaServiceImplTest {
     // Objects
     private ConejoModel semental, panda, peluchin, pelusa, rata, nube, castor, chocolata;
     private MontaModel sp, pp, rn, cc;
+    private EjemplarModel eje1, eje2, eje3, eje4, eje5;
+    
+    private List<EjemplarModel> ejemplares;
+    private NacimientoModel n4;
 
     @BeforeEach
     void setup(){
@@ -85,10 +95,24 @@ public class MontaServiceImplTest {
         chocolata = new ConejoModel(8L, null, null, "chocolata", "Hembra", null, true, 
         "Enanita chocolata", "123abc", "https://cloudinary.com/Chocolata.png", null, null, null, 4L);
 
+        // Montas
         sp = new MontaModel(1L, "Monta de MiniLop", LocalDate.of(2025, 8, 10), 3, EstatusMonta.PENDIENTE, panda, semental, null);
         pp = new MontaModel(2L, "Monta de Leones", LocalDate.of(2025, 9, 20), 2, EstatusMonta.EFECTIVA, pelusa, peluchin, null);
         rn = new MontaModel(3L, "Monta de FuzzyLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, nube, rata, null);
         cc = new MontaModel(4L, "Monta de Enanos", LocalDate.now(), 1, EstatusMonta.EFECTIVA, chocolata, castor, null);
+
+        // Ejemplares
+        eje1 = new EjemplarModel(1L, "Macho", false, 300.00, null, n4, null);
+        eje2 = new EjemplarModel(2L, "Hembra", false, 300.00, null, n4, null);
+        eje3 = new EjemplarModel(3L, "Macho", false, 300.00, null, n4, null);
+        eje4 = new EjemplarModel(4L, "Hemba", false, 300.00, null, n4, null);
+        eje5 = new EjemplarModel(5L, "Macho", false, 300.00, null, n4, null);
+
+        // Ejemplares
+        ejemplares = List.of(eje1, eje2, eje3, eje4, eje5);
+
+        // Nacimientos
+        n4 = new NacimientoModel(1L, LocalDate.of(2025, 11, 4), 6, 0, "Ratitas", cc, ejemplares);
     }      
 
     // Model to DTO
@@ -150,5 +174,61 @@ public class MontaServiceImplTest {
 
         verify(montaRepository, times(1)).findAll(any(Pageable.class));
         verify(modelMapper, atMost(4)).map(any(MontaModel.class), eq(MontaDTO.class));
+    }
+
+    @Test
+    void testEliminarMontaById_Success(){
+        when(montaRepository.findById(anyLong())).thenReturn(Optional.of(cc));
+        when(nacimientoRepository.findByMonta(any(MontaModel.class))).thenReturn(Optional.empty());
+        doNothing().when(montaRepository).deleteById(anyLong());
+
+        boolean eliminado = montaService.eliminarMontaById(4L);
+        assertTrue(eliminado);
+
+        verify(montaRepository).findById(anyLong());
+        verify(nacimientoRepository, times(1)).findByMonta(any(MontaModel.class));
+        verify(montaRepository).deleteById(anyLong());
+    }
+
+    @Test
+    void testEliminarMontaById_MontaNotFound(){
+        when(montaRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> montaService.eliminarMontaById(4L));
+        assertNotNull(exception);
+        assertEquals("La monta con id "+4L+" no fue encontrada.", exception.getMessage());
+
+        verify(montaRepository).findById(anyLong());
+        verify(nacimientoRepository, never()).findByMonta(any(MontaModel.class));
+        verify(montaRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void testEliminarMontaById_NacimientoIsPresent(){
+        when(montaRepository.findById(anyLong())).thenReturn(Optional.of(cc));
+        when(nacimientoRepository.findByMonta(any(MontaModel.class))).thenReturn(Optional.of(n4));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> montaService.eliminarMontaById(4L));
+        assertNotNull(exception);
+        assertEquals("La monta tiene un nacimiento registrado, primero elimine el nacimiento.", exception.getMessage());
+    
+        verify(montaRepository).findById(anyLong());
+        verify(nacimientoRepository).findByMonta(any(MontaModel.class));
+        verify(montaRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void testEliminarMontaById_ErrorPersis(){
+        when(montaRepository.findById(anyLong())).thenReturn(Optional.of(cc));
+        when(nacimientoRepository.findByMonta(any(MontaModel.class))).thenReturn(Optional.empty());
+        doThrow(new RuntimeException()).when(montaRepository).deleteById(anyLong());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> montaService.eliminarMontaById(4L));
+        assertNotNull(exception);
+        assertEquals("Ocurrio un error al eliminar la monta de la base de datos.", exception.getMessage());
+
+        verify(montaRepository).findById(anyLong());
+        verify(nacimientoRepository).findByMonta(any(MontaModel.class));
+        verify(montaRepository).deleteById(anyLong());
     }
 }
