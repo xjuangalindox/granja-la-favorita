@@ -1,15 +1,18 @@
 package com.example.demo.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +23,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.example.demo.controllers.dto.ConejoDTO;
@@ -117,4 +124,31 @@ public class MontaServiceImplTest {
         verify(montaRepository, times(1)).findById(anyLong());
         verify(modelMapper, times(1)).map(any(MontaModel.class), eq(MontaDTO.class));
     }      
+
+    @Test
+    void testFindAll(){
+        List<MontaModel> lista = List.of(sp, pp, rn, cc);
+        Page<MontaModel> pageMontas = new PageImpl<>(lista);
+
+        when(montaRepository.findAll(any(Pageable.class))).thenReturn(pageMontas);
+        when(modelMapper.map(any(MontaModel.class), eq(MontaDTO.class))).thenAnswer(inv -> modelToDTO(inv.getArgument(0)));
+
+        Page<MontaDTO> pageDTO = montaService.findAll(0, 5);
+        assertNotNull(pageDTO);
+        assertEquals(0, pageDTO.getNumber()); // page number
+        assertEquals(4, pageDTO.getNumberOfElements()); // elements number
+        assertEquals(4, pageDTO.getTotalElements()); // elements total db
+        assertEquals(1, pageDTO.getTotalPages()); // pages total db
+
+        List<MontaDTO> listaDTO = pageDTO.getContent();
+        assertNotNull(listaDTO);
+        assertEquals(4, listaDTO.size());
+        assertEquals("Monta de MiniLop", listaDTO.get(0).getNota());
+        assertEquals("Monta de Leones", listaDTO.get(1).getNota());
+        assertEquals("Monta de FuzzyLop", listaDTO.get(2).getNota());
+        assertEquals("Monta de Enanos", listaDTO.get(3).getNota());
+
+        verify(montaRepository, times(1)).findAll(any(Pageable.class));
+        verify(modelMapper, atMost(4)).map(any(MontaModel.class), eq(MontaDTO.class));
+    }
 }
