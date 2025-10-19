@@ -263,4 +263,20 @@ public class MontaServiceImplTest {
         assertEquals("Monta de Leones", listaDTO.get(0).getNota());
         assertEquals("Monta de Enanos", listaDTO.get(1).getNota());
     }
+
+    @Test
+    void testFindByNacimientoIsNull(){
+        List<MontaModel> lista = List.of(rn, cc);
+
+        when(montaRepository.findByNacimientoIsNull()).thenReturn(lista);
+        when(modelMapper.map(any(MontaModel.class), eq(MontaDTO.class))).thenAnswer(inv -> modelToDTO(inv.getArgument(0)));
+
+        List<MontaDTO> listaDTO = montaService.findByNacimientoIsNull();
+        assertNotNull(listaDTO);
+        assertEquals(2, listaDTO.size());
+        assertEquals("Monta de FuzzyLop", listaDTO.get(0).getNota());
+        assertEquals(null, listaDTO.get(0).getNacimiento());
+        assertEquals("Monta de Enanos", listaDTO.get(1).getNota());
+        assertEquals(null, listaDTO.get(1).getNacimiento());
+    }
 }
