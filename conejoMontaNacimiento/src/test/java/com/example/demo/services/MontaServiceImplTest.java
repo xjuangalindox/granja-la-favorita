@@ -37,6 +37,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.example.demo.controllers.dto.ConejoDTO;
 import com.example.demo.controllers.dto.MontaDTO;
 import com.example.demo.controllers.dto.NacimientoDTO;
+import com.example.demo.controllers.dto.RazaDTO;
 import com.example.demo.models.ConejoModel;
 import com.example.demo.models.EjemplarModel;
 import com.example.demo.models.MontaModel;
@@ -278,5 +279,85 @@ public class MontaServiceImplTest {
         assertEquals(null, listaDTO.get(0).getNacimiento());
         assertEquals("Monta de Enanos", listaDTO.get(1).getNota());
         assertEquals(null, listaDTO.get(1).getNacimiento());
+    }
+
+    @Test
+    void testGuardarMonta(){
+        // given
+        RazaDTO minilop = new RazaDTO(1L, "MiniLop");
+
+        ConejoDTO sementalDTO = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
+        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+        ConejoDTO pandaDTO = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
+        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop);
+
+        // when
+        MontaDTO spInput = new MontaDTO(null, "Monta de MiniLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, pandaDTO, sementalDTO, null, false);
+        MontaModel spBefore = new MontaModel(null, "Monta de MiniLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, panda, semental, null);
+
+        MontaModel spAfter = new MontaModel(1L, "Monta de MiniLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, panda, semental, null);
+        MontaDTO spOutput = new MontaDTO(1L, "Monta de MiniLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, pandaDTO, sementalDTO, null, false);
+    
+        when(modelMapper.map(spInput, MontaModel.class)).thenReturn(spBefore);
+        when(montaRepository.save(any(MontaModel.class))).thenReturn(spAfter);
+        when(modelMapper.map(spAfter, MontaDTO.class)).thenReturn(spOutput);
+
+        // then
+        MontaDTO result = montaService.guardarMonta(spInput);
+        assertNotNull(result);
+    }
+
+    @Test
+    void testEditarMonta_Success(){
+        // given
+        RazaDTO minilop = new RazaDTO(1L, "MiniLop");
+
+        ConejoDTO sementalDTO = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
+        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+        ConejoDTO pandaDTO = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
+        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop);
+
+        // when
+        MontaModel spOriginal = new MontaModel(1L, "Monta de MiniLop Original", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, panda, semental, null);
+
+        MontaDTO spInput = new MontaDTO(null, "Monta de MiniLop Update", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, pandaDTO, sementalDTO, null, false);
+
+        MontaModel spAfter = new MontaModel(1L, "Monta de MiniLop Update", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, panda, semental, null);
+        MontaDTO spOutput = new MontaDTO(1L, "Monta de MiniLop Update", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, pandaDTO, sementalDTO, null, false);
+        
+        when(montaRepository.findById(anyLong())).thenReturn(Optional.of(spOriginal));
+        when(montaRepository.save(any(MontaModel.class))).thenReturn(spAfter);
+        when(modelMapper.map(any(MontaModel.class), eq(MontaDTO.class))).thenReturn(spOutput);
+
+        MontaDTO result = montaService.editarMonta(1L, spInput);
+        assertNotNull(result);
+        
+        verify(montaRepository).findById(anyLong());
+        verify(montaRepository).save(any(MontaModel.class));
+        verify(modelMapper, times(1)).map(any(MontaModel.class), eq(MontaDTO.class));
+    }
+
+    @Test
+    void testEditarMonta_NotFound(){
+        // given
+        RazaDTO minilop = new RazaDTO(1L, "MiniLop");
+
+        ConejoDTO sementalDTO = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
+        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+        ConejoDTO pandaDTO = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
+        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop);
+
+        MontaDTO spInput = new MontaDTO(null, "Monta de MiniLop Update", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, pandaDTO, sementalDTO, null, false);
+
+        // when
+        when(montaRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // then
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> montaService.editarMonta(1L, spInput));
+        assertNotNull(exception);
+        assertEquals("La monta con id "+1L+" no fue encontrada.", exception.getMessage());
+
+        verify(montaRepository, never()).save(any(MontaModel.class));
+        verify(modelMapper, never()).map(any(MontaModel.class), eq(MontaDTO.class));
     }
 }
