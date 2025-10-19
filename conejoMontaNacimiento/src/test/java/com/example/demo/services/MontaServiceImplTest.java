@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +42,7 @@ import com.example.demo.models.EjemplarModel;
 import com.example.demo.models.MontaModel;
 import com.example.demo.models.NacimientoModel;
 import com.example.demo.models.enums.EstatusMonta;
+import com.example.demo.models.enums.EstatusVenta;
 import com.example.demo.repositories.MontaRepository;
 import com.example.demo.repositories.NacimientoRepository;
 
@@ -68,7 +70,7 @@ public class MontaServiceImplTest {
     private EjemplarModel eje1, eje2, eje3, eje4, eje5;
     
     private List<EjemplarModel> ejemplares;
-    private NacimientoModel n4;
+    private NacimientoModel n1, n2, n3, n4;
 
     @BeforeEach
     void setup(){
@@ -95,12 +97,6 @@ public class MontaServiceImplTest {
         chocolata = new ConejoModel(8L, null, null, "chocolata", "Hembra", null, true, 
         "Enanita chocolata", "123abc", "https://cloudinary.com/Chocolata.png", null, null, null, 4L);
 
-        // Montas
-        sp = new MontaModel(1L, "Monta de MiniLop", LocalDate.of(2025, 8, 10), 3, EstatusMonta.PENDIENTE, panda, semental, null);
-        pp = new MontaModel(2L, "Monta de Leones", LocalDate.of(2025, 9, 20), 2, EstatusMonta.EFECTIVA, pelusa, peluchin, null);
-        rn = new MontaModel(3L, "Monta de FuzzyLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, nube, rata, null);
-        cc = new MontaModel(4L, "Monta de Enanos", LocalDate.now(), 1, EstatusMonta.EFECTIVA, chocolata, castor, null);
-
         // Ejemplares
         eje1 = new EjemplarModel(1L, "Macho", false, 300.00, null, n4, null);
         eje2 = new EjemplarModel(2L, "Hembra", false, 300.00, null, n4, null);
@@ -112,7 +108,16 @@ public class MontaServiceImplTest {
         ejemplares = List.of(eje1, eje2, eje3, eje4, eje5);
 
         // Nacimientos
-        n4 = new NacimientoModel(1L, LocalDate.of(2025, 11, 4), 6, 0, "Ratitas", cc, ejemplares);
+        n1 = new NacimientoModel(1L, LocalDate.of(2025, 11, 4), 6, 0, "Ratitas", null, ejemplares);
+        n2 = new NacimientoModel(2L, LocalDate.of(2025, 12, 4), 6, 0, "Ratitas", null, ejemplares);
+        n3 = new NacimientoModel(3L, LocalDate.now(), 6, 0, "Ratitas", null, ejemplares);
+        n4 = new NacimientoModel(4L, LocalDate.now(), 6, 0, "Ratitas", null, ejemplares);
+
+        // Montas
+        sp = new MontaModel(1L, "Monta de MiniLop", LocalDate.of(2025, 8, 10), 3, EstatusMonta.PENDIENTE, panda, semental, n1);
+        pp = new MontaModel(2L, "Monta de Leones", LocalDate.of(2025, 9, 20), 2, EstatusMonta.EFECTIVA, pelusa, peluchin, n2);
+        rn = new MontaModel(3L, "Monta de FuzzyLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, nube, rata, null);
+        cc = new MontaModel(4L, "Monta de Enanos", LocalDate.now(), 1, EstatusMonta.EFECTIVA, chocolata, castor, null);
     }      
 
     // Model to DTO
@@ -230,5 +235,32 @@ public class MontaServiceImplTest {
         verify(montaRepository).findById(anyLong());
         verify(nacimientoRepository).findByMonta(any(MontaModel.class));
         verify(montaRepository).deleteById(anyLong());
+    }
+
+    @Test
+    void testFindByEstatus(){
+        // given
+        List<MontaModel> lista = List.of(pp, cc);
+        Page<MontaModel> pageMontas = new PageImpl<>(lista);
+
+        // when
+        when(montaRepository.findByEstatus(any(Pageable.class), any(EstatusMonta.class))).thenReturn(pageMontas);
+        when(modelMapper.map(any(MontaModel.class), eq(MontaDTO.class))).thenAnswer(inv -> modelToDTO(inv.getArgument(0)));
+
+        // then
+        Page<MontaDTO> pageDTOS = montaService.findByEstatus(0, 5, EstatusMonta.EFECTIVA);
+        assertNotNull(pageDTOS);
+        assertEquals(0, pageMontas.getNumber());
+        assertEquals(2, pageDTOS.getNumberOfElements());
+        assertEquals(1, pageDTOS.getTotalPages());
+        assertEquals(2, pageMontas.getTotalElements());
+
+        List<MontaDTO> listaDTO = pageDTOS.getContent();
+        assertNotNull(listaDTO);
+        assertEquals(2, listaDTO.size());
+        assertEquals(EstatusMonta.EFECTIVA, listaDTO.get(0).getEstatus());
+        assertEquals("EFECTIVA", listaDTO.get(1).getEstatus().name());
+        assertEquals("Monta de Leones", listaDTO.get(0).getNota());
+        assertEquals("Monta de Enanos", listaDTO.get(1).getNota());
     }
 }
