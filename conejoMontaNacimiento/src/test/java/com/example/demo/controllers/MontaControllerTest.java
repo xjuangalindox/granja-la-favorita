@@ -2,6 +2,10 @@ package com.example.demo.controllers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*; // Agregar manualmente (get)
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -14,6 +18,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.verification.AtMost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
@@ -195,5 +200,30 @@ public class MontaControllerTest {
             .andExpect(model().attribute("totalPaginas", pageMontas.getTotalPages()))
             .andExpect(model().attribute("totalElements", pageMontas.getTotalElements()));
 
+    }
+
+    @Test
+    void testFormularioCrear() throws Exception{
+        List<ConejoDTO> machos = List.of(peluchin, rata, nube);
+        List<ConejoDTO> hembras = List.of(pelusa, nube, chocolata);
+
+        when(conejoService.obtenerConejosActivosPorSexo("Macho")).thenReturn(machos);
+        when(conejoService.obtenerConejosActivosPorSexo("Hembra")).thenReturn(hembras);
+
+        ResultActions result = mockMvc.perform(get("/montas/crear"));
+
+        result.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("montas/formulario"))
+            .andExpect(model().attributeExists("montaDTO"))
+            .andExpect(model().attribute("titulo", "Registrar Monta"))
+            .andExpect(model().attribute("accion", "/montas/guardar"))
+            .andExpect(model().attribute("listaEstatus", EstatusMonta.values()))
+            .andExpect(model().attributeExists("listaMachos"))
+            .andExpect(model().attributeExists("listaHembras"));
+
+        verify(conejoService, atMost(1)).obtenerConejosActivosPorSexo("Macho");
+        verify(conejoService, atMost(1)).obtenerConejosActivosPorSexo("Hembra");
+        verify(conejoService, times(2)).obtenerConejosActivosPorSexo(anyString());
     }
 }
