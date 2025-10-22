@@ -110,7 +110,7 @@ public class MontaControllerTest {
     }
 
     @Test
-    void testObtenerMontas() throws Exception{
+    void testObtenerMontas_Success_WithEstatus() throws Exception{
         // given
         int pagina = 0;
         String estatus = "EFECTIVA";
@@ -136,5 +136,64 @@ public class MontaControllerTest {
             .andExpect(model().attribute("paginaActual", pagina))
             .andExpect(model().attribute("totalPaginas", pageMontas.getTotalPages()))
             .andExpect(model().attribute("totalElements", pageMontas.getTotalElements()));
+    }
+
+    @Test
+    void testObtenerMontas_Success_NullEstatus() throws Exception{
+        // given
+        int pagina = 0;
+        String estatus = null;
+
+        List<MontaDTO> lista = List.of(sp, pp, rn, cc);
+        Page<MontaDTO> pageMontas = new PageImpl<>(lista);
+
+        // when
+        when(montaService.findAll(anyInt(), anyInt())).thenReturn(pageMontas);
+
+        // then
+        ResultActions result = mockMvc.perform(get("/montas")
+            .param("pagina", String.valueOf(pagina))
+            .param("estatus", estatus)
+        );
+
+        result.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("montas/lista"))
+            .andExpect(model().attribute("listaEstatus", EstatusMonta.values()))
+            .andExpect(model().attribute("estatus", estatus))
+            .andExpect(model().attribute("listaMontas", pageMontas.getContent()))
+            .andExpect(model().attribute("paginaActual", pageMontas.getNumber()))
+            .andExpect(model().attribute("totalPaginas", pageMontas.getTotalPages()))
+            .andExpect(model().attribute("totalElements", pageMontas.getTotalElements()));
+    }
+
+    @Test
+    void testObtenerMontas_Success_EmptyEstatus() throws Exception{
+        // given
+        int pagina = 0;
+        String estatus = "";
+
+        List<MontaDTO> lista = List.of(sp, pp, rn, cc);
+        Page<MontaDTO> pageMontas = new PageImpl<>(lista);
+
+        // when
+        when(montaService.findAll(anyInt(), anyInt())).thenReturn(pageMontas);
+
+        // then
+        ResultActions result = mockMvc.perform(get("/montas")
+            .param("pagina", String.valueOf(pagina))
+            .param("estatus", estatus)
+        );
+
+        result.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("montas/lista"))
+            .andExpect(model().attribute("listaEstatus", EstatusMonta.values()))
+            .andExpect(model().attribute("estatus", estatus))
+            .andExpect(model().attribute("listaMontas", pageMontas.getContent()))
+            .andExpect(model().attribute("paginaActual", pagina))
+            .andExpect(model().attribute("totalPaginas", pageMontas.getTotalPages()))
+            .andExpect(model().attribute("totalElements", pageMontas.getTotalElements()));
+
     }
 }
