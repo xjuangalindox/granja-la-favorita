@@ -1,8 +1,140 @@
 package com.example.demo.controllers;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*; // Agregar manualmente (get)
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+
+import com.example.demo.controllers.dto.ConejoDTO;
+import com.example.demo.controllers.dto.MontaDTO;
+import com.example.demo.controllers.dto.RazaDTO;
+import com.example.demo.models.ConejoModel;
+import com.example.demo.models.EjemplarModel;
+import com.example.demo.models.MontaModel;
+import com.example.demo.models.NacimientoModel;
+import com.example.demo.models.enums.EstatusMonta;
+import com.example.demo.services.IConejoService;
+import com.example.demo.services.IMontaService;
+import com.example.demo.util.ArchivoUtil;
 
 @WebMvcTest(MontaController.class)
 public class MontaControllerTest {
     
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private ArchivoUtil archivoUtil;
+
+    @MockitoBean
+    private IMontaService montaService;
+
+    @MockitoBean
+    private IConejoService conejoService;
+
+    // Objects
+    private RazaDTO minilop, leon, fuzzylop, enano;
+    private ConejoDTO semental, panda, peluchin, pelusa, rata, nube, castor, chocolata;
+    private MontaDTO sp, pp, rn, cc;
+    // private EjemplarModel eje1, eje2, eje3, eje4, eje5;
+    
+    // private List<EjemplarModel> ejemplares;
+    // private NacimientoModel n1, n2, n3, n4;
+
+    @BeforeEach
+    void setup(){
+        minilop = new RazaDTO(1L, "MiniLop");
+        minilop = new RazaDTO(1L, "Cabeza de León");
+        minilop = new RazaDTO(1L, "FuzzyLop");
+        minilop = new RazaDTO(1L, "Enano Holandés");
+
+        // MiniLop - Inactivos
+        semental = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
+        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+        panda = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
+        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop);
+        // Leones - Activos
+        peluchin = new ConejoDTO(3L, null, null, null, "Peluchin", "Macho", null, true, 
+        "Semental, nacido en granja", "123abc", "https://cloudinary.com/rocko.png", null, null, null, leon);
+        pelusa = new ConejoDTO(4L, null, null, null, "Pelusa", "Hembra", null, true, 
+        "Hermana del semental, nacida en granja", "123abc", "https://cloudinary.com/trueno.png", null, null, null, leon);
+        // FuzzyLop - Activos
+        rata = new ConejoDTO(5L, null, null, null, "Rata", "Macho", null, true, 
+        "Traido de mexico", "123abc", "https://cloudinary.com/marino.png", null, null, null, fuzzylop);
+        nube = new ConejoDTO(6L, null, null, null, "Nube", "Hembra", null, true, 
+        "Traida de jiutepec", "123abc", "https://cloudinary.com/mexicana.png", null, null, null, fuzzylop);
+        // Enanos - Activos
+        castor = new ConejoDTO(7L, null, null, null, "castor", "Macho", null, true, 
+        "Unico enanito semental en la granja", "123abc", "https://cloudinary.com/Castor.png", null, null, null, enano);
+        chocolata = new ConejoDTO(8L, null, null, null, "chocolata", "Hembra", null, true, 
+        "Enanita chocolata", "123abc", "https://cloudinary.com/Chocolata.png", null, null, null, enano);
+
+        // Ejemplares
+        // eje1 = new EjemplarModel(1L, "Macho", false, 300.00, null, n4, null);
+        // eje2 = new EjemplarModel(2L, "Hembra", false, 300.00, null, n4, null);
+        // eje3 = new EjemplarModel(3L, "Macho", false, 300.00, null, n4, null);
+        // eje4 = new EjemplarModel(4L, "Hemba", false, 300.00, null, n4, null);
+        // eje5 = new EjemplarModel(5L, "Macho", false, 300.00, null, n4, null);
+
+        // // Ejemplares
+        // ejemplares = List.of(eje1, eje2, eje3, eje4, eje5);
+
+        // // Nacimientos
+        // n1 = new NacimientoModel(1L, LocalDate.of(2025, 11, 4), 6, 0, "Ratitas", null, ejemplares);
+        // n2 = new NacimientoModel(2L, LocalDate.of(2025, 12, 4), 6, 0, "Ratitas", null, ejemplares);
+        // n3 = new NacimientoModel(3L, LocalDate.now(), 6, 0, "Ratitas", null, ejemplares);
+        // n4 = new NacimientoModel(4L, LocalDate.now(), 6, 0, "Ratitas", null, ejemplares);
+
+        // Montas
+        sp = new MontaDTO(1L, "Monta de MiniLop", LocalDate.of(2025, 8, 10), 3, EstatusMonta.PENDIENTE, panda, semental, null, false);
+        pp = new MontaDTO(2L, "Monta de Leones", LocalDate.of(2025, 9, 20), 2, EstatusMonta.EFECTIVA, pelusa, peluchin, null, false);
+        rn = new MontaDTO(3L, "Monta de FuzzyLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, nube, rata, null, false);
+        cc = new MontaDTO(4L, "Monta de Enanos", LocalDate.now(), 1, EstatusMonta.EFECTIVA, chocolata, castor, null, false);
+    }
+
+    @Test
+    void testObtenerMontas() throws Exception{
+        // given
+        int pagina = 0;
+        String estatus = "EFECTIVA";
+
+        List<MontaDTO> lista = List.of(sp, rn);
+        Page<MontaDTO> pageMontas = new PageImpl<>(lista);
+
+        // when
+        when(montaService.findByEstatus(anyInt(), anyInt(), any(EstatusMonta.class))).thenReturn(pageMontas);
+
+        // then
+        ResultActions result = mockMvc.perform(get("/montas")
+            .param("pagina", String.valueOf(pagina))
+            .param("estatus", estatus)
+        );
+
+        result.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("montas/lista"))
+            .andExpect(model().attribute("listaEstatus", EstatusMonta.values()))
+            .andExpect(model().attribute("estatus", estatus))
+            .andExpect(model().attribute("listaMontas", pageMontas.getContent()))
+            .andExpect(model().attribute("paginaActual", pagina))
+            .andExpect(model().attribute("totalPaginas", pageMontas.getTotalPages()))
+            .andExpect(model().attribute("totalElements", pageMontas.getTotalElements()));
+    }
 }
