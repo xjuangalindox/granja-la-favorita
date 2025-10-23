@@ -2,7 +2,9 @@ package com.example.demo.controllers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,10 +16,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.internal.verification.AtMost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -28,7 +35,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.example.demo.controllers.dto.ConejoDTO;
+import com.example.demo.controllers.dto.EjemplarDTO;
 import com.example.demo.controllers.dto.MontaDTO;
+import com.example.demo.controllers.dto.NacimientoDTO;
 import com.example.demo.controllers.dto.RazaDTO;
 import com.example.demo.models.ConejoModel;
 import com.example.demo.models.EjemplarModel;
@@ -58,10 +67,10 @@ public class MontaControllerTest {
     private RazaDTO minilop, leon, fuzzylop, enano;
     private ConejoDTO semental, panda, peluchin, pelusa, rata, nube, castor, chocolata;
     private MontaDTO sp, pp, rn, cc;
-    // private EjemplarModel eje1, eje2, eje3, eje4, eje5;
+    private EjemplarDTO eje1, eje2, eje3, eje4, eje5;
     
-    // private List<EjemplarModel> ejemplares;
-    // private NacimientoModel n1, n2, n3, n4;
+    private List<EjemplarDTO> ejemplares;
+    private NacimientoDTO n1, n2, n3, n4;
 
     @BeforeEach
     void setup(){
@@ -92,24 +101,24 @@ public class MontaControllerTest {
         "Enanita chocolata", "123abc", "https://cloudinary.com/Chocolata.png", null, null, null, enano);
 
         // Ejemplares
-        // eje1 = new EjemplarModel(1L, "Macho", false, 300.00, null, n4, null);
-        // eje2 = new EjemplarModel(2L, "Hembra", false, 300.00, null, n4, null);
-        // eje3 = new EjemplarModel(3L, "Macho", false, 300.00, null, n4, null);
-        // eje4 = new EjemplarModel(4L, "Hemba", false, 300.00, null, n4, null);
-        // eje5 = new EjemplarModel(5L, "Macho", false, 300.00, null, n4, null);
+        eje1 = new EjemplarDTO(1L, null, null, "Macho", false, 300.00, null, n4, null);
+        eje2 = new EjemplarDTO(2L, null, null, "Hembra", false, 300.00, null, n4, null);
+        eje3 = new EjemplarDTO(3L, null, null, "Macho", false, 300.00, null, n4, null);
+        eje4 = new EjemplarDTO(4L, null, null, "Hembra", false, 300.00, null, n4, null);
+        eje5 = new EjemplarDTO(5L, null, null, "Macho", false, 300.00, null, n4, null);
 
         // // Ejemplares
-        // ejemplares = List.of(eje1, eje2, eje3, eje4, eje5);
+        ejemplares = List.of(eje1, eje2, eje3, eje4, eje5);
 
         // // Nacimientos
-        // n1 = new NacimientoModel(1L, LocalDate.of(2025, 11, 4), 6, 0, "Ratitas", null, ejemplares);
-        // n2 = new NacimientoModel(2L, LocalDate.of(2025, 12, 4), 6, 0, "Ratitas", null, ejemplares);
-        // n3 = new NacimientoModel(3L, LocalDate.now(), 6, 0, "Ratitas", null, ejemplares);
-        // n4 = new NacimientoModel(4L, LocalDate.now(), 6, 0, "Ratitas", null, ejemplares);
+        n1 = new NacimientoDTO(1L, LocalDate.of(2025, 11, 4), 6, 0, "Ratitas", null, ejemplares);
+        n2 = new NacimientoDTO(2L, LocalDate.of(2025, 12, 4), 6, 0, "Ratitas", null, ejemplares);
+        n3 = new NacimientoDTO(3L, LocalDate.now(), 6, 0, "Ratitas", null, ejemplares);
+        n4 = new NacimientoDTO(4L, LocalDate.now(), 6, 0, "Ratitas", null, ejemplares);
 
         // Montas
-        sp = new MontaDTO(1L, "Monta de MiniLop", LocalDate.of(2025, 8, 10), 3, EstatusMonta.PENDIENTE, panda, semental, null, false);
-        pp = new MontaDTO(2L, "Monta de Leones", LocalDate.of(2025, 9, 20), 2, EstatusMonta.EFECTIVA, pelusa, peluchin, null, false);
+        sp = new MontaDTO(1L, "Monta de MiniLop", LocalDate.of(2025, 8, 10), 3, EstatusMonta.PENDIENTE, panda, semental, n1, true);
+        pp = new MontaDTO(2L, "Monta de Leones", LocalDate.of(2025, 9, 20), 2, EstatusMonta.EFECTIVA, pelusa, peluchin, n2, true);
         rn = new MontaDTO(3L, "Monta de FuzzyLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, nube, rata, null, false);
         cc = new MontaDTO(4L, "Monta de Enanos", LocalDate.now(), 1, EstatusMonta.EFECTIVA, chocolata, castor, null, false);
     }
@@ -225,5 +234,36 @@ public class MontaControllerTest {
         verify(conejoService, atMost(1)).obtenerConejosActivosPorSexo("Macho");
         verify(conejoService, atMost(1)).obtenerConejosActivosPorSexo("Hembra");
         verify(conejoService, times(2)).obtenerConejosActivosPorSexo(anyString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void testFormularioEditar_IdValido(boolean conNacimiento) throws Exception{
+        Long id = 1L;
+        List<ConejoDTO> machos = List.of(semental, peluchin, rata, castor);
+        List<ConejoDTO> hembras = List.of(panda, pelusa, nube, chocolata);
+
+        MontaDTO montaDTO = conNacimiento ? sp : rn;
+
+        when(montaService.obtenerMontaById(anyLong())).thenReturn(Optional.of(montaDTO)); // with and without nacimientoDTO
+        when(conejoService.obtenerConejosPorSexo("Macho")).thenReturn(machos);
+        when(conejoService.obtenerConejosPorSexo("Hembra")).thenReturn(hembras);
+
+
+        ResultActions result = mockMvc.perform(get("/montas/editar/{id}",id));
+
+        result.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("montas/formulario"))
+            .andExpect(model().attributeExists("montaDTO"))
+            .andExpect(model().attribute("titulo", "Editar Monta"))
+            .andExpect(model().attribute("accion", "/montas/editar/"+id))
+            .andExpect(model().attribute("listaEstatus", EstatusMonta.values()))
+            .andExpect(model().attributeExists("listaMachos"))
+            .andExpect(model().attributeExists("listaHembras"));
+
+        verify(conejoService, atMost(1)).obtenerConejosPorSexo("Macho");
+        verify(conejoService, atMost(1)).obtenerConejosPorSexo("Hembra");
+        verify(conejoService, atLeast(2)).obtenerConejosPorSexo(anyString());
     }
 }
