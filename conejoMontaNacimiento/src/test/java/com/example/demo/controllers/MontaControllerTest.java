@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*; // Agregar manualmente (get)
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -47,6 +48,8 @@ import com.example.demo.models.enums.EstatusMonta;
 import com.example.demo.services.IConejoService;
 import com.example.demo.services.IMontaService;
 import com.example.demo.util.ArchivoUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @WebMvcTest(MontaController.class)
 public class MontaControllerTest {
@@ -265,5 +268,20 @@ public class MontaControllerTest {
         verify(conejoService, atMost(1)).obtenerConejosPorSexo("Macho");
         verify(conejoService, atMost(1)).obtenerConejosPorSexo("Hembra");
         verify(conejoService, atLeast(2)).obtenerConejosPorSexo(anyString());
+    }
+
+    @Test
+    void testFormularioEditar_IdInvalido() throws Exception{
+        Long id = 1L;
+        String urlNginx = "https://granjalafavorita.com";
+
+        when(montaService.obtenerMontaById(anyLong())).thenReturn(Optional.empty());
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(urlNginx);
+
+        ResultActions result = mockMvc.perform(get("/montas/editar/{id}", id));
+
+        result.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(urlNginx+"/montas"));
     }
 }
