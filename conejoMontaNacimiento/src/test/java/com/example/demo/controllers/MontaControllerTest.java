@@ -349,4 +349,83 @@ public class MontaControllerTest {
             .andExpect(model().attributeExists("listaHembras"))
             .andExpect(model().attribute("error", "Error al persistir la monta."));
     }
+
+    @Test
+    void testEliminarMonta_Success_WithEstatus() throws Exception{
+        Long id = 1L;
+        String estatus = "EFECTIVA";
+        String urlNginx = "https://granjalafavorita.com";
+
+        when(montaService.eliminarMontaById(anyLong())).thenReturn(true);
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(urlNginx);
+
+        ResultActions result = mockMvc.perform(get("/montas/eliminar/{id}", id)
+            .param("estatus", estatus)
+        );
+
+        result.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(urlNginx+"/montas?estatus="+estatus))
+            .andExpect(flash().attribute("ok", "Monta eliminada correctamente"))
+            ;
+    }
+
+    @Test
+    void testEliminarMonta_Error_NullEstatus() throws Exception{
+        Long id = 1L;
+        String estatus = null;
+        String urlNginx = "https://granjalafavorita.com";
+
+        when(montaService.eliminarMontaById(anyLong())).thenReturn(true);
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(urlNginx);
+
+        ResultActions result = mockMvc.perform(get("/montas/eliminar/{id}", id)
+            .param("estatus", estatus)
+        );
+
+        result.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(urlNginx+"/montas"))
+            .andExpect(flash().attribute("ok", "Monta eliminada correctamente"))
+            ;
+    }
+
+    @Test
+    void testEliminarMonta_Error_BlankEstatus() throws Exception{
+        Long id = 1L;
+        String estatus = "";
+        String urlNginx = "https://granjalafavorita.com";
+
+        when(montaService.eliminarMontaById(anyLong())).thenReturn(true);
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(urlNginx);
+
+        ResultActions result = mockMvc.perform(get("/montas/eliminar/{id}", id)
+            .param("estatus", estatus)
+        );
+
+        result.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(urlNginx+"/montas"))
+            .andExpect(flash().attribute("ok", "Monta eliminada correctamente"))
+            ;
+    }
+
+    @Test
+    void testEliminarMonta_Error_Delete() throws Exception{
+        Long id = 1L;
+        String estatus = "PENDIENTE";
+        String urlNginx = "https://granjalafavorita.com";
+        
+        when(montaService.eliminarMontaById(anyLong())).thenThrow(new RuntimeException("Ocurrio un error al eliminar la monta"));
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(urlNginx);
+        
+        ResultActions result = mockMvc.perform(get("/montas/eliminar/{id}", id)
+            .param("estatus", estatus)
+        );
+
+        result.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(urlNginx+"/montas?estatus="+estatus))
+            .andExpect(flash().attribute("error", "Ocurrio un error al eliminar la monta"));
+    }
 }
