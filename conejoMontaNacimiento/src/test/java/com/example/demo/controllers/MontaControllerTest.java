@@ -1,12 +1,12 @@
 package com.example.demo.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -285,6 +285,70 @@ public class MontaControllerTest {
         result.andExpect(status().is3xxRedirection())
             .andDo(print())
             .andExpect(redirectedUrl(urlNginx+"/montas"));
+    }
+
+    @Test
+    void testGuardarMonta_Success() throws Exception{
+        // sp = new MontaDTO(1L, "Monta de MiniLop", LocalDate.of(2025, 8, 10), 3, EstatusMonta.PENDIENTE, panda, semental, n1, true);
+        String urlNginx = "https://www.granjalafavorita.com";
+
+        when(montaService.guardarMonta(any(MontaDTO.class))).thenReturn(sp);
+        when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(urlNginx);
+
+        ResultActions result = mockMvc.perform(post("/montas/guardar")
+            .param("id", String.valueOf(sp.getId()))
+            .param("nota", sp.getNota())
+            .param("fechaMonta", sp.getFechaMonta().toString())
+            .param("cantidadMontas", String.valueOf(sp.getCantidadMontas()))
+            .param("estatus", sp.getEstatus().name())
+            .param("hembra", sp.getHembra().toString())
+            .param("macho", sp.getMacho().toString())
+            .param("nacimiento", sp.getNacimiento().toString())
+            .param("tieneNacimiento", String.valueOf(sp.isTieneNacimiento()))
+        );
+
+        result.andExpect(status().is3xxRedirection())
+            .andDo(print())
+            .andExpect(redirectedUrl(urlNginx + "/montas"));
+
+        verify(conejoService, never()).obtenerConejosActivosPorSexo(anyString());
+        verify(montaService).guardarMonta(any(MontaDTO.class));
+        verify(archivoUtil, atMost(1)).getBaseUrlNginx(any(HttpServletRequest.class));
+    }
+
+    @Test
+    void testGuardarMonta_Error() throws Exception{
+        // sp = new MontaDTO(1L, "Monta de MiniLop", LocalDate.of(2025, 8, 10), 3, EstatusMonta.PENDIENTE, panda, semental, n1, true);
+        List<ConejoDTO> machos = List.of(semental, peluchin, rata, castor);
+        List<ConejoDTO> hembras = List.of(panda, pelusa, nube, chocolata);
+        
+        when(montaService.guardarMonta(any(MontaDTO.class))).thenThrow(new RuntimeException("Error al persistir la monta."));
+        when(conejoService.obtenerConejosPorSexo("Macho")).thenReturn(machos);
+        when(conejoService.obtenerConejosPorSexo("Hembra")).thenReturn(hembras);
+        
+
+        ResultActions result = mockMvc.perform(post("/montas/guardar")
+            .param("id", String.valueOf(sp.getId()))
+            .param("nota", sp.getNota())
+            .param("fechaMonta", sp.getFechaMonta().toString())
+            .param("cantidadMontas", String.valueOf(sp.getCantidadMontas()))
+            .param("estatus", sp.getEstatus().name())
+            .param("hembra", sp.getHembra().toString())
+            .param("macho", sp.getMacho().toString())
+            .param("nacimiento", sp.getNacimiento().toString())
+            .param("tieneNacimiento", String.valueOf(sp.isTieneNacimiento()))
+        );
+
+        result.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("montas/formulario"))
+            .andExpect(model().attributeExists("montaDTO"))
+            .andExpect(model().attribute("titulo", "Registrar Monta"))
+            .andExpect(model().attribute("accion", "/montas/guardar"))
+            .andExpect(model().attribute("listaEstatus", EstatusMonta.values()))
+            .andExpect(model().attributeExists("listaMachos"))
+            .andExpect(model().attributeExists("listaHembras"))
+            .andExpect(model().attribute("error", "Error al persistir la monta."));
     }
 
     @Test
