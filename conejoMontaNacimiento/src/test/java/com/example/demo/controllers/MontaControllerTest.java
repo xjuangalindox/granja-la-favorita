@@ -453,4 +453,41 @@ public class MontaControllerTest {
 
         verify(conejoService, never()).obtenerConejosPorSexo(anyString());
     }
+
+    @Test
+    void testEditarMonta_Error() throws Exception{
+        Long id = 1L;
+        List<ConejoDTO> machos = List.of(semental, peluchin, rata, castor);
+        List<ConejoDTO> hembras = List.of(panda, pelusa, nube, chocolata);
+
+        MontaDTO montaUpdate = new MontaDTO(1L, "Monta de MiniLop Updated", LocalDate.of(2025, 8, 10), 
+            3, EstatusMonta.PENDIENTE, panda, semental, n1, true);
+
+        when(montaService.editarMonta(anyLong(), any(MontaDTO.class))).thenThrow(new RuntimeException("Ocurrio un error al editar la monta."));
+        when(conejoService.obtenerConejosPorSexo("Macho")).thenReturn(machos);
+        when(conejoService.obtenerConejosPorSexo("Hembra")).thenReturn(hembras);
+
+        ResultActions result = mockMvc.perform(post("/montas/editar/{id}", id)
+            .param("id", String.valueOf(montaUpdate.getId()))
+            .param("nota", montaUpdate.getNota())
+            .param("fechaMonta", montaUpdate.getFechaMonta().toString())
+            .param("cantidadMontas", String.valueOf(montaUpdate.getCantidadMontas()))
+            .param("estatus", montaUpdate.getEstatus().name())
+            .param("macho", montaUpdate.getMacho().toString())
+            .param("hembra", montaUpdate.getHembra().toString())
+            .param("nacimiento", montaUpdate.getNacimiento().toString())
+            .param("tieneNacimiento", String.valueOf(montaUpdate.isTieneNacimiento()))
+        );
+
+        result.andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(view().name("montas/formulario"))
+            .andExpect(model().attributeExists("montaDTO"))
+            .andExpect(model().attribute("titulo", "Editar Monta"))
+            .andExpect(model().attribute("accion", "/montas/editar/"+id))
+            .andExpect(model().attribute("listaEstatus", EstatusMonta.values()))
+            .andExpect(model().attributeExists("listaMachos"))
+            .andExpect(model().attributeExists("listaHembras"))
+            .andExpect(model().attribute("error", "Ocurrio un error al editar la monta."));
+    }
 }
