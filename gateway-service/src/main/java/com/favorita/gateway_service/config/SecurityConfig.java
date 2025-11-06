@@ -45,7 +45,8 @@ public class SecurityConfig {
                         return exchange.getResponse().setComplete();
                     })
                 )
-                // .httpBasic(Customizer.withDefaults())
+                // Habilitar autenticación básica
+                .httpBasic(Customizer.withDefaults())
                 .build();
     }
 
