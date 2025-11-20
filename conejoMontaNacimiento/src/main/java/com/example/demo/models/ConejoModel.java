@@ -2,6 +2,7 @@ package com.example.demo.models;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CollectionId;
@@ -63,7 +64,7 @@ public class ConejoModel {
 
 	// Relacion con RecreoModel
 	@OneToMany(targetEntity = RecreoModel.class, mappedBy = "conejo", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<RecreoModel> recreos;
+	private List<RecreoModel> recreos = new ArrayList<>();
 
 	// RELATIONS
 	// @ManyToOne(targetEntity = RazaModel.class, fetch = FetchType.LAZY)

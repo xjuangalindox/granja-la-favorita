@@ -11,9 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +28,6 @@ public class RecreoModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Inicio recreo es obligatorio")
     @Column(name = "inicio_recreo")
     private LocalDateTime inicioRecreo;
 
@@ -41,13 +37,4 @@ public class RecreoModel {
     @ManyToOne(targetEntity = ConejoModel.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "conejo_id", nullable = false)
     private ConejoModel conejo;
-
-    // VALIDATION
-    @AssertTrue(message = "Inicio recreo debe ser menor que Fin recreo")
-    private boolean isInicioAntesDeFin() {
-        // finRecreo NULL
-        if(finRecreo == null) return true;
-        // inicioRecreo < finRecreo
-        return inicioRecreo.isBefore(finRecreo);
-    }
 }
