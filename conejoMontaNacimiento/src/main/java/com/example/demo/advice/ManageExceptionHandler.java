@@ -8,19 +8,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class ConejoExceptionHandler {
-
-    // Error mostrado en PostMan
+public class ManageExceptionHandler {
+    
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> messageException(MethodArgumentNotValidException error){
-        Map<String, String> mapa = new HashMap<>();
+    public Map<String, String> handleInvalidArguments(MethodArgumentNotValidException exception){
+        Map<String, String> errors = new HashMap<>();
 
-        // Lista.forEach - Lambda
-        error.getBindingResult().getFieldErrors().forEach(x -> {
-            mapa.put(x.getField(), x.getDefaultMessage());
+        exception.getBindingResult().getFieldErrors().forEach(error -> {
+            errors.put(error.getField(), error.getDefaultMessage());
         });
 
-        return mapa;
+        return errors;
     }
 
     /*
