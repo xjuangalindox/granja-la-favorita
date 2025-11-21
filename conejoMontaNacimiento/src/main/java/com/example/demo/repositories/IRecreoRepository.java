@@ -10,4 +10,7 @@ import com.example.demo.models.RecreoModel;
 @Repository
 public interface IRecreoRepository extends CrudRepository<RecreoModel, Long>{
     Page<RecreoModel> findAll(Pageable pageable);
+
+    // Obtener recreos de un conejo
+    Page<RecreoModel> findByConejoId(Long idConejo, Pageable pageable);
 }

@@ -75,4 +75,16 @@ public class RecreoServiceImpl implements IRecreoService{
 
         recreoRepository.deleteById(id);
     }
+
+    // Obtener recreos de un conejo
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RecreoDTO> findByConejoId(Long conejoId, int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("inicioRecreo").descending());
+        Page<RecreoModel> pageRecreos = recreoRepository.findByConejoId(conejoId, pageable);
+
+        return pageRecreos.map(
+            model -> modelMapper.map(model, RecreoDTO.class)
+        );
+    }
 }

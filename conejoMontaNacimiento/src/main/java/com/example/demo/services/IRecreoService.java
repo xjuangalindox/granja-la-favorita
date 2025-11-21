@@ -11,4 +11,7 @@ public interface IRecreoService {
     public RecreoDTO saveRecreo(RecreoDTO recreoDTO);
     public RecreoDTO updateRecreo(Long id, RecreoDTO recreoDTO);
     public void deleteById(Long id);
+
+    // Obtener recreos de un conejo
+    public Page<RecreoDTO> findByConejoId(Long conejoId, int pageNumber, int pageSize);
 }

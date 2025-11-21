@@ -24,15 +24,34 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/recreos")
 public class RecreoRestController {
-    
+    private static final int PAGE_SIZE = 10;
+
     @Autowired
     private IRecreoService recreoService;
 
+    @GetMapping("/conejo/{conejoId}")
+    public ResponseEntity<Map<String, Object>> findByConejoId(
+        @PathVariable("conejoId") Long conejoId,
+        @RequestParam(defaultValue = "0") int pageNumber
+        ){
+
+        Page<RecreoDTO> pageRecreos = recreoService.findByConejoId(conejoId, pageNumber, PAGE_SIZE);
+
+        Map<String, Object> response = Map.of(
+            "conejoId", conejoId,
+            "pageNumber", pageRecreos.getNumber(),
+            "pageSize", pageRecreos.getSize(),
+            "recreos", pageRecreos.getContent(),
+            "totalPages", pageRecreos.getTotalPages(),
+            "totalElements", pageRecreos.getTotalElements()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping
-    public ResponseEntity<Map<String, Object>> findAll(
-        @RequestParam(defaultValue = "0") int pageNumber, 
-        @RequestParam(defaultValue = "10") int pageSize){
-        
+    public ResponseEntity<Map<String, Object>> findAll(@RequestParam(defaultValue = "0") int pageNumber){
+        int pageSize = 10;
         Page<RecreoDTO> pageRecreos = recreoService.findAll(pageNumber, pageSize);
 
         if(pageRecreos.getContent().isEmpty()){

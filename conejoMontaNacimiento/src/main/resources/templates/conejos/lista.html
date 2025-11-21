@@ -92,8 +92,9 @@
               <tr class="text-center">
                 <th scope="col">Nombre</th>
                 <th scope="col">Imagen</th>
-                <th scope="col">Recreo</th>
-                <th scope="col" class="col-hide-mobile">Fin Recreo</th>
+                <th scope="col">Recreos</th>
+                <!-- <th scope="col">Recreo</th> -->
+                <!-- <th scope="col" class="col-hide-mobile">Fin Recreo</th> -->
                 <th scope="col" class="col-hide-mobile">Raza</th>
                 <th scope="col" class="col-hide-mobile">Peso</th>
                 <th scope="col" class="col-hide-mobile">Fecha Nacimiento</th>
@@ -132,9 +133,17 @@
                   </div>
                 </td>
 
+                <td>
+                  <button
+                    class="btn btn-sm btn-warning"
+                    th:attr="data-id=${item.id}"
+                    onclick="abrirRecreos(this)">
+                    Administrar
+                  </button>
+                </td>
                 <!-- Recreo -->
-                <td th:text="${item.inicioRecreo != null} ? ${#temporals.format(item.inicioRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''"></td>
-                <td th:text="${item.finRecreo != null} ? ${#temporals.format(item.finRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''" class="col-hide-mobile"></td>
+                <!-- <td th:text="${item.inicioRecreo != null} ? ${#temporals.format(item.inicioRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''"></td> -->
+                <!-- <td th:text="${item.finRecreo != null} ? ${#temporals.format(item.finRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''" class="col-hide-mobile"></td> -->
                 <!-- Fin Recreo -->
 
                 <td th:text="${item.raza.nombre}" class="col-hide-mobile"></td>
@@ -157,6 +166,67 @@
               </tr>
             </tbody>
           </table>
+
+<!-- MODAL -->
+<div class="modal fade" id="modalRecreos" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Recreos del Conejo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Inicio</th>
+              <th>Fin</th>
+            </tr>
+          </thead>
+          <tbody id="tablaRecreos">
+            <!-- Se va a llenar con JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- FIN MODAL -->
+
+<!-- SCRIPT MODAL -->
+<script>
+async function abrirRecreos(btn) {
+
+    const conejoId = btn.getAttribute("data-id");
+
+    const response = await fetch(`/api/recreos/conejo/${conejoId}`);
+    const data = await response.json();
+
+    const tbody = document.getElementById("tablaRecreos");
+    tbody.innerHTML = ""; // Limpiar tabla
+
+    if (data.recreos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="2">No hay recreos registrados</td></tr>`;
+    } else {
+        data.recreos.forEach(r => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${r.inicioRecreo}</td>
+                    <td>${r.finRecreo ?? "—"}</td>
+                </tr>
+            `;
+        });
+    }
+
+    // Abrir modal
+    const modal = new bootstrap.Modal(document.getElementById("modalRecreos"));
+    modal.show();
+}
+</script>
+<!-- FIN SCRIPT MODAL -->
 
 <!-- PAGINADOR -->
 <div class="d-flex justify-content-center mt-3" th:if="${totalPaginas > 0}">
