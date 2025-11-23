@@ -82,13 +82,13 @@ public class ConejoControllerTest {
         minilop = new RazaDTO(1L, "Minilop");
         
         semental = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
-            "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+            "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop, null);
         panda = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
-            "Reproductora mas grande en la granja", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop);
+            "Reproductora mas grande en la granja", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop, null);
         rocko = new ConejoDTO(3L, null, null, null, "Rocko", "Macho", null, true, 
-            "Malito del ojo", "123abc", "https://cloudinary.com/rocko.png", null, null, null, minilop);
+            "Malito del ojo", "123abc", "https://cloudinary.com/rocko.png", null, null, null, minilop, null);
         enojona = new ConejoDTO(4L, null, null, null, "Enojona", "Hembra", null, true, 
-        "Mordelona de la granja", "123abc", "https://cloudinary.com/enojona.png", null, null, null, minilop);
+        "Mordelona de la granja", "123abc", "https://cloudinary.com/enojona.png", null, null, null, minilop, null);
     }
 
     @Test
@@ -174,7 +174,7 @@ public class ConejoControllerTest {
     @Test
     void testEditarConejo_Success() throws Exception{
         ConejoDTO sementalEditado = new ConejoDTO(1L, null, null, imagen, "SementalEdi", "Macho", null, false, 
-            "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+            "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop, null);
 
         when(conejoService.obtenerConejoById(anyLong())).thenReturn(Optional.of(semental));
         when(conejoService.editarConejo(anyLong(), any(ConejoDTO.class))).thenReturn(sementalEditado);
@@ -203,7 +203,7 @@ public class ConejoControllerTest {
         List<RazaDTO> lista = List.of(minilop);
         // DTO sin uso, solo como referencia de informacion
         ConejoDTO sementalEditado = new ConejoDTO(1L, null, null, imagen, "SementalEdi", "Macho", null, false, 
-            "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+            "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop, null);
         
         when(conejoService.obtenerConejoById(anyLong())).thenReturn(Optional.of(semental));
         when(conejoService.editarConejo(anyLong(), any(ConejoDTO.class))).thenThrow(new RuntimeException("Ocurrio un error al editar el ejemplar."));
@@ -290,7 +290,7 @@ public class ConejoControllerTest {
     void tetsGuardarconejo_Success() throws Exception{
         // DTO sin uso, solo como referencia de informacion
         ConejoDTO nuevoSemental = new ConejoDTO(null, null, null, imagen, "Semental", "Macho", null, false, 
-            "Primer semental de la granja", null, null, null, null, null, minilop);
+            "Primer semental de la granja", null, null, null, null, null, minilop, null);
 
         when(conejoService.guardarConejo(any(ConejoDTO.class))).thenReturn(semental);
         when(archivoUtil.getBaseUrlNginx(any(HttpServletRequest.class))).thenReturn(url);
