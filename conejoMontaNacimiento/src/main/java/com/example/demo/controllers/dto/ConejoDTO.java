@@ -2,11 +2,14 @@ package com.example.demo.controllers.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.PastOrPresent;
@@ -54,4 +57,8 @@ public class ConejoDTO {
 	private Integer totalGazapos;
 
 	private RazaDTO raza;
+
+	// Relacion con RecreoModel
+	@JsonManagedReference
+	private List<RecreoDTO> recreos = new ArrayList<>();
 }

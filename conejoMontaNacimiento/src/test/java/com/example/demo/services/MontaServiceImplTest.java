@@ -79,24 +79,24 @@ public class MontaServiceImplTest {
 
         // MiniLop - Inactivos
         semental = new ConejoModel(1L, null, null, "Semental", "Macho", null, false, 
-        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, 1L);
+        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, 1L, null);
         panda = new ConejoModel(2L, null, null, "Panda", "Hembra", null, false, 
-        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, 1L);
+        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, 1L, null);
         // Leones - Activos
         peluchin = new ConejoModel(3L, null, null, "Peluchin", "Macho", null, true, 
-        "Semental, nacido en granja", "123abc", "https://cloudinary.com/rocko.png", null, null, null, 2L);
+        "Semental, nacido en granja", "123abc", "https://cloudinary.com/rocko.png", null, null, null, 2L, null);
         pelusa = new ConejoModel(4L, null, null, "Pelusa", "Hembra", null, true, 
-        "Hermana del semental, nacida en granja", "123abc", "https://cloudinary.com/trueno.png", null, null, null, 2L);
+        "Hermana del semental, nacida en granja", "123abc", "https://cloudinary.com/trueno.png", null, null, null, 2L, null);
         // FuzzyLop - Activos
         rata = new ConejoModel(5L, null, null, "Rata", "Macho", null, true, 
-        "Traido de mexico", "123abc", "https://cloudinary.com/marino.png", null, null, null, 3L);
+        "Traido de mexico", "123abc", "https://cloudinary.com/marino.png", null, null, null, 3L, null);
         nube = new ConejoModel(6L, null, null, "Nube", "Hembra", null, true, 
-        "Traida de jiutepec", "123abc", "https://cloudinary.com/mexicana.png", null, null, null, 3L);
+        "Traida de jiutepec", "123abc", "https://cloudinary.com/mexicana.png", null, null, null, 3L, null);
         // Enanos - Activos
         castor = new ConejoModel(7L, null, null, "castor", "Macho", null, true, 
-        "Unico enanito semental en la granja", "123abc", "https://cloudinary.com/Castor.png", null, null, null, 4L);
+        "Unico enanito semental en la granja", "123abc", "https://cloudinary.com/Castor.png", null, null, null, 4L, null);
         chocolata = new ConejoModel(8L, null, null, "chocolata", "Hembra", null, true, 
-        "Enanita chocolata", "123abc", "https://cloudinary.com/Chocolata.png", null, null, null, 4L);
+        "Enanita chocolata", "123abc", "https://cloudinary.com/Chocolata.png", null, null, null, 4L, null);
 
         // Ejemplares
         eje1 = new EjemplarModel(1L, "Macho", false, 300.00, null, n4, null);
@@ -287,9 +287,9 @@ public class MontaServiceImplTest {
         RazaDTO minilop = new RazaDTO(1L, "MiniLop");
 
         ConejoDTO sementalDTO = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
-        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop, null);
         ConejoDTO pandaDTO = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
-        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop);
+        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop, null);
 
         // when
         MontaDTO spInput = new MontaDTO(null, "Monta de MiniLop", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, pandaDTO, sementalDTO, null, false);
@@ -313,9 +313,9 @@ public class MontaServiceImplTest {
         RazaDTO minilop = new RazaDTO(1L, "MiniLop");
 
         ConejoDTO sementalDTO = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
-        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop, null);
         ConejoDTO pandaDTO = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
-        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop);
+        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop, null);
 
         // when
         MontaModel spOriginal = new MontaModel(1L, "Monta de MiniLop Original", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, panda, semental, null);
@@ -343,9 +343,9 @@ public class MontaServiceImplTest {
         RazaDTO minilop = new RazaDTO(1L, "MiniLop");
 
         ConejoDTO sementalDTO = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
-        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop);
+        "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop, null);
         ConejoDTO pandaDTO = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
-        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop);
+        "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop, null);
 
         MontaDTO spInput = new MontaDTO(null, "Monta de MiniLop Update", LocalDate.of(2025, 10, 4), 3, EstatusMonta.PENDIENTE, pandaDTO, sementalDTO, null, false);
 
