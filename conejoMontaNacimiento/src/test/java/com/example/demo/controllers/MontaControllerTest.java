@@ -78,24 +78,24 @@ public class MontaControllerTest {
         minilop = new RazaDTO(1L, "Enano Holandés");
 
         // MiniLop - Inactivos
-        semental = new ConejoDTO(1L, null, null, null, "Semental", "Macho", null, false, 
+        semental = new ConejoDTO(1L, null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, minilop, null);
-        panda = new ConejoDTO(2L, null, null, null, "Panda", "Hembra", null, false, 
+        panda = new ConejoDTO(2L, null, "Panda", "Hembra", null, false, 
         "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, minilop, null);
         // Leones - Activos
-        peluchin = new ConejoDTO(3L, null, null, null, "Peluchin", "Macho", null, true, 
+        peluchin = new ConejoDTO(3L, null, "Peluchin", "Macho", null, true, 
         "Semental, nacido en granja", "123abc", "https://cloudinary.com/rocko.png", null, null, null, leon, null);
-        pelusa = new ConejoDTO(4L, null, null, null, "Pelusa", "Hembra", null, true, 
+        pelusa = new ConejoDTO(4L, null, "Pelusa", "Hembra", null, true, 
         "Hermana del semental, nacida en granja", "123abc", "https://cloudinary.com/trueno.png", null, null, null, leon, null);
         // FuzzyLop - Activos
-        rata = new ConejoDTO(5L, null, null, null, "Rata", "Macho", null, true, 
+        rata = new ConejoDTO(5L, null, "Rata", "Macho", null, true, 
         "Traido de mexico", "123abc", "https://cloudinary.com/marino.png", null, null, null, fuzzylop, null);
-        nube = new ConejoDTO(6L, null, null, null, "Nube", "Hembra", null, true, 
+        nube = new ConejoDTO(6L, null, "Nube", "Hembra", null, true, 
         "Traida de jiutepec", "123abc", "https://cloudinary.com/mexicana.png", null, null, null, fuzzylop, null);
         // Enanos - Activos
-        castor = new ConejoDTO(7L, null, null, null, "castor", "Macho", null, true, 
+        castor = new ConejoDTO(7L, null, "castor", "Macho", null, true, 
         "Unico enanito semental en la granja", "123abc", "https://cloudinary.com/Castor.png", null, null, null, enano, null);
-        chocolata = new ConejoDTO(8L, null, null, null, "chocolata", "Hembra", null, true, 
+        chocolata = new ConejoDTO(8L, null, "chocolata", "Hembra", null, true, 
         "Enanita chocolata", "123abc", "https://cloudinary.com/Chocolata.png", null, null, null, enano, null);
 
         // Ejemplares

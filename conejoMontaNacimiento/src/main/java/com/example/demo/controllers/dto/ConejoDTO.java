@@ -24,21 +24,6 @@ public class ConejoDTO {
 
 	private Long id;
 
-	@PastOrPresent(message = "La fecha de inicio del recreo no puede ser futura")
-	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-	private LocalDateTime inicioRecreo;
-	@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-	private LocalDateTime finRecreo;
-
-	// Validacion personalizada: fin > inicio
-	@AssertTrue(message = "La fecha de fin del recreo debe ser porterior a la de inicio")
-	public boolean isFinRecreoValido(){
-		if(inicioRecreo == null || finRecreo == null){
-			return true; // Si alguno es nulo, no hay error
-		}
-		return finRecreo.isAfter(inicioRecreo); // esctrictamente mayor
-	}
-
 	@JsonIgnore // Ignorar al crear el JSON, solo para recibir desde el frontend
 	private MultipartFile imagen;
 

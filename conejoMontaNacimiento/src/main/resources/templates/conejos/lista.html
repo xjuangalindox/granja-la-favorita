@@ -93,13 +93,11 @@
                 <th scope="col">Nombre</th>
                 <th scope="col">Imagen</th>
                 <th scope="col">Recreos</th>
-                <!-- <th scope="col">Recreo</th> -->
-                <!-- <th scope="col" class="col-hide-mobile">Fin Recreo</th> -->
                 <th scope="col" class="col-hide-mobile">Raza</th>
                 <th scope="col" class="col-hide-mobile">Peso</th>
                 <th scope="col" class="col-hide-mobile">Fecha Nacimiento</th>
-                <th scope="col" class="col-hide-mobile">Total Nacimientos</th>
-                <th scope="col" class="col-hide-mobile">Total Gazapos</th>
+                <th scope="col" class="col-hide-mobile">Nacimientos</th>
+                <th scope="col" class="col-hide-mobile">Gazapos</th>
                 <th scope="col" class="col-hide-mobile">Activo</th>
                 <th scope="col">Acciones</th>
               </tr>
@@ -108,7 +106,11 @@
               <tr class="text-center align-middle" th:each="item, iterStat : ${listaConejos}" th:classappend=
                 "${item.sexo == 'Macho'} ? 'table-info' : 
                 (${item.sexo == 'Hembra'} ? 'table-danger' : '')">
-                <td th:text="${item.nombre}"></td>
+
+                <!-- nombre -->
+                <td th:text="${item.nombre}"></td> 
+
+                <!-- imagen -->
                 <td style="width: 80px;">
                   <a href="#" data-bs-toggle="modal" th:attr="data-bs-target='#modalImagen' + ${iterStat.index}">
                     <img
@@ -117,7 +119,7 @@
                       style="max-width: 100px; max-height: 100px; object-fit: cover;" 
                       alt="Imagen del conejo">
                   </a>
-                  <!-- Modal para la imagen -->
+                  <!-- Modal imagen -->
                   <div class="modal fade" th:id="'modalImagen' + ${iterStat.index}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                       <div class="modal-content">
@@ -131,8 +133,10 @@
                       </div>
                     </div>
                   </div>
+                  <!-- Fin Modal imagen -->
                 </td>
 
+                <!-- button administrar -->
                 <td>
                   <button
                     class="btn btn-sm btn-warning"
@@ -141,17 +145,21 @@
                     Administrar
                   </button>
                 </td>
-                <!-- Recreo -->
-                <!-- <td th:text="${item.inicioRecreo != null} ? ${#temporals.format(item.inicioRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''"></td> -->
-                <!-- <td th:text="${item.finRecreo != null} ? ${#temporals.format(item.finRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''" class="col-hide-mobile"></td> -->
-                <!-- Fin Recreo -->
 
+                <!-- raza -->
                 <td th:text="${item.raza.nombre}" class="col-hide-mobile"></td>
+                <!-- peso -->
                 <td th:text="${item.peso}" class="col-hide-mobile"></td>
+                <!-- fecha nacimiento -->
                 <td th:text="${#temporals.format(item.fechaNacimiento, 'dd/MMMM/yyyy')}" class="col-hide-mobile"></td>
+                <!-- nacimientos -->
                 <td th:text="${item.totalNacimientos}" class="col-hide-mobile"></td>
+                <!-- gazapos -->
                 <td th:text="${item.totalGazapos}" class="col-hide-mobile"></td>
+                <!-- activo -->
                 <td th:text="${item.activo}" class="col-hide-mobile"></td>
+
+                <!-- editar y eliminar -->
                 <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
                     <a th:href="@{/conejos/editar/{id}(id=${item.id})}" class="btn btn-info btn-sm">
