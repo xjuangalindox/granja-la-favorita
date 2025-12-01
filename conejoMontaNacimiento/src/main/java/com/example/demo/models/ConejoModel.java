@@ -2,9 +2,12 @@ package com.example.demo.models;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CollectionId;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
@@ -31,11 +35,6 @@ public class ConejoModel {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	@Column(name = "inicio_recreo")
-	private LocalDateTime inicioRecreo;
-	@Column(name = "fin_recreo")
-	private LocalDateTime finRecreo;
 
 	private String nombre;
 	private String sexo;
@@ -57,6 +56,10 @@ public class ConejoModel {
 
 	@Column(name = "raza_id")
 	private Long razaId;
+
+	// Relacion con RecreoModel
+	@OneToMany(targetEntity = RecreoModel.class, mappedBy = "conejo", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<RecreoModel> recreos = new ArrayList<>();
 
 	// RELATIONS
 	// @ManyToOne(targetEntity = RazaModel.class, fetch = FetchType.LAZY)

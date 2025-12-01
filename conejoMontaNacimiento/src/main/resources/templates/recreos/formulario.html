@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Formulario Recreos</title>
+    <style>
+      @media (max-width: 575.98px) {
+        .card {
+          margin: 0 5px;
+        }
+      }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <!-- errores -->
+                        <div th:if="${errores}">
+                            <ul>
+                                <li th:each="err : ${errores}" th:text="${err}"></li>
+                            </ul>
+                        </div>
+                        <!-- ok and error -->
+                        <div th:if="${ok}" class="alert alert-success mb-2" th:text="${ok}"></div>
+                        <div th:if="${error}" class="alert alert-danger mb-2" th:text="${error}"></div>
+                        <h2 class="mb-0" th:text="${titulo}">Titulo</h2>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{${accion}}" th:object="${recreoDTO}" method="post">
+                            <div class="mb-3">
+                                <label for="inicioRecreo" class="form-label">Inicio Recreo<span class="text-danger">*</span></label>
+                                <input id="inicioRecreo" class="form-control" type="datetime-local" th:field="*{inicioRecreo}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="finRecreo" class="form-label">Fin Recreo</label>
+                                <input id="finRecreo" class="form-control" type="datetime-local" th:field="*{finRecreo}">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Guardar Recreo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

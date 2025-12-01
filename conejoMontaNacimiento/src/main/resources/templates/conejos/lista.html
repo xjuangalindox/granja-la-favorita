@@ -9,8 +9,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" th:href="@{/styles.css}">
     <title>Conejos</title>
+
     <style>
-      @media (max-width: 767.98px) {
+      /* form.row {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+      } */
+      /* @media (max-width: 767.98px) { */
+      @media (max-width: 800.00px) {
         .col-hide-mobile {
           display: none;
         }
@@ -22,92 +28,145 @@
         .img-thumbnail {
           max-width: 60px !important;
           max-height: 60px !important;
+          /* max-width: 70px !important; */
+          /* max-height: 70px !important; */
         }
       }
+
+      .filtro label {
+        margin-bottom: 2px !important; /* súper pegado */
+        font-size: 0.75rem;            /* opcional: más compacto */
+        color: #555;                   /* opcional */
+      }
+
+      /* Centrar el label y el select dentro del contenedor .filtro */
+      .filtro {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Centrar el texto visible del select */
+      .filtro .form-select {
+        text-align: center;             /* para la mayoría de navegadores */
+        text-align-last: center;        /* para Chrome/Edge (valor final) */
+        -moz-text-align-last: center;   /* para Firefox */
+      }
+
+      /* Asegurar que las opciones también se vean centradas en la lista desplegable */
+      .filtro .form-select option {
+        text-align: center;
+      }
     </style>
+
 </head>
 <body>
   <div th:replace="fragments/navbar :: layoutNavbarPrivate"></div>
 
   <div class="container mt-4">
     <div class="row justify-content-center">
+
+      <!-- Mensajes de errores -->
       <div th:if="${ok}" class="alert alert-success text-center" role="alert">
           <span th:text="${ok}"></span>
       </div>
       <div th:if="${error}" class="alert alert-danger text-center" role="alert">
           <span th:text="${error}"></span>
       </div>
+
+      <!-- Nuevo conejo -->
       <div class="col-12 mb-3">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-          <h1 class="fs-3">Lista de conejos</h1>
+        <!-- <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-md-center gap-2"> -->
+        <!-- <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2"> -->
+          <!-- <h1 class="fs-3">Lista de conejos</h1> -->
+        <div class="d-flex justify-content-between align-items-center">
+          <h1 class="fs-3 m-0">Lista de conejos</h1>
           <a th:href="@{/conejos/crear}" class="btn btn-success ms-md-3">Nuevo Conejo</a>
         </div>
       </div>
 
-<!-- FILTRADO -->
-<form th:action="@{/conejos}" method="get" class="mb-3">
-  
-  <!-- Filtro sexo -->
-  <div class="row g-2 align-items-center mb-2">
-    <div class="col-auto">
-      <label for="sexo" class="form-label mb-0">Filtrar por sexo:</label>
-    </div>
-    <div class="col-auto">
-      <select id="sexo" name="sexo" class="form-select form-select-sm" onchange="this.form.submit()">
-        <option value="" th:selected="${sexo == null or sexo == ''}">Todos</option>
-        <option value="Macho" th:selected="${sexo == 'Macho'}">Machos</option>
-        <option value="Hembra" th:selected="${sexo == 'Hembra'}">Hembras</option>
-      </select>
-    </div>
-  </div>
-  <!-- Fin Filtro sexo -->
+      <!-- FILTRADO -->
+      <form th:action="@{/conejos}" method="get" class="mb-3 row justify-content-center text-center g-3">
+        
+        <!-- Cantidad -->
+        <div class="col-6 col-md-2 d-flex flex-column align-items-center filtro">
+        <!-- <div class="col-md-2 d-flex flex-column align-items-center"> -->
+            <label for="cantidad" class="form-label">Cantidad / Página</label>
+            
+            <select id="cantidad" name="cantidad" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value=10 th:selected="${cantidad == 10}">10</option>
+              <option value=20 th:selected="${cantidad == 20}">20</option>
+              <option value=30 th:selected="${cantidad == 30}">30</option>
+              <option value=40 th:selected="${cantidad == 40}">40</option>
+              <option value=50 th:selected="${cantidad == 50}">50</option>
+            </select>
+        </div>
 
-  <!-- Order -->
-  <div class="row g-2 align-items-center">
-    <div class="col-auto">
-      <label class="form-label mb-0">Ordenar por:</label>
-    </div>
-    <div class="col-auto">
-      <div>
-        <input type="radio" id="ordenNombre" name="ordenarPor" value="nombre" 
-          th:checked="${ordenarPor == null or ordenarPor == 'nombre'}" onchange="this.form.submit()">
-        <label for="ordenNombre">Nombre (A-Z)</label>
-      </div>
-      <div>
-        <input type="radio" id="ordenRecreo" name="ordenarPor" value="inicioRecreo" 
-          th:checked="${ordenarPor == 'inicioRecreo'}" onchange="this.form.submit()">
-        <label for="ordenRecreo">Último recreo</label>
-      </div>
-    </div>
-  </div>
-  <!-- Fin Order -->
+        <!-- Orden -->
+        <div class="col-6 col-md-2 d-flex flex-column align-items-center filtro">
+        <!-- <div class="col-md-2 d-flex flex-column align-items-center"> -->
+            <label for="orden" class="form-label">Orden</label>
+            
+            <select id="orden" name="orden" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="Ascendente" th:selected="${orden == 'Ascendente'}">Ascendente</option>
+              <option value="Descendente" th:selected="${orden == 'Descendente'}">Descendente</option>
+            </select>
+        </div>
 
-</form>
-<!-- FIN FILTRADO -->
+        <!-- Sexo -->
+        <div class="col-6 col-md-2 d-flex flex-column align-items-center filtro">
+        <!-- <div class="col-md-2 d-flex flex-column align-items-center"> -->
+            <label for="sexo" class="form-label">Sexo</label>
+            
+            <select id="sexo" name="sexo" class="form-select form-select-sm" onchange="actualizarNombres()">
+              <option value="Todos" th:selected="${sexo == 'Todos'}">Todos</option>
+              <option value="Machos" th:selected="${sexo == 'Machos'}">Machos</option>
+              <option value="Hembras" th:selected="${sexo == 'Hembras'}">Hembras</option>
+            </select>
+        </div>
+
+        <!-- Nombre -->
+        <div class="col-6 col-md-2 d-flex flex-column align-items-center filtro">
+        <!-- <div class="col-md-2 d-flex flex-column align-items-center"> -->
+            <label for="nombre" class="form-label">Nombre</label>
+            
+            <select id="nombre" name="nombre" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="Todos" th:selected="${nombre == 'Todos'}">Todos</option>
+              <option th:each="n : ${listaNombres}" 
+                      th:value="${n}" th:selected="${nombre == n}" th:text="${n}">
+            </select>
+        </div>
+
+      </form>
+      <!-- FIN FILTRADO -->
 
       <div class="col-12">
         <div class="table-responsive">
+
+          <!-- TABLE -->
           <table class="table table-bordered table-hover align-middle">
             <thead>
               <tr class="text-center">
                 <th scope="col">Nombre</th>
                 <th scope="col">Imagen</th>
-                <th scope="col">Recreo</th>
-                <th scope="col" class="col-hide-mobile">Fin Recreo</th>
+                <th scope="col">Recreos</th>
                 <th scope="col" class="col-hide-mobile">Raza</th>
                 <th scope="col" class="col-hide-mobile">Peso</th>
                 <th scope="col" class="col-hide-mobile">Fecha Nacimiento</th>
-                <th scope="col" class="col-hide-mobile">Total Nacimientos</th>
-                <th scope="col" class="col-hide-mobile">Total Gazapos</th>
+                <th scope="col" class="col-hide-mobile">Nacimientos</th>
+                <th scope="col" class="col-hide-mobile">Gazapos</th>
                 <th scope="col" class="col-hide-mobile">Activo</th>
                 <th scope="col">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="text-center align-middle" th:each="item, iterStat : ${listaConejos}" th:classappend=
-                "${item.sexo == 'Macho'} ? 'table-info' : 
-                (${item.sexo == 'Hembra'} ? 'table-danger' : '')">
-                <td th:text="${item.nombre}"></td>
+              <tr class="text-center align-middle" th:each="item, iterStat : ${listaConejos}" 
+                  th:classappend="${item.sexo == 'Macho'} ? 'table-info' : (${item.sexo == 'Hembra'} ? 'table-danger' : '')">
+
+                <!-- nombre -->
+                <td th:text="${item.nombre}"></td> 
+
+                <!-- imagen -->
                 <td style="width: 80px;">
                   <a href="#" data-bs-toggle="modal" th:attr="data-bs-target='#modalImagen' + ${iterStat.index}">
                     <img
@@ -116,7 +175,7 @@
                       style="max-width: 100px; max-height: 100px; object-fit: cover;" 
                       alt="Imagen del conejo">
                   </a>
-                  <!-- Modal para la imagen -->
+                  <!-- Modal imagen -->
                   <div class="modal fade" th:id="'modalImagen' + ${iterStat.index}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                       <div class="modal-content">
@@ -130,19 +189,33 @@
                       </div>
                     </div>
                   </div>
+                  <!-- Fin Modal imagen -->
                 </td>
 
-                <!-- Recreo -->
-                <td th:text="${item.inicioRecreo != null} ? ${#temporals.format(item.inicioRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''"></td>
-                <td th:text="${item.finRecreo != null} ? ${#temporals.format(item.finRecreo, 'dd/MMMM/yyyy hh:mm a')} : ''" class="col-hide-mobile"></td>
-                <!-- Fin Recreo -->
+                <!-- button administrar -->
+                <td>
+                  <button
+                    class="btn btn-sm btn-warning"
+                    th:attr="data-id=${item.id}, data-nombre=${item.nombre}"
+                    onclick="abrirRecreos(this)">
+                    Administrar
+                  </button>
+                </td>
 
+                <!-- raza -->
                 <td th:text="${item.raza.nombre}" class="col-hide-mobile"></td>
+                <!-- peso -->
                 <td th:text="${item.peso}" class="col-hide-mobile"></td>
+                <!-- fecha nacimiento -->
                 <td th:text="${#temporals.format(item.fechaNacimiento, 'dd/MMMM/yyyy')}" class="col-hide-mobile"></td>
+                <!-- nacimientos -->
                 <td th:text="${item.totalNacimientos}" class="col-hide-mobile"></td>
+                <!-- gazapos -->
                 <td th:text="${item.totalGazapos}" class="col-hide-mobile"></td>
+                <!-- activo -->
                 <td th:text="${item.activo}" class="col-hide-mobile"></td>
+
+                <!-- editar y eliminar -->
                 <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
                     <a th:href="@{/conejos/editar/{id}(id=${item.id})}" class="btn btn-info btn-sm">
@@ -157,32 +230,432 @@
               </tr>
             </tbody>
           </table>
+          <!-- FIN TABLE -->
 
-<!-- PAGINADOR -->
-<div class="d-flex justify-content-center mt-3" th:if="${totalPaginas > 0}">
-  <nav>
-    <ul class="pagination">
-      <!-- Botón Anterior -->
-      <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
-        <a class="page-link" th:href="@{/conejos(pagina=${paginaActual - 1}, sexo=${sexo})}">Anterior</a>
-      </li>
+          <!-- PAGINADOR -->
+          <div class="text-center mb-2" th:if="${totalPaginas > 0}">
+              Página <span th:text="${pagina + 1}"></span> de <span th:text="${totalPaginas}"></span>
+          </div>
 
-      <!-- Números de página -->
-      <li class="page-item" 
-          th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" 
-          th:classappend="${i == paginaActual} ? 'active'">
-        <a class="page-link" th:href="@{/conejos(pagina=${i}, sexo=${sexo})}" 
-           th:text="${i + 1}"></a>
-      </li>
+          <div class="d-flex justify-content-center mt-3" th:if="${totalPaginas > 0}">
+            <nav>
+              <ul class="pagination">
+                <!-- Botón Anterior -->
+                <li class="page-item" th:classappend="${pagina == 0} ? 'disabled'">
+                  <a class="page-link" 
+                      th:href="@{/conejos(pagina=${pagina - 1}, cantidad=${cantidad}, orden=${orden}, sexo=${sexo}, nombre=${nombre})}">
+                      <i class="bi bi-arrow-left"></i></a>
+                </li>
 
-      <!-- Botón Siguiente -->
-      <li class="page-item" th:classappend="${paginaActual == totalPaginas - 1} ? 'disabled'">
-        <a class="page-link" th:href="@{/conejos(pagina=${paginaActual + 1}, sexo=${sexo})}">Siguiente</a>
-      </li>
-    </ul>
-  </nav>
+                <!-- Números de página -->
+                <li class="page-item" 
+                    th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" 
+                    th:classappend="${i == pagina} ? 'active'">
+                  <a class="page-link" 
+                      th:href="@{/conejos(pagina=${i}, cantidad=${cantidad}, orden=${orden}, sexo=${sexo}, nombre=${nombre})}"
+                      th:text="${i + 1}"></a>
+                </li>
+
+                <!-- Botón Siguiente -->
+                <li class="page-item" th:classappend="${pagina == totalPaginas - 1} ? 'disabled'">
+                  <a class="page-link" 
+                      th:href="@{/conejos(pagina=${pagina + 1}, cantidad=${cantidad}, orden=${orden}, sexo=${sexo}, nombre=${nombre})}">
+                      <i class="bi bi-arrow-right"></i></a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+          <!-- FIN PAGINADOR -->
+
+<!-- MODAL RECREOS -->
+<div class="modal fade" id="modalRecreos" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalRecreosTitle">Recreos del Conejo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- 🔵 BOTÓN NUEVO RECREO (agregar aquí) -->
+        <div class="d-flex justify-content-end mb-3">
+          <button class="btn btn-success btn-sm" onclick="abrirModalCrearRecreo()">
+            <i class="bi bi-plus-circle"></i> Nuevo Recreo
+          </button>
+        </div>
+        <!-- 🔵 FIN BOTÓN NUEVO RECREO -->
+
+        <!-- Importante para crear y edicion: id del conejo seleccionado -->
+        <input type="hidden" id="conejoIdSeleccionado">
+
+        <table class="table table-bordered">
+          <thead>
+            <tr class="text-center">
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaRecreos">
+            <!-- Se va a llenar con JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
 </div>
-<!-- FIN PAGINADOR -->
+<!-- FIN MODAL RECREOS -->
+
+<!-- MODAL CREAR RECREO -->
+<div class="modal fade" id="modalCrearRecreo" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar Nuevo Recreo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formCrearRecreo">
+
+          <!-- <input type="hidden" id="crearConejoId"> -->
+
+          <div class="mb-3">
+            <label>Inicio</label>
+            <input type="datetime-local" id="nuevoInicio" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label>Fin</label>
+            <input type="datetime-local" id="nuevoFin" class="form-control">
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarNuevoRecreo()">Guardar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- FIN MODAL CREAR RECREO -->
+
+<!-- MODAL EDITAR RECREO -->
+<div class="modal fade" id="modalEditarRecreo" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Recreo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formEditarRecreo">
+
+          <input type="hidden" id="editRecreoId">
+
+          <div class="mb-3">
+            <label>Inicio</label>
+            <input type="datetime-local" id="editInicio" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label>Fin</label>
+            <input type="datetime-local" id="editFin" class="form-control">
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarEdicionRecreo()">Guardar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- FIN MODAL EDITAR RECREO -->
+
+<!-- SCRIPT MODALES -->
+<script>
+  
+  // ACTUALIZAR NOMBRES 
+  function actualizarNombres() {
+    const sexoSelect = document.getElementById("sexo");
+    const nombreSelect = document.getElementById("nombre");
+    
+    nombreSelect.value = "Todos";
+    sexoSelect.form.submit();
+  }
+
+  // boton que guarda el id y nombre del conejo seleccionado
+  let botonRecreosActual = null;
+
+  async function abrirRecreos(btn) {
+
+    // Se guarda el boton para actualizacion en caso de persistir
+    botonRecreosActual = btn;
+
+    const conejoId = btn.getAttribute("data-id");
+    const nombre = btn.getAttribute("data-nombre");
+
+    // Se setea el id del conejo al input del model
+    document.getElementById("conejoIdSeleccionado").value = conejoId;
+
+    // Cambiar titulo del modal
+    document.getElementById("modalRecreosTitle").textContent = `Recreos de ${nombre}`;
+
+    const response = await fetch(`/api/recreos/conejo/${conejoId}`);
+    const data = await response.json();
+
+    const tbody = document.getElementById("tablaRecreos");
+    tbody.innerHTML = ""; // Limpiar tabla
+
+    if (data.recreos.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="3" class="text-center">No hay recreos registrados</td>
+          </tr>
+        `;
+
+    } else {
+        data.recreos.forEach(r => {
+            tbody.innerHTML += `
+                <tr class="text-center align-middle">
+                    <td>${formatearFecha(r.inicioRecreo) ?? ""}</td>
+                    <td>${formatearFecha(r.finRecreo) ?? ""}</td>
+                    <td>
+                      <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
+                        
+                          <button
+                            class="btn btn-info btn-sm"
+                            data-id="${r.id}"
+                            onclick="cargarRecreoEnEdicion(this)">
+
+                          <i class="bi bi-pencil"></i>
+                          <span class="d-none d-md-inline">Editar</span>
+                          
+                          <button
+                            class="btn btn-danger btn-sm"
+                            data-id="${r.id}"
+                            onclick="eliminarRecreoSimple(this)">
+
+                          <i class="bi bi-trash"></i>
+                          <span class="d-none d-md-inline">Eliminar</span>
+
+                      </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Abrir modal recreos
+    const modal = new bootstrap.Modal(document.getElementById("modalRecreos"));
+    modal.show();
+  }
+
+  // ======================================================================
+  // ABRIR MODAL CREAR RECREO Y GUARDAR EL ID DEL CONEJO
+  // ======================================================================
+  function abrirModalCrearRecreo() {
+      // Limpiar inputs
+      document.getElementById("nuevoInicio").value = "";
+      document.getElementById("nuevoFin").value = "";
+
+      const modal = new bootstrap.Modal(document.getElementById("modalCrearRecreo"));
+      modal.show();
+  }
+
+// ======================================================================
+// GUARDAR NUEVO RECREO (POST)
+// ======================================================================
+  function guardarNuevoRecreo() {
+    const form = document.getElementById("formCrearRecreo");
+
+    if (!form.checkValidity()) {
+        form.reportValidity(); // Muestra los mensajes de error nativos del navegador
+        return;
+    }
+
+    const conejoId = document.getElementById("conejoIdSeleccionado").value; // id del input del modal recreos
+
+    console.log("guardarNuevoRecreo - ConejoId: "+conejoId);
+    console.log("guardarNuevoRecreo - nuevoInicio: "+document.getElementById("nuevoInicio").value);
+    console.log("guardarNuevoRecreo - nuevoFin: "+document.getElementById("nuevoFin").value);
+
+    const body = {
+        inicioRecreo: document.getElementById("nuevoInicio").value,
+        finRecreo: document.getElementById("nuevoFin").value,
+        conejo: {id : Number(conejoId)}
+    };
+
+    fetch("/api/recreos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    })
+    .then(async res => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          // Tomar TODOS los mensajes del backend
+          const mensaje = data ? Object.values(data).join("\n") : "Error al guardar";
+
+          alert(mensaje);
+          throw new Error(mensaje);
+        }
+        
+        return res.json();
+    })
+    .then(() => {
+        // Cerrar modal de crear
+        bootstrap.Modal.getInstance(document.getElementById("modalCrearRecreo")).hide();
+
+        // Refrescar tabla del modal principal
+        bootstrap.Modal.getInstance(document.getElementById("modalRecreos")).hide();
+        abrirRecreos(botonRecreosActual);
+    })
+    .catch(err => console.error(err));
+  }
+
+  // ======================
+  // CARGAR DATOS AL EDITAR
+  // ======================
+  function cargarRecreoEnEdicion(btn) {
+      const recreoId = btn.getAttribute("data-id");
+      console.log("recreoId: "+recreoId);
+
+      document.getElementById("editRecreoId").value = recreoId;
+
+      fetch(`/api/recreos/${recreoId}`)
+          .then(res => res.json())
+          .then(data => {
+            
+              // Formato necesario para <input type="datetime-local">
+              const inicio = data.inicioRecreo ? data.inicioRecreo.substring(0,16) : "";
+              const fin = data.finRecreo ? data.finRecreo.substring(0,16) : "";
+
+              document.getElementById("editInicio").value = inicio;
+              document.getElementById("editFin").value = fin;
+
+              // Abrir modal edicion recreo
+              const modal = new bootstrap.Modal(document.getElementById("modalEditarRecreo"));
+              modal.show();              
+          })
+          .catch(err => console.error("Error cargando recreo:", err));
+  }
+
+  // ======================
+  // GUARDAR EDICIÓN (PUT)
+  // ======================
+  function guardarEdicionRecreo() {
+
+      const form = document.getElementById("formEditarRecreo");
+
+      if (!form.checkValidity()) {
+          form.reportValidity(); // Muestra los mensajes de error nativos del navegador
+          return;
+      }
+
+      const conejoId = document.getElementById("conejoIdSeleccionado").value; // id del input del modal recreos
+      const recreoId = document.getElementById("editRecreoId").value; // id del input del modal edicion
+
+      const inicio = document.getElementById("editInicio").value;
+      const fin = document.getElementById("editFin").value;
+
+      console.log("guardarEdicionRecreo - conejoId: "+conejoId);
+      console.log("guardarEdicionRecreo - RecreoId: "+recreoId);
+      console.log("guardarEdicionRecreo - editInicio: "+inicio);
+      console.log("guardarEdicionRecreo - editFin: "+fin);
+
+      const body = {
+          id: Number(recreoId),  
+          inicioRecreo: inicio !== "" ? inicio : null,
+          finRecreo: fin !== "" ? fin : null,
+          conejo: {id : Number(conejoId)}
+      };
+
+      fetch(`/api/recreos/${recreoId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+      })
+      .then(async res => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => null);
+
+            // Tomar TODOS los mensajes del backend
+            const mensaje = data ? Object.values(data).join("\n") : "Error al actualizar";
+            
+            alert(mensaje);
+            throw new Error(mensaje);
+          }
+          
+          return res.json();
+      })
+      .then(() => {
+          // Cerrar modal
+          bootstrap.Modal.getInstance(document.getElementById("modalEditarRecreo")).hide();
+
+          bootstrap.Modal.getInstance(document.getElementById("modalRecreos")).hide();
+          abrirRecreos(botonRecreosActual); // refrescar
+      })
+      .catch(err => console.error(err));
+  }
+
+  // ======================
+  // ELIMINAR CON CONFIRMACIÓN SIMPLE
+  // ======================
+  function eliminarRecreoSimple(btn) {
+      const id = btn.getAttribute("data-id");
+
+      if (!confirm("¿Seguro que deseas eliminar este recreo?")) {
+          return; // Cancelado
+      }
+
+      fetch(`/api/recreos/${id}`, {
+          method: "DELETE"
+      })
+      .then(res => {
+          if (!res.ok) throw new Error("Error al eliminar");
+          
+          bootstrap.Modal.getInstance(document.getElementById("modalRecreos")).hide();
+          abrirRecreos(botonRecreosActual); // refrescar
+      })
+      .catch(err => console.error(err));
+  }
+
+  // =============================================
+  // FORMATEAR FECHA
+  // =============================================
+  function formatearFecha(fechaIso) {
+    if (!fechaIso) return "";
+    
+    const fecha = new Date(fechaIso);
+
+    return fecha.toLocaleString("es-MX", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    });
+  }
+
+</script>
+<!-- FIN SCRIPT MODALES -->
 
         </div>
       </div>
