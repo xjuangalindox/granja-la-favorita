@@ -1,6 +1,9 @@
 package com.example.demo.controllers;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -37,43 +40,35 @@ public class ConejoController {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@GetMapping
-	public String obtenerConejos(@RequestParam(defaultValue = "0") int pagina, 
-								 @RequestParam(required = false) String sexo, 
-								 @RequestParam(required = false, defaultValue = "nombre") String ordenarPor, 
-								 Model model){
+	public String obtenerConejos(
+		@RequestParam(required = false, defaultValue = "0") int pagina, 
+		@RequestParam(required = false, defaultValue = "10") int cantidad,
+		@RequestParam(required = false, defaultValue = "Ascendente") String orden,
+		@RequestParam(required = false, defaultValue = "Todos") String sexo, 
+		@RequestParam(required = false, defaultValue = "Todos") String nombre,
+		Model model){
 
-		int cantidad = 10; // Cantidad de conejos por pagina
-		Page<ConejoDTO> pageConejos; // Pagina para almacenar los conejos
+		// lista de nombres
+		List<String> listaNombres = conejoService.findNombresBySexoOrderByNombreAsc(orden, sexo);
 
-		// Condificional simplificado: si hay sexo, buscar por sexo, de lo contrario buscar todos los conejos
-		pageConejos = sexo != null && !sexo.isEmpty() ? 
-			conejoService.findBySexo(pagina, cantidad, sexo, ordenarPor) : conejoService.findAll(pagina, cantidad, ordenarPor); 
+		Page<ConejoDTO> pageConejos = nombre.equalsIgnoreCase("Todos") ?
+			conejoService.findBySexo(orden, sexo, pagina, cantidad) :
+			conejoService.findByNombre(nombre, pagina, cantidad);
 
+		model.addAttribute("pagina", pagina);
+		model.addAttribute("cantidad", cantidad);
+		model.addAttribute("orden", orden);
 		model.addAttribute("sexo", sexo);
-		model.addAttribute("ordenarPor", ordenarPor);
+		model.addAttribute("nombre", nombre);
+
+		model.addAttribute("listaNombres", listaNombres);
 		model.addAttribute("listaConejos", pageConejos.getContent());
-		model.addAttribute("paginaActual", pagina);
+		
 		model.addAttribute("totalPaginas", pageConejos.getTotalPages());
 		model.addAttribute("totalElementos", pageConejos.getTotalElements());
 
 		return "conejos/lista"; // Retornar al archivo html
 	}
-
-	// @GetMapping
-	// public String obtenerConejos(@RequestParam(required = false) String sexo, Model model) {
-	// 	List<ConejoDTO> listaConejos = new ArrayList<>();
-
-	// 	// Filtrar por sexo si se proporciona, de lo contrario obtener todos los conejos
-	// 	if(sexo == null || sexo.isEmpty()){
-	// 		listaConejos = conejoService.obtenerConejos();
-	// 	}else{
-	// 		listaConejos = conejoService.obtenerConejosPorSexo(sexo);
-	// 	}
-
-	// 	model.addAttribute("sexo", sexo);
-	// 	model.addAttribute("listaConejos", listaConejos);
-	// 	return "conejos/lista"; // Retornar al archivo html
-	// }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
