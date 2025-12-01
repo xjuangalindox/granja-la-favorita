@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.controllers.dto.RecreoDTO;
+import com.example.demo.models.ConejoModel;
 import com.example.demo.models.RecreoModel;
+import com.example.demo.repositories.ConejoRepository;
 import com.example.demo.repositories.IRecreoRepository;
 
 @Service
@@ -50,6 +52,9 @@ public class RecreoServiceImpl implements IRecreoService{
         return modelMapper.map(recreoModel, RecreoDTO.class);
     }
 
+    @Autowired
+    private ConejoRepository conejoRepository;
+
     @Override
     @Transactional
     public RecreoDTO updateRecreo(Long id, RecreoDTO recreoDTO) {
@@ -57,8 +62,15 @@ public class RecreoServiceImpl implements IRecreoService{
         RecreoModel recreoModel = recreoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Recreo con id "+id+" no encontrado"));
 
+        ConejoModel conejoModel = conejoRepository.findById(recreoDTO.getConejo().getId())
+            .orElseThrow(() -> new RuntimeException("Conejo con id "+recreoDTO.getConejo().getId()+" no encontrado"));
+
+        recreoModel.setInicioRecreo(recreoDTO.getInicioRecreo());
+        recreoModel.setFinRecreo(recreoDTO.getFinRecreo());
+        recreoModel.setConejo(conejoModel);
+
         // 2. Mapear solo los campos cambiados
-        modelMapper.map(recreoDTO, recreoModel);
+        // modelMapper.map(recreoDTO, recreoModel);
 
         // 3. Guardar el mismo objeto modificado
         recreoModel = recreoRepository.save(recreoModel);
