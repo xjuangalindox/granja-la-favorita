@@ -28,22 +28,22 @@ public class ConejoRepositoryTest {
     @BeforeEach
     void setup(){
         // Inactivos
-        ConejoModel semental = new ConejoModel(null, null, null, "Semental", "Macho", null, false, 
+        ConejoModel semental = new ConejoModel(null,"Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, 1L, null);
-        ConejoModel panda = new ConejoModel(null, null, null, "Panda", "Hembra", null, false, 
+        ConejoModel panda = new ConejoModel(null, "Panda", "Hembra", null, false, 
         "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, 1L, null);
 
         // Activos
-        ConejoModel rocko = new ConejoModel(null, null, null, "Rocko", "Macho", null, true, 
+        ConejoModel rocko = new ConejoModel(null, "Rocko", "Macho", null, true, 
         "Tiene malito el ojo", "123abc", "https://cloudinary.com/rocko.png", null, null, null, 1L, null);
-        ConejoModel trueno = new ConejoModel(null, null, null, "Trueno", "Macho", null, true, 
+        ConejoModel trueno = new ConejoModel(null, "Trueno", "Macho", null, true, 
         "Tiene lloroso el ojo", "123abc", "https://cloudinary.com/trueno.png", null, null, null, 1L, null);
-        ConejoModel marino = new ConejoModel(null, null, null, "Marino", "Macho", null, true, 
+        ConejoModel marino = new ConejoModel(null, "Marino", "Macho", null, true, 
         "Tiene gripa", "123abc", "https://cloudinary.com/marino.png", null, null, null, 1L, null);
 
-        ConejoModel mexicana = new ConejoModel(null, null, null, "Mexicana", "Hembra", null, true, 
+        ConejoModel mexicana = new ConejoModel(null, "Mexicana", "Hembra", null, true, 
         "Perfecto estado", "123abc", "https://cloudinary.com/mexicana.png", null, null, null, 1L, null);
-        ConejoModel enojona = new ConejoModel(null, null, null, "Enojona", "Hembra", null, true, 
+        ConejoModel enojona = new ConejoModel(null, "Enojona", "Hembra", null, true, 
         "Perfecto estado", "123abc", "https://cloudinary.com/enojona.png", null, null, null, 1L, null);
         
         List<ConejoModel> lista = Arrays.asList(semental, panda, rocko, trueno, marino, mexicana, enojona);
@@ -91,7 +91,7 @@ public class ConejoRepositoryTest {
     @Test
     void testExistsById(){
         // given
-        ConejoModel princesa = conejoRepository.save(new ConejoModel(null, null, null, "Princesa", "Hembra", null, true, 
+        ConejoModel princesa = conejoRepository.save(new ConejoModel(null, "Princesa", "Hembra", null, true, 
         "Cariñosa", "123abc", "https://cloudinary.com/princesa.png", null, null, null, 1L, null));
 
         // when
