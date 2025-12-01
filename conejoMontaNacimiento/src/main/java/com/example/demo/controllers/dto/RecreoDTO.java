@@ -3,7 +3,9 @@ package com.example.demo.controllers.dto;
 import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.validation.constraints.AssertTrue;
@@ -28,11 +30,12 @@ public class RecreoDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime finRecreo;
     
-    @JsonIgnore // Necesario para evitar recursividad circular
+    // @JsonIgnore // Necesario para evitar recursividad circular
+    @JsonBackReference
     private ConejoDTO conejo;
 
     // VALIDATION
-    @AssertTrue(message = "Inicio recreo debe ser menor que Fin recreo")
+    @AssertTrue(message = "Inicio recreo debe ser menor que fin recreo")
     private boolean isInicioAntesDeFin() {
         // finRecreo NULL
         if(finRecreo == null) return true;
