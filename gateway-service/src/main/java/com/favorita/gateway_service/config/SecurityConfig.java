@@ -46,7 +46,7 @@ public class SecurityConfig {
                     })
                 )
                 // Habilitar autenticación básica
-                .httpBasic(Customizer.withDefaults())
+                // .httpBasic(Customizer.withDefaults())
                 .build();
     }
 
