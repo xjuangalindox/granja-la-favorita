@@ -60,19 +60,6 @@
                                 <input type="text" th:field="*{nombre}" class="form-control" id="nombre" required>
                             </div>
 
-                            <!-- Recreo, solo mostrar en edición -->
-                            <div th:if="*{id != null}" class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="inicioRecreo" class="form-label">Inicio recreo:</label>
-                                    <input type="datetime-local" th:field="*{inicioRecreo}" class="form-control" id="inicioRecreo">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="finRecreo" class="form-label">Fin recreo:</label>
-                                    <input type="datetime-local" th:field="*{finRecreo}" class="form-control" id="finRecreo">
-                                </div>
-                            </div>
-
                             <div class="mb-3" th:if="${conejoDTO.id == null}">
                                 <label for="imagen" class="form-label">Imagen<span class="text-danger">*</span></label>
                                 <input type="file" th:field="*{imagen}" class="form-control" id="imagen" name="imagen" accept="image/*" required>

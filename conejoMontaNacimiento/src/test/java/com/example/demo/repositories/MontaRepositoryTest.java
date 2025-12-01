@@ -35,25 +35,25 @@ public class MontaRepositoryTest {
     @BeforeEach
     void setup(){
         // MiniLop - Inactivos
-        semental = new ConejoModel(null, null, null, "Semental", "Macho", null, false, 
+        semental = new ConejoModel(null, "Semental", "Macho", null, false, 
         "Primer semental de la granja", "123abc", "https://cloudinary.com/semental.png", null, null, null, 1L, null);
-        panda = new ConejoModel(null, null, null, "Panda", "Hembra", null, false, 
+        panda = new ConejoModel(null, "Panda", "Hembra", null, false, 
         "Abuelita, jubilada", "123abc", "https://cloudinary.com/panda.png", null, null, null, 1L, null);
         // Leones - Activos
-        peluchin = new ConejoModel(null, null, null, "Peluchin", "Macho", null, true, 
+        peluchin = new ConejoModel(null, "Peluchin", "Macho", null, true, 
         "Semental, nacido en granja", "123abc", "https://cloudinary.com/rocko.png", null, null, null, 2L, null);
-        pelusa = new ConejoModel(null, null, null, "Pelusa", "Hembra", null, true, 
+        pelusa = new ConejoModel(null, "Pelusa", "Hembra", null, true, 
         "Hermana del semental, nacida en granja", "123abc", "https://cloudinary.com/trueno.png", null, null, null, 2L, null);
         // FuzzyLop - Activos
-        rata = new ConejoModel(null, null, null, "Rata", "Macho", null, true, 
+        rata = new ConejoModel(null, "Rata", "Macho", null, true, 
         "Traido de mexico", "123abc", "https://cloudinary.com/marino.png", null, null, null, 3L, null);
-        nube = new ConejoModel(null, null, null, "Nube", "Hembra", null, true, 
+        nube = new ConejoModel(null, "Nube", "Hembra", null, true, 
         "Traida de jiutepec", "123abc", "https://cloudinary.com/mexicana.png", null, null, null, 3L, null);
 
         // Enanos - Activos / Registrados pero sin monta
-        castor = new ConejoModel(null, null, null, "castor", "Macho", null, true, 
+        castor = new ConejoModel(null, "castor", "Macho", null, true, 
         "Unico enanito semental en la granja", "123abc", "https://cloudinary.com/Castor.png", null, null, null, 4L, null);
-        chocolata = new ConejoModel(null, null, null, "chocolata", "Hembra", null, true, 
+        chocolata = new ConejoModel(null, "chocolata", "Hembra", null, true, 
         "Enanita chocolata", "123abc", "https://cloudinary.com/Chocolata.png", null, null, null, 4L, null);
 
         // save conejos
