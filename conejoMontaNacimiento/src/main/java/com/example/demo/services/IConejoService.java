@@ -9,6 +9,12 @@ import com.example.demo.controllers.dto.ConejoDTO;
 
 public interface IConejoService {
 
+    List<String> findNombresBySexoOrderByNombreAsc(String orden, String sexo);
+    Page<ConejoDTO> findBySexo(String orden, String sexo, int pagina, int cantidad);
+    Page<ConejoDTO> findByNombre(String nombre, int pagina, int cantidad);
+
+
+
     public Page<ConejoDTO> findAll(int pagina, int cantidad, String ordenarPor);
     public Page<ConejoDTO> findBySexo(int pagina, int cantidad, String sexo, String ordenarPor);
 
@@ -37,4 +43,6 @@ public interface IConejoService {
 
     // Usado: formulario montas
     List<ConejoDTO> obtenerConejosActivosPorSexo(String sexo);
+
+    // List<String> findAllNombresOrderByNombreAsc();
 }

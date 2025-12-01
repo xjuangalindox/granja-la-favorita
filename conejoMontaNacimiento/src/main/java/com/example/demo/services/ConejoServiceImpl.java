@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,60 @@ public class ConejoServiceImpl implements IConejoService{
 
     @Autowired
     private RazaClient razaClient;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public List<String> findNombresBySexoOrderByNombreAsc(String orden, String sexo) {
+        sexo = switch(sexo) {
+            case "Machos" -> "Macho";
+            case "Hembras" -> "Hembra";
+            default -> "";
+        };
+
+        List<String> listaNombres = conejoRepository.findNombresBySexoOrderByNombreAsc(sexo);
+        if(orden.equalsIgnoreCase("Descendente")) Collections.reverse(listaNombres);
+
+        return listaNombres;
+    }
+
+    @Override
+    public Page<ConejoDTO> findBySexo(String orden, String sexo, int pagina, int cantidad) {
+        sexo = switch(sexo) {
+            case "Machos" -> "Macho";
+            case "Hembras" -> "Hembra";
+            default -> "%";
+        };
+
+        Pageable pageable = orden.equalsIgnoreCase("Ascendente") ?
+            PageRequest.of(pagina, cantidad, Sort.by("nombre").ascending()) :
+            PageRequest.of(pagina, cantidad, Sort.by("nombre").descending());
+
+        Page<ConejoModel> pageConejos = conejoRepository.findBySexoLike(sexo, pageable);
+
+        return pageConejos.map(model -> {
+            RazaDTO razaDTO = razaClient.obtenerRazaPorId(model.getRazaId());
+            ConejoDTO conejoDTO = modelMapper.map(model, ConejoDTO.class);
+            conejoDTO.setRaza(razaDTO);
+
+            return conejoDTO;
+        });
+    }
+
+    @Override
+    public Page<ConejoDTO> findByNombre(String nombre, int pagina, int cantidad) {
+        Pageable pageable = PageRequest.of(pagina, cantidad);
+        Page<ConejoModel> pageConejos = conejoRepository.findByNombre(nombre, pageable);
+
+        return pageConejos.map(model -> {
+            RazaDTO razaDTO = razaClient.obtenerRazaPorId(model.getRazaId());
+            ConejoDTO conejoDTO = modelMapper.map(model, ConejoDTO.class);
+            conejoDTO.setRaza(razaDTO);
+
+            return conejoDTO;
+        });
+    }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -441,6 +496,9 @@ public class ConejoServiceImpl implements IConejoService{
         return conejoRepository.existsByRazaId(id);
     }
 
-
+    // @Override
+    // public List<String> findAllNombresOrderByNombreAsc() {
+    //     return conejoRepository.findAllNombresOrderByNombreAsc();
+    // }
 }
 
