@@ -14,7 +14,8 @@
     <!-- FRAGMENT PRIVADO -->
     <div th:fragment="layoutNavbarPrivate">
         <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3 position-relative">
-            <div class="container d-flex justify-content-between align-items-center">
+            <div class="container d-flex align-items-center">
+            <!-- <div class="container d-flex justify-content-between align-items-center"> -->
 
                 <!-- Logo a la izquierda -->
                 <a class="navbar-brand fw-bold d-flex align-items-center" 
@@ -77,15 +78,15 @@
                         </li>
                         <!-- Articulos -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/articulos}">Artículos</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/articulos}">Insumos</a>
                         </li>
                         <!-- Ejemplares disponibles -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/ejemplares}">Ejemplares Disponibles</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/ejemplares}">Ejemplares</a>
                         </li>
                         <!-- Articulos disponibles -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/articulos}">Artículos Disponibles</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/articulos}">Artículos</a>
                         </li>
                         <!-- Cerrar sesion -->
                         <li class="nav-item">
@@ -107,7 +108,8 @@
     <!-- FRAGMENT PUBLICO -->
     <div th:fragment="layoutNavbarPublic">
         <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3 position-relative">
-            <div class="container d-flex justify-content-between align-items-center">
+            <div class="container d-flex align-items-center">
+            <!-- <div class="container d-flex justify-content-between align-items-center"> -->
 
                 <!-- Logo a la izquierda -->
                 <a class="navbar-brand fw-bold d-flex align-items-center" 
@@ -136,11 +138,11 @@
                     
                         <!-- Ejemplares disponibles -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/ejemplares}">Ejemplares Disponibles</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/ejemplares}">Ejemplares</a>
                         </li>
                         <!-- Articulos disponibles -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/articulos}">Artículos Disponibles</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/articulos}">Artículos</a>
                         </li>
                         <!-- Iniciar sesion -->
                         <li class="nav-item">
