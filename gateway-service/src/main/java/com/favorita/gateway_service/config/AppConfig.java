@@ -4,6 +4,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.server.session.WebSessionManager;
 
 @Configuration
 public class AppConfig {
@@ -35,5 +36,11 @@ public class AppConfig {
 
             return chain.filter(exchange.mutate().request(mutatedRequest).build());
         };
+    }
+
+    @Bean
+    public WebSessionManager webSessionManager(){
+        return exchange -> exchange.getSession()
+            .doOnNext(webSession -> webSession.setMaxIdleTime(java.time.Duration.ofDays(1)));
     }
 }
