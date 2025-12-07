@@ -39,18 +39,29 @@ public class AppConfig {
         };
     }
 
-    @Bean
-    public WebFilter sessionTimeoutFilter() {
-        return (exchange, chain) ->
-                exchange.getSession()
-                        .doOnNext(session -> {
-                            // Solo configurar si aún no tiene maxIdleTime
-                            if (session.getMaxIdleTime() == null) {
-                                session.setMaxIdleTime(Duration.ofHours(12));
-                                logger.info("⚪⚪⚪ Nueva sesión creada, maxIdleTime: {}", session.getMaxIdleTime());
-                            }
-                        })
-                        .then(chain.filter(exchange));
-    } 
+    // @Bean
+    // public WebFilter sessionTimeoutFilter() {
+    // return (exchange, chain) ->
+    //     exchange.getSession()
+    //             .flatMap(session -> {
+    //                 if (session.getMaxIdleTime() == null) {
+    //                     session.setMaxIdleTime(Duration.ofSeconds(30));
+    //                     logger.info("⚪⚪⚪ Nueva sesión creada, maxIdleTime: {}", session.getMaxIdleTime());
+    //                 }
+    //                 return chain.filter(exchange);
+    //             });
+
+        // return (exchange, chain) ->
+        //         exchange.getSession()
+        //                 .doOnNext(session -> {
+        //                     // Solo configurar si aún no tiene maxIdleTime
+        //                     if (session.getMaxIdleTime() == null) {
+        //                         session.setMaxIdleTime(Duration.ofSeconds(30));
+        //                         // session.setMaxIdleTime(Duration.ofHours(12));
+        //                         logger.info("⚪⚪⚪ Nueva sesión creada, maxIdleTime: {}", session.getMaxIdleTime());
+        //                     }
+        //                 })
+        //                 .then(chain.filter(exchange));
+    // } 
 
 }

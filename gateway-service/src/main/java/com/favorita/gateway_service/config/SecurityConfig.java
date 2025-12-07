@@ -1,6 +1,7 @@
 package com.favorita.gateway_service.config;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Arrays;
 
 import org.slf4j.Logger;
@@ -81,6 +82,43 @@ public class SecurityConfig {
                 .build();
     }
 
+    // @Bean
+    // @Order(Ordered.HIGHEST_PRECEDENCE)
+    // public WebFilter saveRequestUrlFilter(){
+    //     return (exchange, chain) -> {
+    //         String path = exchange.getRequest().getURI().getPath();
+    //         logger.info("🟡🟡🟡 Path: {}", path);
+
+    //         boolean isPublic = path.equals("/logout")
+    //                             || path.startsWith("/.well-known")
+    //                             || path.endsWith(".ico") 
+    //                             || path.endsWith(".css") 
+    //                             || path.endsWith(".js") 
+    //                             || Arrays.stream(publicEndpoints()).anyMatch(publicUrl -> path.equals(publicUrl));     
+
+    //         return exchange.getPrincipal()
+    //             .flatMap(p -> chain.filter(exchange)) // usuario ya autenticado -> nada que hacer
+    //             .switchIfEmpty( // usuario no autenticado
+    //                 exchange.getSession().flatMap(session -> {
+               
+    //                     // Configurar maxIdleTime solo si aún no está configurado
+    //                     if (session.getMaxIdleTime() == null) {
+    //                         session.setMaxIdleTime(Duration.ofSeconds(30));
+    //                         logger.info("⚪⚪⚪ Nueva sesión creada, maxIdleTime: {}", session.getMaxIdleTime());
+    //                     }
+                        
+    //                     // Guardar URL privada si aplica
+    //                     if(!isPublic){
+    //                         logger.info("🟢🟢🟢 Guardando URL privada: {}", path);
+    //                         session.getAttributes().put("requested-url", path);
+    //                     }
+
+    //                     return chain.filter(exchange);
+    //                 })
+    //             );
+    //     };
+    // }
+
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public WebFilter saveRequestUrlFilter(){
@@ -98,6 +136,7 @@ public class SecurityConfig {
 
                         boolean isPublic = path.equals("/logout")
                                             || path.startsWith("/.well-known")
+                                            || path.endsWith(".ico") 
                                             || path.endsWith(".css") 
                                             || path.endsWith(".js") 
                                             || Arrays.stream(publicEndpoints())
