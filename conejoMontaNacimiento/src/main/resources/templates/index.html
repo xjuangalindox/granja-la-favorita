@@ -18,6 +18,9 @@
 </head>
 <body>
     
+    <div th:if="${isAuthenticated}" th:include="fragments/navbar :: layoutNavbarPrivate"></div>
+    <div th:if="${!isAuthenticated}" th:include="fragments/navbar :: layoutNavbarPublic"></div>
+
     <!-- TITULO -->
     <section class="hero-title text-center my-5">
         <h1 class="display-3 fw-bold">

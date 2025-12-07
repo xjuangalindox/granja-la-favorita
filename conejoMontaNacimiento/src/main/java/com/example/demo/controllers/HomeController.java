@@ -28,9 +28,7 @@ import com.example.demo.services.IEjemplarService;
 import com.netflix.discovery.converters.Auto;
 
 @Controller
-// @RestController
 @RequestMapping("/")
-// @RequestMapping("/home")
 public class HomeController {
     
     // @Autowired
@@ -51,7 +49,10 @@ public class HomeController {
     private ArticuloClient articuloClient;
 
     @GetMapping
-    public String home(Model model) {
+    public String home(@RequestHeader(value = "User-Authenticated", required = false) String authHeader, Model model) {
+        boolean isAuthenticated = authHeader.equalsIgnoreCase("true");
+        model.addAttribute("isAuthenticated", isAuthenticated);
+
         List<EjemplarDTO> ejemplaresDisponibles = ejemplarService.ejemplaresDisponibles(false);
         List<ArticuloDTO> articulosDisponibles = articuloClient.obtenerArticulos();
 
