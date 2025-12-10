@@ -3,10 +3,12 @@ package com.example.demo.services;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -137,6 +140,25 @@ public class NacimientoServiceImpl implements INacimientoService{
 
     @Autowired
     private EjemplarRepository ejemplarRepository;
+
+    @Async("asyncExecutor")
+    public CompletableFuture<Map<String, String>> subirImagenAsync(MultipartFile imagen) {
+        try {
+            Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(imagen, "ejemplares", Optional.empty());
+            String publicId = resultUpload.get("public_id").toString();
+            String secureUrl = archivoUtil.getUrlWithPagina(publicId); // según tu util
+
+            Map<String, String> res = new HashMap<>();
+            res.put("publicId", publicId);
+            res.put("secureUrl", secureUrl);
+
+            return CompletableFuture.completedFuture(res);
+        } catch (Exception e) {
+            CompletableFuture<Map<String, String>> failed = new CompletableFuture<>();
+            failed.completeExceptionally(e);
+            return failed;
+        }
+    }
 
     @Override
     @Transactional
