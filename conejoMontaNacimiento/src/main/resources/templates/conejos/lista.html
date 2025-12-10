@@ -172,7 +172,7 @@
                 <td style="width: 80px;">
                   <a href="#" data-bs-toggle="modal" th:attr="data-bs-target='#modalImagen' + ${iterStat.index}">
                     <img
-                      th:src="${item.secureUrl}" 
+                      th:src="${item.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" 
                       class="img-thumbnail"
                       style="max-width: 100px; max-height: 100px; object-fit: cover;" 
                       alt="Imagen del conejo">
@@ -186,7 +186,9 @@
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                         </div>
                         <div class="modal-body text-center">
-                          <img th:src="${item.secureUrl}" class="img-fluid" alt="Imagen del conejo">
+                          <img th:src="${item.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" 
+                            class="img-fluid" 
+                            alt="Imagen del conejo">
                         </div>
                       </div>
                     </div>
