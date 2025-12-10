@@ -64,19 +64,25 @@
             </thead>
             <tbody>
               <tr class="text-center align-middle" th:each="item : ${listaArticulos}">
+                <!-- Nombre -->
                 <td th:text="${item.nombre}"></td>
+                <!-- Imagen -->
                 <td style="width: 120px;">
-                  <a th:href="${item.secureUrl}" target="_blank">
+                  <a th:href="${item.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" target="_blank">
                     <img
-                      th:src="${item.secureUrl}" 
+                      th:src="${item.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" 
                       class="img-thumbnail mx-auto d-block"
                       style="object-fit: cover;" 
                       alt="Imagen del artículo">
                   </a>
                 </td>
+                <!-- Presentacion -->
                 <td th:text="${item.presentacion}" class="col-hide-mobile"></td>
+                <!-- Descripcion -->
                 <td th:text="${item.descripcion}" class="col-hide-mobile"></td>
+                <!-- Precio -->
                 <td th:text="${#numbers.formatDecimal(item.precio, 1, 'COMMA', 2, 'POINT')} + ' MXM'"></td>
+                <!-- Acciones -->
                 <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
                     <a th:href="@{/articulos/update/{id}(id=${item.id})}" class="btn btn-info btn-sm">
