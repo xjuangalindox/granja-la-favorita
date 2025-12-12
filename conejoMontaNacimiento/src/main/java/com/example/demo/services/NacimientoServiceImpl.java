@@ -9,12 +9,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import javax.management.RuntimeErrorException;
+
 import org.bouncycastle.crypto.RuntimeCryptoException;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,7 +51,7 @@ import com.example.demo.util.ArchivoUtil;
 public class NacimientoServiceImpl implements INacimientoService{
 
 	// Logger para capturar errores
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(NacimientoServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(NacimientoServiceImpl.class);
 
     @Autowired
     private ArchivoUtil archivoUtil;
@@ -141,38 +146,21 @@ public class NacimientoServiceImpl implements INacimientoService{
     @Autowired
     private EjemplarRepository ejemplarRepository;
 
-    @Async("asyncExecutor")
-    public CompletableFuture<Map<String, String>> subirImagenAsync(MultipartFile imagen) {
-        try {
-            Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(imagen, "ejemplares", Optional.empty());
-            String publicId = resultUpload.get("public_id").toString();
-            String secureUrl = archivoUtil.getUrlWithPagina(publicId); // según tu util
-
-            Map<String, String> res = new HashMap<>();
-            res.put("publicId", publicId);
-            res.put("secureUrl", secureUrl);
-
-            return CompletableFuture.completedFuture(res);
-        } catch (Exception e) {
-            CompletableFuture<Map<String, String>> failed = new CompletableFuture<>();
-            failed.completeExceptionally(e);
-            return failed;
-        }
-    }
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     @Override
     @Transactional
     public NacimientoDTO guardarNacimiento(NacimientoDTO nacimientoDTO) { // Funcionando, falta probar
-
-        // ¿La monta existe?
+        // 1) validar existencia de la monta
         MontaModel montaModel = montaRepository.findById(nacimientoDTO.getMonta().getId())
             .orElseThrow(() -> new RuntimeException("Monta no encontrada"));
 
-        // Actualizar estatus y persistir la monta
+        // 2) actualizar estatus y persistir la monta
         montaModel.setEstatus(EstatusMonta.EFECTIVA);
         montaModel = montaRepository.save(montaModel);
 
-        // Setear informacion y peristir el nacimiento
+        // 3) crear y persistir nacimiento
         NacimientoModel nacimientoModel = new NacimientoModel();
         nacimientoModel.setFechaNacimiento(nacimientoDTO.getFechaNacimiento());
 		nacimientoModel.setGazaposVivos(nacimientoDTO.getGazaposVivos());
@@ -181,46 +169,78 @@ public class NacimientoServiceImpl implements INacimientoService{
         nacimientoModel.setMonta(montaModel);
         nacimientoModel = nacimientoRepository.save(nacimientoModel);
 
-        // ¿Vienen ejemplares nuevos?
-		if(nacimientoDTO.getEjemplares() != null && !nacimientoDTO.getEjemplares().isEmpty()){
+        // 4) preparar ejemplares nuevos
+        if(!CollectionUtils.isEmpty(nacimientoDTO.getEjemplares())){
+		// if(nacimientoDTO.getEjemplares() != null && !nacimientoDTO.getEjemplares().isEmpty()){
             nacimientoDTO.setEjemplares(filtrarEjemplaresNuevos(nacimientoDTO.getEjemplares()));
         
-            // ¿Existe algun ejemplar valido?
-            if(nacimientoDTO.getEjemplares() != null && !nacimientoDTO.getEjemplares().isEmpty()){
+            // 5) validar si existen ejemplares validos
+            if(!CollectionUtils.isEmpty(nacimientoDTO.getEjemplares())){
+            // if(nacimientoDTO.getEjemplares() != null && !nacimientoDTO.getEjemplares().isEmpty()){
 
-                // Por cada EjemplarDTO en el nacimientoDTO
-                for(EjemplarDTO ejemplar : nacimientoDTO.getEjemplares()){
+                // Para cada ejemplar, guardamos el ejemplar y lanzamos las subidas en paralelo.
+                for(EjemplarDTO ejemplarDTO : nacimientoDTO.getEjemplares()){
+                    
                     EjemplarModel ejemplarModel = new EjemplarModel();
-
-                    ejemplarModel.setSexo(ejemplar.getSexo());
-                    ejemplarModel.setPrecio(ejemplar.getPrecio());
-                    ejemplarModel.setPrecioOferta(ejemplar.getPrecioOferta());
+                    ejemplarModel.setSexo(ejemplarDTO.getSexo());
+                    ejemplarModel.setPrecio(ejemplarDTO.getPrecio());
+                    ejemplarModel.setPrecioOferta(ejemplarDTO.getPrecioOferta());
                     ejemplarModel.setVendido(false);
                     ejemplarModel.setNacimiento(nacimientoModel);
-                    ejemplarModel = ejemplarRepository.save(ejemplarModel);
+                    ejemplarModel = ejemplarRepository.save(ejemplarModel); // persistido en la transacción principal
 
-                    // Por cada imagen en el EjemplarDTO
-                    for(MultipartFile imagen : ejemplar.getImagenes()){
-                        FotoEjemplarModel fotoEjemplarModel = new FotoEjemplarModel();
-
-                        try {
-                            Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(imagen, "ejemplares", Optional.empty());
-                            String publicId = resultUpload.get("public_id").toString();
-                            fotoEjemplarModel.setPublicId(publicId);
-                            fotoEjemplarModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
-                            
-                            // fotoEjemplarModel.setPublicId(resultUpload.get("public_id").toString());
-                            // fotoEjemplarModel.setSecureUrl(resultUpload.get("secure_url").toString());
-                            fotoEjemplarModel.setEjemplar(ejemplarModel);
-                            fotoEjemplarModel = fotoEjemplarRepository.save(fotoEjemplarModel);
-
-                        } catch (Exception e) {
-                            throw new RuntimeException(e.getMessage());
-                        }
+                    if (CollectionUtils.isEmpty(ejemplarDTO.getImagenes())) {
+                        continue; // no hay imágenes, pasar al siguiente ejemplar
                     }
+
+                    // ----------------------------------------------
+                    // 1) Lista de futures para controlar las subidas
+                    // ----------------------------------------------
+                    List<CompletableFuture<Map<String, Object>>> futures = new ArrayList<>();
+
+                    // ----------------------------------------------
+                    // 2) Llamar a subirImagenAsync() por cada archivo
+                    //    Esto se ejecuta EN PARALELO automáticamente
+                    // ----------------------------------------------
+                    for(MultipartFile imagen : ejemplarDTO.getImagenes()){
+                        // subirImagenAsync() se ejecuta en otro hilo
+                        CompletableFuture<Map<String, Object>> future = 
+                            cloudinaryService.subirImagenAsync(imagen, "ejemplares", Optional.empty());
+                        
+                        futures.add(future);
+                    }
+
+                    // ----------------------------------------------
+                    // 3) Esperar a que TODAS las subidas terminen
+                    //    (sigue siendo fácil de entender)
+                    // ----------------------------------------------
+                    List<Map<String, Object>> resultados = futures.stream()
+                        .map(CompletableFuture::join) // join = esperar
+                        .collect(Collectors.toList());
+
+                    // ----------------------------------------------
+                    // 4) Convertir cada resultado a FotoEjemplarModel
+                    // ----------------------------------------------
+                    List<FotoEjemplarModel> fotos = new ArrayList<>();
+
+                    for(Map<String, Object> result : resultados){
+                        String publicId = result.get("public_id").toString();
+
+                        FotoEjemplarModel fotoEjemplarModel = new FotoEjemplarModel();
+                        fotoEjemplarModel.setPublicId(publicId);
+                        fotoEjemplarModel.setSecureUrl(cloudinaryService.getUrlWithPagina(publicId));
+                        fotoEjemplarModel.setEjemplar(ejemplarModel);
+
+                        fotos.add(fotoEjemplarModel);
+                    }
+
+                    // ----------------------------------------------
+                    // 5) Guardas todas las fotos en la BD
+                    // ----------------------------------------------
+                    fotoEjemplarRepository.saveAll(fotos);
                 }
             }
-		}
+        }
 
         return modelMapper.map(nacimientoModel, NacimientoDTO.class);
     }
@@ -245,26 +265,53 @@ public class NacimientoServiceImpl implements INacimientoService{
             .collect(Collectors.toList());
     }
 
-    /*private String guardarImagenEnDisco(String nombreBase, MultipartFile imagen) {
-        String extension = ArchivoUtil.obtenerExtensionImagen(imagen);
-        String nombreImagen = ArchivoUtil.crearNombreImagen(nombreBase, extension);
-        Path ruta = ArchivoUtil.crearRuta(RUTA_EJEMPLARES, nombreImagen);
 
-        int contador = 1;
-        while (Files.exists(ruta)) {
-            nombreImagen = ArchivoUtil.crearNombreImagen(nombreBase + "(" + contador + ")", extension);
-            ruta = ArchivoUtil.crearRuta(RUTA_EJEMPLARES, nombreImagen);
-            contador++;
-        }
+    // private FotoEjemplarModel persistirNuevo(FotoEjemplarDTO fotoEjemplarDTO){
+    //     EjemplarModel ejemplarModel = ejemplarRepository.findById(fotoEjemplarDTO.getEjemplar().getId())
+    //         .orElseThrow(() -> new RuntimeException("El ejemplar con id "+fotoEjemplarDTO.getEjemplar().getId()+" no fue encontrado"));
+        
+    //     FotoEjemplarModel fotoEjemplarModel = new FotoEjemplarModel();
+    //     fotoEjemplarModel.setPublicId(fotoEjemplarDTO.getPublicId());
+    //     fotoEjemplarModel.setSecureUrl(fotoEjemplarDTO.getSecureUrl());
+    //     fotoEjemplarModel.setEjemplar(ejemplarModel);
 
-        try {
-            Files.write(ruta, imagen.getBytes());
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar la imagen");
-        }
+    //     return fotoEjemplarRepository.save(fotoEjemplarModel);
+    // }
 
-        return nombreImagen;
-    }*/
+    // private List<EjemplarModel> persistirNuevo(List<EjemplarDTO> ejemplarDTO){
+    //     if(!CollectionUtils.isEmpty(ejemplarDTO.getImagenes())){
+    //         for(MultipartFile imagen : ejemplarDTO.getImagenes()){
+                
+    //         }
+    //     }
+
+    //     NacimientoModel nacimientoModel = nacimientoRepository.findById(ejemplarDTO.getNacimiento().getId())
+    //         .orElseThrow(() -> new RuntimeException("El nacimiento con id "+ejemplarDTO.getNacimiento().getId()+" no fue encontrado"));
+        
+    //     EjemplarModel ejemplarModel = new EjemplarModel();
+    //     ejemplarModel.setSexo(ejemplarDTO.getSexo());
+    //     ejemplarModel.setPrecio(ejemplarDTO.getPrecio());
+    //     ejemplarModel.setPrecioOferta(ejemplarDTO.getPrecioOferta());
+    //     ejemplarModel.setVendido(false);
+    //     ejemplarModel.setNacimiento(nacimientoModel);
+
+    //     return ejemplarRepository.save(ejemplarModel);
+    // }
+
+    // private NacimientoModel persistirNuevo(NacimientoDTO nacimientoDTO){
+    //     MontaModel montaModel = montaRepository.findById(nacimientoDTO.getMonta().getId())
+    //         .orElseThrow(() -> new RuntimeException("La monta con id "+nacimientoDTO.getMonta().getId()+" no fue encontrada"));
+        
+    //     NacimientoModel nacimientoModel = new NacimientoModel();
+    //     nacimientoModel.setFechaNacimiento(nacimientoDTO.getFechaNacimiento());
+    //     nacimientoModel.setGazaposVivos(nacimientoDTO.getGazaposVivos());
+    //     nacimientoModel.setGazaposMuertos(nacimientoDTO.getGazaposMuertos());
+    //     nacimientoModel.setNota(nacimientoDTO.getNota());
+    //     nacimientoModel.setMonta(montaModel);
+    //     nacimientoModel.setEjemplares(persistirNuevo(nacimientoDTO.getEjemplares()));
+
+    //     return nacimientoRepository.save(nacimientoModel);
+    // }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -276,35 +323,134 @@ public class NacimientoServiceImpl implements INacimientoService{
         // 1. Persistir informacion general del nacimiento
         NacimientoModel nacimientoModel = nacimientoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("El nacimiento con id "+id+" no fue encontrado"));
-        
-        // MontaModel montaModel = montaRepository.findById(nacimientoModel.getMonta().getId()) // Innecesario, la monta no se puede modificar
-            // .orElseThrow(() -> new RuntimeException("La monta con id "+nacimientoDTO.getMonta().getId()+" no fue encontrada"));
 
+        // 2. Setear informacion general del nacimiento
         nacimientoModel.setFechaNacimiento(nacimientoDTO.getFechaNacimiento());
         nacimientoModel.setGazaposVivos(nacimientoDTO.getGazaposVivos());
         nacimientoModel.setGazaposMuertos(nacimientoDTO.getGazaposMuertos());
         nacimientoModel.setNota(nacimientoDTO.getNota());
-        // nacimientoModel.setMonta(montaModel); Innecesario, la monta no se puede modificar
-        nacimientoModel = nacimientoRepository.save(nacimientoModel);
 
-        // 2. Eliminar ejemplares eliminados en el formulario, incluyendo las imagenes
+        // 3. Obtener ejemplares eliminados en el formulario
+        List<EjemplarModel> ejemplares = new ArrayList<>();
         if(!CollectionUtils.isEmpty(ejemplaresEliminados)){
             for(Long idEjemplar : ejemplaresEliminados){
+                Optional<EjemplarModel> ejemplarOpt = ejemplarRepository.findById(idEjemplar);
+                ejemplares.add(ejemplarOpt.get());
+            }
+        }
 
-                EjemplarModel ejemplarModel = ejemplarRepository.findById(idEjemplar)
-                    .orElseThrow(() -> new RuntimeException("El ejemplar con id "+idEjemplar+" no fue encontrado"));
+        // 4. Eliminar fotos de ejemplares eliminados y removerlos del nacimiento
+        if(!CollectionUtils.isEmpty(ejemplares)){
+            ejemplares.forEach(ejemplar ->{
 
-                // Por cada foto en el ejemplar -> Eliminar foto Cloudinary
-                for(FotoEjemplarModel foto : ejemplarModel.getFotos()){
-                    archivoUtil.eliminarImagenCloudinary(foto.getPublicId());
+                if(!CollectionUtils.isEmpty(ejemplar.getFotos())){
+
+                    // 🚀 Crear lista de futuros (cada imagen en paralelo)
+                    List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+                    ejemplar.getFotos().forEach(foto ->{
+                        futures.add(cloudinaryService.eliminarImagenAsync(foto.getPublicId()));
+                    });
+
+                    // 🚧 Esperar a que terminen TODAS las imágenes de este ejemplar
+                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();                    
                 }
 
-                ejemplarModel.getFotos().clear();
-                nacimientoModel.getEjemplares().remove(ejemplarModel);
-            }
-
-            nacimientoModel = nacimientoRepository.save(nacimientoModel);
+                nacimientoModel.getEjemplares().remove(ejemplar);
+            });
         }
+        
+        // 5. Obtener ejemplares nuevos y existentes (si vienen)
+        if(!CollectionUtils.isEmpty(nacimientoDTO.getEjemplares())){
+            List<EjemplarDTO> ejemplaresNuevos = filtrarEjemplaresNuevos(nacimientoDTO.getEjemplares());
+            List<EjemplarDTO> ejemplaresExistentes = filtrarEjemplaresExistentes(nacimientoDTO.getEjemplares());
+
+            if(!CollectionUtils.isEmpty(ejemplaresNuevos)){
+                for(EjemplarDTO ejemplarDTO : ejemplaresNuevos){
+                    EjemplarModel ejemplarModel = new EjemplarModel();
+
+                    ejemplarModel.setSexo(ejemplarDTO.getSexo());
+                    ejemplarModel.setPrecio(ejemplarDTO.getPrecio());
+                    ejemplarModel.setPrecioOferta(ejemplarDTO.getPrecioOferta());
+                    ejemplarModel.setVendido(false);
+                    ejemplarModel.setNacimiento(nacimientoModel);
+
+                    if(!CollectionUtils.isEmpty(ejemplarDTO.getImagenes())){
+
+
+                        // -------------------------------------------
+                        // 🚀 Crear lista de futuros (cada imagen en paralelo)
+                        // List<CompletableFuture<Void>> futures = new ArrayList<>();
+                        
+                        // // Por cada foto en el ejemplar
+                        // for(FotoEjemplarModel foto : ejemplarDTO.getImagenes()){
+                        //     futures.add(cloudinaryService.eliminarImagenAsync(foto.getPublicId())); // Eliminar fotos en paralelo
+                        // }
+
+                        // // 🚧 Esperar a que terminen TODAS las imágenes de este ejemplar
+                        // CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+                        // -------------------------------------------
+
+                        // 🚀 Crear lista de futuros (cada imagen en paralelo)
+                        List<CompletableFuture<Map<String, Object>>> futures = new ArrayList<>();
+                        
+                        //Crear lista de fotosEjemplar
+                        List<FotoEjemplarModel> fotosEjemplar = new ArrayList<>();
+
+                        for(MultipartFile imagen : ejemplarDTO.getImagenes()){
+                            FotoEjemplarModel fotoEjemplarModel = new FotoEjemplarModel();
+
+                            futures.add(cloudinaryService.subirImagenAsync(imagen, "ejemplares", Optional.empty()));
+                            Map<String, Object> resultUpload = futures.get(0).join();
+                            String publicId = resultUpload.get("public_id").toString();
+
+                            fotoEjemplarModel.setPublicId(publicId);
+                            fotoEjemplarModel.setSecureUrl(cloudinaryService.getUrlWithPagina(publicId));
+                            
+                            fotosEjemplar.add(fotoEjemplarModel);
+                        }
+
+                        // 🚧 Esperar a que terminen TODAS las imágenes de este ejemplar
+                        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+                    }
+
+                }
+            }
+        }
+
+        //________________________________________________________________________________
+        //________________________________________________________________________________
+
+        // // 1. Persistir informacion general del nacimiento
+        // NacimientoModel nacimientoModel = nacimientoRepository.findById(id)
+        //     .orElseThrow(() -> new RuntimeException("El nacimiento con id "+id+" no fue encontrado"));
+
+        // nacimientoModel.setFechaNacimiento(nacimientoDTO.getFechaNacimiento());
+        // nacimientoModel.setGazaposVivos(nacimientoDTO.getGazaposVivos());
+        // nacimientoModel.setGazaposMuertos(nacimientoDTO.getGazaposMuertos());
+        // nacimientoModel.setNota(nacimientoDTO.getNota());
+        // // nacimientoModel.setMonta(montaModel); Innecesario, la monta no se puede modificar
+        // nacimientoModel = nacimientoRepository.save(nacimientoModel);
+
+        // // 2. Eliminar ejemplares eliminados en el formulario, incluyendo las imagenes
+        // if(!CollectionUtils.isEmpty(ejemplaresEliminados)){
+        //     for(Long idEjemplar : ejemplaresEliminados){
+
+        //         EjemplarModel ejemplarModel = ejemplarRepository.findById(idEjemplar)
+        //             .orElseThrow(() -> new RuntimeException("El ejemplar con id "+idEjemplar+" no fue encontrado"));
+
+        //         // Por cada foto en el ejemplar -> Eliminar foto Cloudinary
+        //         for(FotoEjemplarModel foto : ejemplarModel.getFotos()){
+        //             archivoUtil.eliminarImagenCloudinary(foto.getPublicId());
+        //         }
+
+        //         ejemplarModel.getFotos().clear();
+        //         nacimientoModel.getEjemplares().remove(ejemplarModel);
+        //     }
+
+        //     nacimientoModel = nacimientoRepository.save(nacimientoModel);
+        // }
 
         // 3. ¿El nacimiento tiene ejemplares?
         if(!CollectionUtils.isEmpty(nacimientoDTO.getEjemplares())){
@@ -453,46 +599,44 @@ public class NacimientoServiceImpl implements INacimientoService{
         NacimientoModel nacimientoModel = nacimientoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("El nacimiento con id "+id+" no fue encontrado."));
 
-        // ¿Tiene ejemplares vendidos?
-        boolean ejemplaresVendidos = nacimientoModel.getEjemplares().stream()
-            .anyMatch(EjemplarModel::isVendido);
-
-        if(ejemplaresVendidos){
-            String msg = "El nacimiento tiene al menos un ejemplar vendido, debe quitar el nacimiento de la venta para eliminar.";
-            throw new RuntimeException(msg);
-        }
-
-        List<EjemplarModel> ejemplares = nacimientoModel.getEjemplares();
-
-        // ¿El nacimiento tiene ejemplares?
-        if(nacimientoModel.getEjemplares() != null && !nacimientoModel.getEjemplares().isEmpty()){
-            
-            // Eliminar imagenes y desvincular
-            nacimientoModel.getEjemplares().removeIf(ejemplar -> {
-                
-                // ELIMINAR IMAGENES DE CADA EJEMPLAR *********************************
-                ejemplar.getFotos().forEach(foto -> {
-                    archivoUtil.eliminarImagenCloudinary(foto.getPublicId());
-                });
-                // FIN ELIMINAR IMAGENES DE CADA EJEMPLAR *********************************
-
-                // archivoUtil.eliminarImagenCloudinary(ejemplar.getPublicId());
-                ejemplar.setNacimiento(null);
-                return true;
-            });
-
-            // Eliminar ejemplares del lado del padre
-            nacimientoRepository.save(nacimientoModel);
-        }
-
+        // Obtener monta
         MontaModel montaModel = montaRepository.findById(nacimientoModel.getMonta().getId())
-            .orElseThrow(() -> new RuntimeException("La monta con el id "+nacimientoModel.getMonta().getId()+" no fue encontrada."));
+            .orElseThrow(() -> new RuntimeException("La monta con id "+id+" no fue encontrada."));
 
-        // Cambiar estatus de la monta y eliminar nacimiento del lado del padre
+        // Ejemplares disponibles en el nacimiento
+        if(!CollectionUtils.isEmpty(nacimientoModel.getEjemplares())){
+
+            // ¿Hay ejemplares vendidos? -> cancelar
+            if(nacimientoModel.getEjemplares().stream().anyMatch(EjemplarModel::isVendido)) 
+                throw new RuntimeException("El nacimiento tiene al menos un ejemplar vendido, debe quitar el nacimiento de la venta para eliminar.");
+
+            // Por cada ejemplar en el nacimiento
+            for(EjemplarModel ejemplar : nacimientoModel.getEjemplares()){
+                
+                // Fotos disponibles en el ejemplar
+                if(!CollectionUtils.isEmpty(ejemplar.getFotos())){
+                    
+                    // 🚀 Crear lista de futuros (cada imagen en paralelo)
+                    List<CompletableFuture<Void>> futures = new ArrayList<>();
+                    
+                    // Por cada foto en el ejemplar
+                    for(FotoEjemplarModel foto : ejemplar.getFotos()){
+                        futures.add(cloudinaryService.eliminarImagenAsync(foto.getPublicId())); // Eliminar fotos en paralelo
+                    }
+
+                    // 🚧 Esperar a que terminen TODAS las imágenes de este ejemplar
+                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+                }
+            }
+        }
+
+        // Cambiar informacion de la monta y persistir
         montaModel.setEstatus(EstatusMonta.PENDIENTE);
         montaModel.setNacimiento(null);
         montaRepository.save(montaModel);
 
+        // Eliminar nacimiento en cascada
+        nacimientoRepository.deleteById(id);
         return true;
     }
 

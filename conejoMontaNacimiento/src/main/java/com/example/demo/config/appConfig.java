@@ -6,15 +6,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
 @Configuration
-@EnableAsync
-public class appConfig {
+public class AppConfig {
     
     @Bean
     public ModelMapper modelMapper(){
@@ -24,11 +22,16 @@ public class appConfig {
     @Bean(name = "asyncExecutor")
     public Executor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);    // recomendado para 2 vCPU
-        executor.setMaxPoolSize(6);     // límite moderado
-        executor.setQueueCapacity(50);  // peticiones en espera
-        executor.setKeepAliveSeconds(60);
-        executor.setThreadNamePrefix("IMG-ASYNC-");
+
+        executor.setCorePoolSize(2);     // Hilos base (2 vCPU en el VPS)
+        executor.setMaxPoolSize(3);      // Máx. hilos permitidos
+        executor.setQueueCapacity(30);   // Tareas en espera
+        executor.setKeepAliveSeconds(60); // Tiempo vivo de hilos extra
+        executor.setThreadNamePrefix("IMG-ASYNC-"); // Prefijo en logs
+
+        executor.setWaitForTasksToCompleteOnShutdown(true); // Espera al apagar
+        executor.setAwaitTerminationSeconds(30); // Tiempo máx. de espera
+        
         executor.initialize();
         return executor;
     }
