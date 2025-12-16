@@ -26,6 +26,7 @@ public class ArticuloModel {
     private String descripcion;
     private String presentacion;
     private Double precio;
+    private Boolean stock;
 
     private String publicId;
     private String secureUrl;

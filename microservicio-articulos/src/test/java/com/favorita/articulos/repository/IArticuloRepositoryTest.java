@@ -23,7 +23,7 @@ public class IArticuloRepositoryTest {
 
     @BeforeEach
     void setup(){
-        campiconejo = new ArticuloModel(null, "Campiconejo", "Alimento diario", "KG", 20.0, "public_id", "secure:url");
+        campiconejo = new ArticuloModel(null, "Campiconejo", "Alimento diario", "KG", 20.0, null, "public_id", "secure:url");
     } 
 
     @Test
@@ -43,7 +43,7 @@ public class IArticuloRepositoryTest {
     @Test
     void testGuardarArticulo(){
         // given
-        ArticuloModel articuloModel = new ArticuloModel(null, "Campiconejo", "Comida diaria", "KG", 20.0, "publicId", "secureURL");
+        ArticuloModel articuloModel = new ArticuloModel(null, "Campiconejo", "Comida diaria", "KG", 20.0, null, "publicId", "secureURL");
 
         // when
         articuloModel = articuloRepository.save(articuloModel);
