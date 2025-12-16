@@ -18,6 +18,9 @@
 </head>
 <body>
     
+    <div th:if="${isAuthenticated}" th:include="fragments/navbar :: layoutNavbarPrivate"></div>
+    <div th:if="${!isAuthenticated}" th:include="fragments/navbar :: layoutNavbarPublic"></div>
+
     <!-- TITULO -->
     <section class="hero-title text-center my-5">
         <h1 class="display-3 fw-bold">
@@ -44,18 +47,17 @@
     <div class="carousel-container">
         <div class="slide">
 
-            <div th:each="item : ${itemsHome}" class="item" th:style="'background-image: url(' + ${item.secureUrl} + ')'">
+            <div th:each="item : ${itemsHome}" 
+                class="item" 
+                th:style="'background-image: url(' + ${item.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')} + ')'">
+                
                 <div class="content">
 
                     <div th:if="${item.tipo == 'ejemplar'}">
                         <div class="name" th:text="${item.sexo}"></div>
-                        <!-- <div class="des">Cuidamos a cada ejemplar con los mejores estándares y alimentación.</div> -->
-                        <!-- <div class="des" th:text="${item.nacimiento}"></div> -->
                     </div>
                     <div th:if="${item.tipo == 'articulo'}">
                         <div class="name" th:text="${item.nombre}"></div>
-                        <!-- <div class="des">Cuidamos a cada ejemplar con los mejores estándares y alimentación.</div> -->
-                        <!-- <div class="des" th:text="${item.descripcion}"></div> -->
                     </div>
                     
                     <a class="btn btn-light" th:if="${item.tipo == 'ejemplar'}" th:href="@{/disponible/ejemplares}">Ver Ejemplares</a>
@@ -71,24 +73,6 @@
         </div>
 
     </div>
-
-    <!-- DESCRIPCION Y CONTACTO -->
-    <!-- <section class="hero text-center py-5">
-        <div class="container">
-            <p class="text-center fs-5">
-                En <strong>Granja La Favorita</strong> nos apasiona la crianza de conejos de calidad, 
-                cuidando su bienestar y ofreciendo ejemplares e insumos de primera. Nuestro compromiso es 
-                brindar a nuestros clientes conejos sanos e insumos para su óptima alimentación y cuidado.
-            </p>
-
-            <a class="btn btn-primary btn-lg me-3" href="https://www.facebook.com/profile.php?id=61554885343997" target="_blank">
-                <i class="bi bi-facebook me-2"></i> Visítanos en Facebook
-            </a>
-            <a class="btn btn-success btn-lg" href="https://wa.me/527351416152" target="_blank">
-                <i class="bi bi-whatsapp me-2"></i> Escríbenos por WhatsApp
-            </a>        
-        </div>
-    </section> -->
 
     <!-- DESCRIPCION Y CONTACTO -->
     <section class="hero text-center py-5">
@@ -145,5 +129,8 @@
 
     <!-- JS externo -->
     <script th:src="@{/js/index.js}"></script>
+    
+    <!-- BOOTSTRAP JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -81,9 +81,10 @@
       <div class="row justify-content-center mb-4">
         <div class="col-6 col-sm-6 col-md-4 d-flex justify-content-center mb-3">
           <div class="card text-center" style="width: 14rem;">
-            <img th:src="${nacimiento.monta.macho.secureUrl}" 
+            <img th:src="${nacimiento.monta.macho.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" 
               th:alt="'Macho ' + ${nacimiento.monta.macho.nombre}" 
-              class="padres-img" onclick="mostrarImagen(this)">
+              class="padres-img" 
+              onclick="mostrarImagen(this)">
             <div class="card-body">
               <h5 class="card-title fw-bold text-primary" th:text="'Padre: ' + ${nacimiento.monta.macho.raza.nombre}">Raza</h5>
             </div>
@@ -93,7 +94,7 @@
         <!-- Madre -->
         <div class="col-6 col-sm-6 col-md-4 d-flex justify-content-center mb-3">
           <div class="card text-center" style="width: 14rem;">
-            <img th:src="${nacimiento.monta.hembra.secureUrl}" 
+            <img th:src="${nacimiento.monta.hembra.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" 
               th:alt="'Hembra ' + ${nacimiento.monta.hembra.nombre}" 
               class="padres-img" onclick="mostrarImagen(this)">
             <div class="card-body">
@@ -109,7 +110,6 @@
         <div class="col-6 col-sm-6 col-md-4 col-lg-3 d-flex justify-content-center" th:each="ejemplar : ${nacimiento.ejemplares}">
 
             <div class="card h-100" style="width: 16rem;">
-              <!-- <img th:src="${ejemplar.secureUrl}" class="card-img-top" th:alt="'Ejemplar ' + ${ejemplar.id}" onclick="mostrarImagen(this)"> -->
 
 <!-- CARROUSEL EJEMPLAR -->
 <div class="carousel slide"
@@ -120,19 +120,14 @@
     <div class="carousel-item"
          th:each="foto, iterStat : ${ejemplar.fotos}"
          th:classappend="${iterStat.index == 0} ? ' active'">
-      <img th:src="${foto.secureUrl}"
+      <img th:src="${foto.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}"
         class="d-block w-100 card-img-top"
         th:alt="'Imagen de ejemplar ' + ${ejemplar.id}"
         style="height: 180px; object-fit: cover; cursor: pointer;"
         
-        th:attr="data-fotos=${ejemplar.fotos.![secureUrl]}, data-index=${iterStat.index}"
+        th:attr="data-fotos=${ejemplar.fotos.![secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')]}, data-index=${iterStat.index}"
         onclick="abrirCarrusel(this)">
     </div>
-    <!-- th:data-fotos="${ejemplar.fotos.![secureUrl]}" -->
-    <!-- th:attr="data-fotos=${ejemplar.fotos.![secureUrl]}, data-index=${iterStat.index}" -->
-    <!-- th:attr="data-fotos=${ejemplar.fotos.![secureUrl]}, data-index=${iterStat.index}" -->
-    <!-- th:attr="data-fotos=${ejemplar.fotos.![secureUrl]}" -->
-    <!-- onclick="mostrarImagen(this)"> -->
   </div>
 
   <!-- Controles (solo si hay > 1 foto) -->
@@ -205,23 +200,6 @@
     </div>
   </div>
 </div>
-
-  <!-- <script>
-    function mostrarImagen(imgElement) {
-      var modal = document.getElementById("visorImagen");
-      var imagenGrande = document.getElementById("imagenGrande");
-      imagenGrande.src = imgElement.src;
-      modal.style.display = "block";
-    }
-    function cerrarImagen() {
-      document.getElementById("visorImagen").style.display = "none";
-    }
-    document.addEventListener('keydown', function(event) {
-      if (event.key === "Escape") {
-        cerrarImagen();
-      }
-    });
-  </script> -->
 
 <script>
 function mostrarImagen(imgElement) {
