@@ -46,6 +46,8 @@ import com.example.demo.repositories.FotoEjemplarRepository;
 import com.example.demo.repositories.MontaRepository;
 import com.example.demo.repositories.NacimientoRepository;
 import com.example.demo.util.ArchivoUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Service
 public class NacimientoServiceImpl implements INacimientoService{
@@ -333,6 +335,9 @@ public class NacimientoServiceImpl implements INacimientoService{
         // 3. Obtener ejemplares eliminados en el formulario
         List<EjemplarModel> ejemplaresEliminados = new ArrayList<>();
         if(!CollectionUtils.isEmpty(idsEjemplaresEliminados)){
+
+            logger.info("SE ELIMINARON EJEMPLARES EN EL FORMULARIO");
+
             for(Long idEjemplar : idsEjemplaresEliminados){
                 Optional<EjemplarModel> ejemplarOpt = ejemplarRepository.findById(idEjemplar);
                 ejemplaresEliminados.add(ejemplarOpt.get());
@@ -341,7 +346,9 @@ public class NacimientoServiceImpl implements INacimientoService{
 
         // 4. Eliminar fotos de ejemplares eliminados y removerlos del nacimiento
         if(!CollectionUtils.isEmpty(ejemplaresEliminados)){
-            ejemplaresEliminados.forEach(ejemplar ->{
+                ejemplaresEliminados.forEach(ejemplar ->{
+
+                logger.info("POR CADA EJEMPLAR ELIMINADO EN EL FOMULARIO");
 
                 if(!CollectionUtils.isEmpty(ejemplar.getFotos())){
 
@@ -353,13 +360,18 @@ public class NacimientoServiceImpl implements INacimientoService{
                     });
 
                     // 🚧 Esperar a que terminen TODAS las imágenes de este ejemplar
-                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();                    
+                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();            
+                    
+                    logger.info("SE TERMINO DE ESPERAR LA ELIMINACION DE IMAGENES EN PARALELO");
                 }
 
-                nacimientoModel.getEjemplares().remove(ejemplar);
+                nacimientoModel.getEjemplares().remove(ejemplar); // Remover de la lista
+                // ejemplarRepository.delete(ejemplar);            // Borrar de la DB                
             });
+
+            logger.info("SE REMOVIERON LOS EJEMPLARES ELIMINADOS (EN EL FORMULARIO) DEL NACIMIENTO");
         }
-        
+
         // 5. Obtener ejemplares nuevos y existentes (si vienen)
         List<EjemplarDTO> ejemplaresNuevos = new ArrayList<>();
         List<EjemplarDTO> ejemplaresExistentes = new ArrayList<>();
@@ -373,20 +385,40 @@ public class NacimientoServiceImpl implements INacimientoService{
 
         // 6. Crear ejemplares nuevos (DTO a MODEL)
         if(!CollectionUtils.isEmpty(ejemplaresNuevos)){
-            ejemplaresFinales.addAll(dtoToModel(ejemplaresNuevos));
+
+            logger.info("EXISTEN EJEMPLARES NUEVOS");
+
+            ejemplaresFinales.addAll(crearEjemplaresDesdeDTO(ejemplaresNuevos));
+
+            logger.info("SE AGREGARON A EJEMPLARES FINALES LOS EJEMPLARES NUEVOS");
         }
 
         // 7. Mapear ejemplares existentes (DTO a MODEL)
         if(!CollectionUtils.isEmpty(ejemplaresExistentes)){
-            ejemplaresFinales.addAll(dtoToModel(ejemplaresExistentes));
+
+            logger.info("EXISTEN EJEMPLARES MODIFICADOS");
+
+            ejemplaresFinales.addAll(actualizarEjemplaresDesdeDTO(ejemplaresExistentes));
+
+            logger.info("SE AGREGARON A EJEMPLARES FINALES LOS EJEMPLARES MODIFICADOS");
         }
 
-        nacimientoModel.getEjemplares().clear();
+        // Setear NacimientoModel a cada EjemplarModel
         ejemplaresFinales.forEach(ejemplar -> ejemplar.setNacimiento(nacimientoModel));
-        nacimientoModel.setEjemplares(ejemplaresFinales);
+        // nacimientoModel.setEjemplares(ejemplaresFinales);
 
-        nacimientoModel = nacimientoRepository.save(nacimientoModel);
-        return modelMapper.map(nacimientoModel, NacimientoDTO.class);
+        // Limpiar lista de ejemplares y agregar ejemplares finales
+        nacimientoModel.getEjemplares().clear();
+        nacimientoModel.getEjemplares().addAll(ejemplaresFinales);
+
+        logger.info("SE AGREGARON LOS EJEMPLARES FINALES AL NACIMIENTO");
+
+        // Persitir y retornar
+        NacimientoModel nacimientoSaved = nacimientoRepository.save(nacimientoModel);
+
+        logger.info("SE PERSISTIO EL NACIMIENTOMODEL");
+
+        return modelMapper.map(nacimientoSaved, NacimientoDTO.class);
     }
     
 
@@ -394,20 +426,22 @@ public class NacimientoServiceImpl implements INacimientoService{
     //___________________________________________________________________________________________
     //___________________________________________________________________________________________
 
-    private List<EjemplarModel> dtoToModel(List<EjemplarDTO> ejemplaresDTO){
+    private List<EjemplarModel> crearEjemplaresDesdeDTO(List<EjemplarDTO> ejemplaresDTO){
         List<EjemplarModel> ejemplaresModel = new ArrayList<>();
 
         for(EjemplarDTO ejemplarDTO : ejemplaresDTO) {
             EjemplarModel ejemplarModel = new EjemplarModel();
             ejemplarModel.setSexo(ejemplarDTO.getSexo());
-            ejemplarModel.setVendido(false);
             ejemplarModel.setPrecio((ejemplarDTO.getPrecio()));
             ejemplarModel.setPrecioOferta((ejemplarDTO.getPrecioOferta()));
+            ejemplarModel.setVendido(false);
 
             //Crear lista de fotosEjemplar
             List<FotoEjemplarModel> fotosEjemplar = new ArrayList<>();
 
-            if(!CollectionUtils.isEmpty(ejemplarDTO.getImagenes())){
+            if(ejemplarDTO.getImagenes() != null && ejemplarDTO.getImagenes().stream().anyMatch(f -> !f.isEmpty())) {
+            // if(ejemplarDTO.getImagenes() != null && !ejemplarDTO.getImagenes().isEmpty()) {
+            // if(!CollectionUtils.isEmpty(ejemplarDTO.getImagenes())){
                 // 🚀 Crear lista de futuros (cada imagen en paralelo)
                 List<CompletableFuture<Map<String, Object>>> futures = new ArrayList<>();
                 
@@ -438,76 +472,137 @@ public class NacimientoServiceImpl implements INacimientoService{
         return ejemplaresModel;
     }
 
+    private List<EjemplarModel> actualizarEjemplaresDesdeDTO(List<EjemplarDTO> ejemplaresDTO){
+        List<EjemplarModel> ejemplaresModel = new ArrayList<>();
+
+        for(EjemplarDTO ejemplarDTO : ejemplaresDTO) {
+            EjemplarModel ejemplarModel = ejemplarRepository.findById(ejemplarDTO.getId())
+                .orElseThrow(() -> new RuntimeException("El ejemplar con id "+ejemplarDTO.getId()+" no fue encontrado"));
+
+            ejemplarModel.setSexo(ejemplarDTO.getSexo());
+            ejemplarModel.setPrecio((ejemplarDTO.getPrecio()));
+            ejemplarModel.setPrecioOferta((ejemplarDTO.getPrecioOferta()));
+            // ejemplarModel.setVendido(ejemplarDTO.isVendido());
+
+            // 🔹 Solo eliminar/subir fotos si vienen nuevas imágenes
+            if(ejemplarDTO.getImagenes() != null && ejemplarDTO.getImagenes().stream().anyMatch(f -> !f.isEmpty())) {
+            // if(ejemplarDTO.getImagenes() != null && !ejemplarDTO.getImagenes().isEmpty()) {
+            // if(!CollectionUtils.isEmpty(ejemplarDTO.getImagenes())){
+
+                logger.info("VIENEN NUEVAS IMAGENES EN EL EJEMPLAR EXISTENTE");
+
+                // Eliminar imagenes de Cloudinary (cada imagen en paralelo)
+                List<CompletableFuture<Void>> futuresDelete = new ArrayList<>();
+                ejemplarModel.getFotos().forEach(foto -> 
+                    futuresDelete.add(cloudinaryService.eliminarImagenAsync(foto.getPublicId()))
+                );
+                CompletableFuture.allOf(futuresDelete.toArray(new CompletableFuture[0])).join();
+
+                // Removemos las fotos del ejemplar para agregar las nuevas imagenes
+                ejemplarModel.getFotos().clear();
+
+                // Subir imagenes a Cloudinary (cada imagen en paralelo)
+                List<CompletableFuture<Map<String, Object>>> futuresUpload = new ArrayList<>();
+                ejemplarDTO.getImagenes().forEach(imagen -> 
+                    futuresUpload.add(cloudinaryService.subirImagenAsync(imagen, "ejemplares", Optional.empty()))
+                );
+                CompletableFuture.allOf(futuresUpload.toArray(new CompletableFuture[0])).join();
+
+                // Crear FotoEjemplarModel
+                List<FotoEjemplarModel> fotosEjemplar = new ArrayList<>();
+
+                for(CompletableFuture<Map<String, Object>> future : futuresUpload){
+                    Map<String, Object> resultUpload = future.join();
+                    String publicId = resultUpload.get("public_id").toString();
+
+                    FotoEjemplarModel fotoEjemplarModel = new FotoEjemplarModel();
+                    fotoEjemplarModel.setPublicId(publicId);
+                    fotoEjemplarModel.setSecureUrl(cloudinaryService.getUrlWithPagina(publicId));
+                    fotoEjemplarModel.setEjemplar(ejemplarModel);
+
+                    fotosEjemplar.add(fotoEjemplarModel);
+                }
+
+                ejemplarModel.setFotos(fotosEjemplar);
+            }
+
+            
+            ejemplaresModel.add(ejemplarModel);
+        }
+
+        return ejemplaresModel;
+    }
+
     //___________________________________________________________________________________________
     //___________________________________________________________________________________________
     //___________________________________________________________________________________________
 
 
             // 5. Persistir ejemplares existentes y agregarlos a la lista
-            if(!CollectionUtils.isEmpty(ejemplaresExistentes)){
-                for(EjemplarDTO ejemplar : ejemplaresExistentes){
+            // if(!CollectionUtils.isEmpty(ejemplaresExistentes)){
+            //     for(EjemplarDTO ejemplar : ejemplaresExistentes){
 
-                    EjemplarModel ejemplarModel = ejemplarRepository.findById(ejemplar.getId())
-                        .orElseThrow(() -> new RuntimeException("El ejemplar con id "+ejemplar.getId()+" no fue encontrado"));
+            //         EjemplarModel ejemplarModel = ejemplarRepository.findById(ejemplar.getId())
+            //             .orElseThrow(() -> new RuntimeException("El ejemplar con id "+ejemplar.getId()+" no fue encontrado"));
 
-                    ejemplarModel.setSexo(ejemplar.getSexo());
-                    ejemplarModel.setPrecio(ejemplar.getPrecio());
-                    ejemplarModel.setPrecioOferta(ejemplar.getPrecioOferta());
-                    // ejemplarModel.setVendido(false); // Modulo nacimiento no modifica la venta de ejemplares
-                    // ejemplarModel.setNacimiento(nacimientoModel); // Innecesario, 
-                    ejemplarModel = ejemplarRepository.save(ejemplarModel);
+            //         ejemplarModel.setSexo(ejemplar.getSexo());
+            //         ejemplarModel.setPrecio(ejemplar.getPrecio());
+            //         ejemplarModel.setPrecioOferta(ejemplar.getPrecioOferta());
+            //         // ejemplarModel.setVendido(false); // Modulo nacimiento no modifica la venta de ejemplares
+            //         // ejemplarModel.setNacimiento(nacimientoModel); // Innecesario, 
+            //         ejemplarModel = ejemplarRepository.save(ejemplarModel);
 
-                    // Obtener ids de fotos existentes en el formulario
-                    List<Long> idsFotosEnFormulario = ejemplar.getFotos() != null ?
-                        ejemplar.getFotos().stream()
-                            .map(FotoEjemplarDTO::getId)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList())
-                        :
-                        new ArrayList<>();
+            //         // Obtener ids de fotos existentes en el formulario
+            //         List<Long> idsFotosEnFormulario = ejemplar.getFotos() != null ?
+            //             ejemplar.getFotos().stream()
+            //                 .map(FotoEjemplarDTO::getId)
+            //                 .filter(Objects::nonNull)
+            //                 .collect(Collectors.toList())
+            //             :
+            //             new ArrayList<>();
 
-                    // Obtener fotos actuales del ejemplar en la BD
-                    List<FotoEjemplarModel> fotosDB = ejemplarModel.getFotos() != null ?
-                        new ArrayList<>(ejemplarModel.getFotos()) : new ArrayList<>();
+            //         // Obtener fotos actuales del ejemplar en la BD
+            //         List<FotoEjemplarModel> fotosDB = ejemplarModel.getFotos() != null ?
+            //             new ArrayList<>(ejemplarModel.getFotos()) : new ArrayList<>();
 
-                    // Determinar fotos a eliminar
-                    List<FotoEjemplarModel> fotosAEliminar = fotosDB.stream()
-                        .filter(fotoDB -> !idsFotosEnFormulario.contains(fotoDB.getId()))
-                        .collect(Collectors.toList());
+            //         // Determinar fotos a eliminar
+            //         List<FotoEjemplarModel> fotosAEliminar = fotosDB.stream()
+            //             .filter(fotoDB -> !idsFotosEnFormulario.contains(fotoDB.getId()))
+            //             .collect(Collectors.toList());
                         
-                    // Eliminar fotos sobrantes (Cloudinary + BD por orphanRemoval)
-                    for(FotoEjemplarModel foto : fotosAEliminar){
-                        archivoUtil.eliminarImagenCloudinary(foto.getPublicId());
-                        ejemplarModel.getFotos().remove(foto);
-                    }
+            //         // Eliminar fotos sobrantes (Cloudinary + BD por orphanRemoval)
+            //         for(FotoEjemplarModel foto : fotosAEliminar){
+            //             archivoUtil.eliminarImagenCloudinary(foto.getPublicId());
+            //             ejemplarModel.getFotos().remove(foto);
+            //         }
 
-                    ejemplarModel = ejemplarRepository.save(ejemplarModel);
+            //         ejemplarModel = ejemplarRepository.save(ejemplarModel);
 
-                    // ¿Se agregaron nuevas imagenes al ejemplar existente?
-                    if(!CollectionUtils.isEmpty(ejemplar.getImagenes())){
+            //         // ¿Se agregaron nuevas imagenes al ejemplar existente?
+            //         if(!CollectionUtils.isEmpty(ejemplar.getImagenes())){
 
-                        for(MultipartFile imagen : ejemplar.getImagenes()){
-                            if(imagen != null && !imagen.isEmpty()){ // Evitar archivos vacios
+            //             for(MultipartFile imagen : ejemplar.getImagenes()){
+            //                 if(imagen != null && !imagen.isEmpty()){ // Evitar archivos vacios
 
-                                FotoEjemplarModel fotoEjemplarModel = new FotoEjemplarModel();
+            //                     FotoEjemplarModel fotoEjemplarModel = new FotoEjemplarModel();
                                 
-                                Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(imagen, "ejemplares", Optional.empty());
-                                String publicId = resultUpload.get("public_id").toString();
-                                fotoEjemplarModel.setPublicId(publicId);
-                                fotoEjemplarModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
+            //                     Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(imagen, "ejemplares", Optional.empty());
+            //                     String publicId = resultUpload.get("public_id").toString();
+            //                     fotoEjemplarModel.setPublicId(publicId);
+            //                     fotoEjemplarModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
 
-                                // fotoEjemplarModel.setPublicId(resultUpload.get("public_id").toString());
-                                // fotoEjemplarModel.setSecureUrl(resultUpload.get("secure_url").toString());
-                                fotoEjemplarModel.setEjemplar(ejemplarModel);
+            //                     // fotoEjemplarModel.setPublicId(resultUpload.get("public_id").toString());
+            //                     // fotoEjemplarModel.setSecureUrl(resultUpload.get("secure_url").toString());
+            //                     fotoEjemplarModel.setEjemplar(ejemplarModel);
 
-                                fotoEjemplarRepository.save(fotoEjemplarModel);
+            //                     fotoEjemplarRepository.save(fotoEjemplarModel);
 
-                            }
-                        }
-                    }
+            //                 }
+            //             }
+            //         }
                     
-                }
-            }
+            //     }
+            // }
 
     @Override
     @Transactional
