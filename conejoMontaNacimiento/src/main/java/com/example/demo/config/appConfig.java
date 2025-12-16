@@ -12,7 +12,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
 @Configuration
-public class AppConfig {
+public class appConfig {
     
     @Bean
     public ModelMapper modelMapper(){
