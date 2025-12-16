@@ -93,19 +93,21 @@
                 th:each="item : ${listaMontas}" th:classappend="${item.estatus.name == 'EFECTIVA'} ? 
                 'table-success' : (${item.estatus.name == 'PENDIENTE'} ? 'table-warning' : '')">
                 <td>
+                  <!-- Nombre Macho -->
                   <div>
                     <span th:text="${item.macho.nombre}"></span>
                   </div>
+                  <!-- Imagen Macho -->
                   <div>
                     <a href="#" data-bs-toggle="modal" th:attr="data-bs-target='#modalMacho' + ${item.id}">
                       <img
-                        th:src="${item.macho.secureUrl}" 
+                        th:src="${item.macho.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" 
                         class="img-thumbnail"
                         style="object-fit: cover;" 
                         alt="Imagen del conejo macho">
                     </a>
                   </div>
-                  <!-- Modal imagen macho -->
+                  <!-- Modal Imagen Macho -->
                   <div class="modal fade" th:id="'modalMacho' + ${item.id}" tabindex="-1" aria-labelledby="modalLabelMacho" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                       <div class="modal-content">
@@ -114,26 +116,30 @@
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                         </div>
                         <div class="modal-body text-center">
-                          <img th:src="${item.macho.secureUrl}" class="img-fluid" alt="Imagen del conejo macho">
+                          <img th:src="${item.macho.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" 
+                            class="img-fluid" 
+                            alt="Imagen del conejo macho">
                         </div>
                       </div>
                     </div>
                   </div>
                 </td>
                 <td>
+                  <!-- Nombre Hembra -->
                   <div>
                     <span th:text="${item.hembra.nombre}"></span>
                   </div>
+                  <!-- Imagen Hembra -->
                   <div>
                     <a href="#" data-bs-toggle="modal" th:attr="data-bs-target='#modalHembra' + ${item.id}">
                       <img
-                        th:src="${item.hembra.secureUrl}" 
+                        th:src="${item.hembra.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" 
                         class="img-thumbnail"
                         style="object-fit: cover;" 
                         alt="Imagen del conejo hembra">
                     </a>
                   </div>
-                  <!-- Modal imagen hembra -->
+                  <!-- Modal Imagen Hembra -->
                   <div class="modal fade" th:id="'modalHembra' + ${item.id}" tabindex="-1" aria-labelledby="modalLabelHembra" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                       <div class="modal-content">
@@ -142,22 +148,29 @@
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                         </div>
                         <div class="modal-body text-center">
-                          <img th:src="${item.hembra.secureUrl}" class="img-fluid" alt="Imagen del conejo hembra">
+                          <img th:src="${item.hembra.secureUrl + '?v=' + #dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}" 
+                            class="img-fluid" 
+                            alt="Imagen del conejo hembra">
                         </div>
                       </div>
                     </div>
                   </div>
                 </td>
                 
+                <!-- Fecha Monta -->
                 <td th:text="${#temporals.format(item.fechaMonta, 'dd/MMMM/yyyy')}"></td>
+                <!-- Cantidad Montas -->
                 <td th:text="${item.cantidadMontas}" class="col-hide-mobile"></td>
+                <!-- Nota -->
                 <td th:text="${item.nota}" class="col-hide-mobile"></td>
                 
+                <!-- Nacimiento -->
                 <td>
                   <a th:if="${item.tieneNacimiento == false}" th:href="@{/nacimientos/crear(idMonta=${item.id})}" class="btn btn-success btn-sm">Registrar</a>
                   <a th:if="${item.tieneNacimiento == true}" th:href="@{/nacimientos/editar/por-monta/{idMonta}(idMonta=${item.id})}" class="btn btn-secondary btn-sm">Mostrar</a>
                 </td>
                 
+                <!-- Acciones -->
                 <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
                     <a th:href="@{/montas/editar/{id}(id=${item.id})}" class="btn btn-info btn-sm">

@@ -1,6 +1,7 @@
 package com.example.demo.models;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -49,5 +50,5 @@ public class NacimientoModel {
 	private MontaModel monta;
 
 	@OneToMany(mappedBy = "nacimiento", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<EjemplarModel> ejemplares;
+	private List<EjemplarModel> ejemplares = new ArrayList<>();
 }
