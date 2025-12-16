@@ -14,7 +14,8 @@
     <!-- FRAGMENT PRIVADO -->
     <div th:fragment="layoutNavbarPrivate">
         <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3 position-relative">
-            <div class="container d-flex justify-content-between align-items-center">
+            <div class="container d-flex align-items-center">
+            <!-- <div class="container d-flex justify-content-between align-items-center"> -->
 
                 <!-- Logo a la izquierda -->
                 <a class="navbar-brand fw-bold d-flex align-items-center" 
@@ -44,14 +45,15 @@
                 </a>
 
                 <!-- Botón hamburguesa a la derecha -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCenter" 
-                    aria-controls="navbarCenter" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCenterPrivate" 
+                    aria-controls="navbarCenterPrivate" aria-expanded="false" aria-label="Toggle navigation">
 
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <!-- Menú colapsable a la derecha -->
-                <div class="collapse navbar-collapse justify-content-end" id="navbarCenter">
+                <div class="collapse navbar-collapse justify-content-end" id="navbarCenterPrivate">
+                <!-- <div class="collapse navbar-collapse justify-content-end" id="navbarCenter"> -->
                     <!-- <ul class="navbar-nav text-center"> -->
                     <ul class="navbar-nav d-flex justify-content-center align-items-center">
 
@@ -77,15 +79,15 @@
                         </li>
                         <!-- Articulos -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/articulos}">Artículos</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/articulos}">Insumos</a>
                         </li>
                         <!-- Ejemplares disponibles -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/ejemplares}">Ejemplares Disponibles</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/ejemplares}">Ejemplares</a>
                         </li>
                         <!-- Articulos disponibles -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/articulos}">Artículos Disponibles</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/articulos}">Artículos</a>
                         </li>
                         <!-- Cerrar sesion -->
                         <li class="nav-item">
@@ -107,7 +109,8 @@
     <!-- FRAGMENT PUBLICO -->
     <div th:fragment="layoutNavbarPublic">
         <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3 position-relative">
-            <div class="container d-flex justify-content-between align-items-center">
+            <div class="container d-flex align-items-center">
+            <!-- <div class="container d-flex justify-content-between align-items-center"> -->
 
                 <!-- Logo a la izquierda -->
                 <a class="navbar-brand fw-bold d-flex align-items-center" 
@@ -123,24 +126,29 @@
                 </a>
 
                 <!-- Botón hamburguesa a la derecha -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCenter" 
-                    aria-controls="navbarCenter" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCenterPublic" 
+                    aria-controls="navbarCenterPublic" aria-expanded="false" aria-label="Toggle navigation">
                     
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <!-- Menú colapsable a la derecha -->
-                <div class="collapse navbar-collapse justify-content-end" id="navbarCenter">
+                <div class="collapse navbar-collapse justify-content-end" id="navbarCenterPublic">
+                <!-- <div class="collapse navbar-collapse justify-content-end" id="navbarCenter"> -->
                     <!-- <ul class="navbar-nav text-center"> -->
                     <ul class="navbar-nav d-flex justify-content-center align-items-center">
-                    
+
                         <!-- Ejemplares disponibles -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/ejemplares}">Ejemplares Disponibles</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/}">Inicio</a>
+                        </li>
+                        <!-- Ejemplares disponibles -->
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/ejemplares}">Ejemplares</a>
                         </li>
                         <!-- Articulos disponibles -->
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/articulos}">Artículos Disponibles</a>
+                            <a class="nav-link nav-link-custom text-uppercase fw-medium" th:href="@{/disponible/articulos}">Artículos</a>
                         </li>
                         <!-- Iniciar sesion -->
                         <li class="nav-item">
