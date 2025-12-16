@@ -59,11 +59,14 @@
                 <th scope="col" class="col-hide-mobile">Presentación</th>
                 <th scope="col" class="col-hide-mobile">Descripción</th>
                 <th scope="col">Precio</th>
+                <th scope="col" class="col-hide-mobile">Stock</th>
                 <th scope="col">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="text-center align-middle" th:each="item : ${listaArticulos}">
+              <tr class="text-center align-middle" th:each="item : ${listaArticulos}"
+                th:classappend="${item.stock == true} ? 'table-success' : 'table-warning'">
+
                 <!-- Nombre -->
                 <td th:text="${item.nombre}"></td>
                 <!-- Imagen -->
@@ -82,6 +85,8 @@
                 <td th:text="${item.descripcion}" class="col-hide-mobile"></td>
                 <!-- Precio -->
                 <td th:text="${#numbers.formatDecimal(item.precio, 1, 'COMMA', 2, 'POINT')} + ' MXM'"></td>
+                <!-- Stock -->
+                <td th:text="${item.stock}" class="col-hide-mobile"></td>
                 <!-- Acciones -->
                 <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">

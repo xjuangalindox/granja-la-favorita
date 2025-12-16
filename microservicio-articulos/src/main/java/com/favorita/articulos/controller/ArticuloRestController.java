@@ -21,8 +21,8 @@ public class ArticuloRestController {
     private IArticuloService articuloService;
 
     @GetMapping
-    public ResponseEntity<List<ArticuloDTO>> obtenerArticulos(){
-        List<ArticuloDTO> listaArticulos = articuloService.obtenerArticulos();
+    public ResponseEntity<List<ArticuloDTO>> obtenerArticulosStockTrue(){
+        List<ArticuloDTO> listaArticulos = articuloService.obtenerArticulosStockTrue();
         if(listaArticulos.isEmpty()){
             return ResponseEntity.noContent().build();
         }
