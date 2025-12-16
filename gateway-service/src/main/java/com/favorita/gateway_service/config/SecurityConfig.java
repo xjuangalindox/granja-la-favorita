@@ -53,7 +53,7 @@ public class SecurityConfig {
                                 String requestedUrl = session.getAttribute("requested-url");
 
                                 if(requestedUrl == null){
-                                    requestedUrl = "/conejos"; // Por defecto
+                                    requestedUrl = "/"; // Por defecto
                                 }
 
                                 // Limpiar la URL guardada
