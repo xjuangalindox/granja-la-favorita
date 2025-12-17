@@ -78,6 +78,7 @@
                 <th scope="col">Entrega</th>
                 <th scope="col">Lugar</th>
                 <th scope="col">Total</th>
+                <th scope="col">Adelanto</th>
                 <th scope="col">Restante</th>
                 <th scope="col" class="col-hide-mobile">Nota</th>
                 <th scope="col">Acciones</th>
@@ -127,16 +128,32 @@
                 <td th:text="${item.vinculoContacto}" class="col-hide-mobile"></td>
                 <td th:text="${item.telefono}" class="col-hide-mobile"></td>
                 
-                <!-- visible -->
+                 <!-- fechaEntrega -->
                 <td th:text="${item.fechaEntrega != null} ? ${#temporals.format(item.fechaEntrega, 'dd/MMMM/yyyy hh:mm a')} : ''"></td>
+                <!-- lugarEntrega -->
                 <td th:text="${item.lugarEntrega}"></td>
-                <td th:text="${item.totalVenta != null} ? '$'+${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')} : ''"></td>
-                <td th:text="${item.totalVenta != null and item.adelanto != null} ? '$'+${#numbers.formatDecimal(item.totalVenta - item.adelanto, 1, 'COMMA', 2, 'POINT')} : ''"></td>
                 
-                <!-- hidden -->
+                <!-- totalVenta -->
+                <td th:text="${item.totalVenta != null} ? 
+                  '$' + ${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')} : 
+                  ''"></td>
+
+                <!-- adelanto -->
+                <td th:text="${item.adelanto != null} ? 
+                  '$' + ${#numbers.formatDecimal(item.adelanto, 1, 'COMMA', 2, 'POINT')} : 
+                  ''"></td>
+
+                <!-- restante -->
+                <td th:text="${item.totalVenta == null} ? '' : (
+                  ${item.adelanto != null} ? 
+                  '$' + ${#numbers.formatDecimal(item.totalVenta - item.adelanto, 1, 'COMMA', 2, 'POINT')} : 
+                  '$' + ${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')}
+                  )"></td>
+
+                <!-- nota -->
                 <td th:text="${item.nota}" class="col-hide-mobile"></td>
                 
-                <!-- visible - acciones -->
+                <!-- acciones -->
                 <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
                     <a th:href="@{/ventas/editar/{id}(id=${item.id})}" class="btn btn-info btn-sm">
