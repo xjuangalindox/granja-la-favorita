@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 
@@ -26,23 +27,64 @@ public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
-    // @Autowired
-    // private final CustomAuthEntryPoint customAuthEntryPoint;
-
-    // public SecurityConfig(CustomAuthEntryPoint customAuthEntryPoint){
-        // this.customAuthEntryPoint = customAuthEntryPoint;
-    // }
-
+    // ALMACENAR PATH (PRIVADA) ANTES DE AUTENTICATION
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    @Order(Ordered.HIGHEST_PRECEDENCE) // Ejecutar antes de seguridad
+    public WebFilter saveRequestUrlFilter(){
+        return (exchange, chain) -> {
+            
+            return exchange.getPrincipal()
+                .flatMap(p -> chain.filter(exchange)) // usuario ya autenticado -> nada que hacer
+                .switchIfEmpty( // usuario no autenticado -> guardar la URL si es privada
+                    exchange.getSession().flatMap(session -> {
+                        String path = exchange.getRequest().getURI().getPath();
+
+                        // MOSTRAR EN LOG
+                        logger.info("🟡🟡🟡 Path: {}", path);
+
+                        boolean isPublic = path.equals("/logout")
+                                            || path.startsWith("/api/")
+                                            || path.startsWith("/.well-known")
+                                            || path.endsWith(".ico") 
+                                            || path.endsWith(".css") 
+                                            || path.endsWith(".js") 
+                                            || Arrays.stream(publicEndpoints())
+                                            .anyMatch(publicUrl -> path.equals(publicUrl));                    
+                                            
+                        if(!isPublic){
+                            logger.info("🟢🟢🟢 Guardando URL privada: {}", path);
+                            session.getAttributes().put("requested-url", path);
+                        }
+
+                        return chain.filter(exchange);
+                    })
+                );
+        };
+    }
+
+    // SECUTIRY PARA APIS
+    @Bean
+    @Order(1)
+    public SecurityWebFilterChain apiSecurity(ServerHttpSecurity http) {
         return http
-                .csrf(csrf -> csrf.disable())
+            .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/api/**"))
+            .csrf(csrf -> csrf.disable()) // Desactivar para APIs
+            .authorizeExchange(ex -> ex
+                .anyExchange().authenticated() // No existen endpoint publicos con /api/**
+            )
+            .httpBasic(basic -> {})
+            .build();
+    }
 
-                // .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthEntryPoint))
-
+    // SECUTIRY PARA FORMULARIOS
+    @Bean
+    @Order(2)
+    public SecurityWebFilterChain webSecurity(ServerHttpSecurity http) {
+        return http
+                // CSRF activo (correcto para formularios)
                 .authorizeExchange(exchanges -> exchanges
-                    .pathMatchers(publicEndpoints()).permitAll() // Continuar sin autenticación
-                    .anyExchange().authenticated() // Redirigir al login (.formLogin)
+                    .pathMatchers(publicEndpoints()).permitAll()
+                    .anyExchange().authenticated()
                 )
 
                 .formLogin(form -> form
@@ -51,10 +93,7 @@ public class SecurityConfig {
 
                             return exchange.getSession().flatMap(session -> {
                                 String requestedUrl = session.getAttribute("requested-url");
-
-                                if(requestedUrl == null){
-                                    requestedUrl = "/"; // Por defecto
-                                }
+                                if(requestedUrl == null) requestedUrl = "/"; // Redirect toindex.html
 
                                 // Limpiar la URL guardada
                                 session.getAttributes().remove("requested-url");
@@ -77,44 +116,31 @@ public class SecurityConfig {
                         return exchange.getResponse().setComplete();
                     })
                 )
-                // .httpBasic(Customizer.withDefaults())
+                .httpBasic(basic -> basic.disable()) // 🚫 DESACTIVAR httpBasic
                 .build();
     }
 
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    public WebFilter saveRequestUrlFilter(){
-        return (exchange, chain) -> {
+    // ENDPOINTS PUBLICOS
+    private String[] publicEndpoints(){
+        return new String[] {
+            "/actuator/health", // Usado por Eureka para comprobar salud
+            "/actuator/info",   // Solo para comprobar salud de gateway-service
+
+            "/",            // Pagina principal
+            "/index.css",   // Necesario para pagina principal
+            "/js/index.js", // Necesario para pagina principal
             
-            return exchange.getPrincipal()
-                .flatMap(p -> chain.filter(exchange)) // usuario ya autenticado -> nada que hacer
-                .switchIfEmpty(
-                    // usuario no autenticado -> guardar la URL si es privada
-                    exchange.getSession().flatMap(session -> {
-                        String path = exchange.getRequest().getURI().getPath();
+            "/login",           // login de spring
+            // "/default-ui.css",  // css del login de spring
 
-                        // MOSTRAR EN LOG
-                        logger.info("🟡🟡🟡 Path: {}", path);
+            // "/.well-known/appspecific/com.chrome.devtools.json", // endpoint del navegador
 
-                        boolean isPublic = path.equals("/logout")
-                                            || path.startsWith("/.well-known")
-                                            || path.endsWith(".ico") 
-                                            || path.endsWith(".css") 
-                                            || path.endsWith(".js") 
-                                            || Arrays.stream(publicEndpoints())
-                                            .anyMatch(publicUrl -> path.equals(publicUrl));                    
-                                            
-                        if(!isPublic){
-                            logger.info("🟢🟢🟢 Guardando URL privada: {}", path);
-                            session.getAttributes().put("requested-url", path);
-                        }
-
-                        return chain.filter(exchange);
-                    })
-                );
+            "/disponible/ejemplares",
+            "/disponible/articulos"
         };
     }
 
+    // VALIDAR AUTENTICACION
     @Bean
     public GlobalFilter addAuthHeaderFilter() {
         return (exchange, chain) -> 
@@ -141,23 +167,28 @@ public class SecurityConfig {
             );
     }
 
-    // Endpoints publicos
-    private String[] publicEndpoints(){
-        return new String[] {
-            "/actuator/health", // Usado por Eureka para comprobar salud
-            "/actuator/info",   // Solo para comprobar salud de gateway-service
+    // EXTRAER HEADERS
+    @Bean
+    public GlobalFilter forwardedHeaderFilter() {
+        return (exchange, chain) -> {
+            ServerHttpRequest originalRequest = exchange.getRequest();
 
-            "/",            // Pagina principal
-            "/index.css",   // Necesario para pagina principal
-            "/js/index.js", // Necesario para pagina principal
-            
-            "/login",           // login de spring
-            // "/default-ui.css",  // css del login de spring
+            // EXTRAER LOS DATOS
+            String host = originalRequest.getHeaders().getHost().getHostName();
+            int port = originalRequest.getHeaders().getHost().getPort();
+            String proto = originalRequest.getURI().getScheme();
 
-            // "/.well-known/appspecific/com.chrome.devtools.json", // endpoint del navegador
+            // MOSTRAR EN LOG
+            // logger.info("🔵🔵🔵 FORWARDED INFO -> Host: {}, Port: {}, Proto: {}", host, port, proto);
 
-            "/disponible/ejemplares",
-            "/disponible/articulos"
+            ServerHttpRequest mutatedRequest = originalRequest.mutate()
+                .header("X-Forwarded-Host", host)
+                .header("X-Forwarded-Port", String.valueOf(port))
+                .header("X-Forwarded-Proto", proto)
+                .build();
+
+            return chain.filter(exchange.mutate().request(mutatedRequest).build());
         };
     }
+
 }
