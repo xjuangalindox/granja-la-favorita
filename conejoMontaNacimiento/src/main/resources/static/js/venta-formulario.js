@@ -13,18 +13,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if(idsNacimientosUtilizados != null){
         console.log("ids nacimientos utilizados: ", idsNacimientosUtilizados);
         idsNacimientosUtilizados.forEach(nacimientoId => agregarNacimientosUtilizados(nacimientoId));
-        /*if(ejemplaresVenta.length > 0){
-            agregarNacimientosUtilizados();
-        }*/
     }
-
-    // ORIGINAL
-    /*if(ejemplaresVenta != null){
-        console.log("ejemplares venta existentes: ", ejemplaresVenta);
-        if(ejemplaresVenta.length > 0){
-            agregarNacimientosUtilizados();
-        }
-    }*/
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,17 +57,6 @@ let nacimientosEliminados = [];
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function guardarArticulo(articuloId) {
-
-    // Desbloquear o bloquear y limpiar input de cantidad
-    // const cantidadInput = select.closest('tr').querySelector('input[type="number"]');
-
-    // if (select.selectedIndex === 0) {
-    //     cantidadInput.setAttribute('readonly', 'readonly');
-    //     cantidadInput.value = 0;
-
-    // } else {
-    //     cantidadInput.removeAttribute('readonly');
-    // }
 
     // Guardar el id del articulo seleccionado
     articuloId = parseInt(articuloId);
@@ -262,20 +240,6 @@ function agregarNacimientoEliminado(boton){
 function onCheckboxChange(checkbox) {
     actualizarTotalVenta(); // Actualizar el total de la venta
 }
-// function onCheckboxChange(checkbox) {
-//     const precioInput = checkbox.closest('.p-2').querySelector('.precio-input');
-//     if (checkbox.checked) { // Precio disponible y obligatorio
-//         precioInput.removeAttribute('readonly');
-//         precioInput.setAttribute('required', 'required');
-    
-//     } else { // Precio bloquado y opcional
-//         precioInput.setAttribute('readonly', 'readonly');
-//         precioInput.removeAttribute('required');
-
-//         precioInput.value = ''; // Opcional: limpia el valor si se desmarca
-//         actualizarTotalVenta(); // Actualizar el total de la venta
-//     }
-// }
 
 //*************************************************************************************************************************
 
@@ -423,21 +387,6 @@ function mostrarEjemplares(nacimientoId, nacimientoIndex) {
         contEjemplar++;
     });
 
-                    // <input 
-                    //     type="number"
-                    //     class="form-control precio-input"
-                    //     name="ejemplaresVenta[${contEjemplar}].precio"
-                    //     value="${precio}"
-                    //     readonly>
-
-                    // <label class="form-label mb-0">Precio:</label>
-                    // <input class="form-control precio-input" 
-                    //     type="number" 
-                    //     name="ejemplaresVenta[${contEjemplar}].precio"
-                    //     min="0"
-                    //     readonly
-                    //     oninput="actualizarTotalVenta()">
-
     contenedor.appendChild(row); // Agrega la fila completa
 }
 
@@ -454,31 +403,6 @@ function agregarNacimientosUtilizados(nacimientoId) {
 
     // Formatear la fecha del nacimiento
     const fechaFormateada = formatearFecha(nac.fechaNacimiento);
-
-    // Generar valor por defecto del select
-    /*let opciones = '<option value="">Selecciona un nacimiento</option>';
-
-    listaNacimientos.forEach(nac => {
-        let selected = '';
-
-        // Evitar nacimientos repetidos en el select
-        if (!nacimientosSeleccionados.includes(nac.id)) {
-            const fechaFormateada = formatearFecha(nac.fechaNacimiento);
-
-            // Seleccionar nacimientos con ejemplares vendidos
-            if(idsNacimientosUtilizados.includes(nac.id)){
-                selected = 'selected';
-            }
-            
-            opciones += `<option 
-                            value="${nac.id}" ${selected}
-                            data-img-macho="${nac.monta.macho.secureUrl}"
-                            data-img-hembra="${nac.monta.hembra.secureUrl}">
-
-                            ${nac.monta.macho.nombre} - ${nac.monta.hembra.nombre} (${fechaFormateada})
-                        </option>`;
-        }
-    });*/
 
     // div para el select de los nacimientos
     const bloque = document.createElement('div');
@@ -530,19 +454,6 @@ function agregarNacimientosUtilizados(nacimientoId) {
     if (!nacimientosSeleccionados.includes(nacimientoId)) {
         nacimientosSeleccionados.push(nacimientoId);
     }
-
-    // Invocar el método manualmente porque no se ejecuta por progrmación
-    /*const select = bloque.querySelector('select');
-    if (select.value) {
-        mostrarEjemplaresExistentes(select.value, nacimientoIndex);
-
-        // Agregar el ID del nacimiento a nacimientosSeleccionados si no está
-        const nacimientoId = parseInt(select.value);
-        if (!nacimientosSeleccionados.includes(nacimientoId)) {
-            nacimientosSeleccionados.push(nacimientoId);
-            console.log("Nacimiento agregado manualmente al final: ", nacimientoId);
-        }
-    }*/
 }
 
 function mostrarEjemplaresExistentes(nacimientoId, nacimientoIndex) {
@@ -648,187 +559,6 @@ function mostrarEjemplaresExistentes(nacimientoId, nacimientoIndex) {
     contenedor.appendChild(row); // Agrega la fila completa
 }
 
-//****** */
-
-/*function agregarNacimientosUtilizados() {
-    const contenedor = document.getElementById('nacimientosContainer');
-    const nacimientoIndex = contNacimiento++;
-
-    // Generar valor por defecto del select
-    let opciones = '<option value="">Selecciona un nacimiento</option>';
-
-    listaNacimientos.forEach(nac => {
-        let selected = '';
-
-        // Evitar nacimientos repetidos select
-        if (!nacimientosSeleccionados.includes(nac.id)) {
-        
-            // Seleccionar nacimientos utilizados
-            if(idsNacimientosUtilizados.includes(nac.id)){
-                selected = 'selected';
-            }
-            
-            const fechaFormateada = formatearFecha(nac.fechaNacimiento);
-            opciones += `<option 
-                            value="${nac.id}"
-                            ${selected}
-                            data-img-macho="${nac.monta.macho.secureUrl}"
-                            data-img-hembra="${nac.monta.hembra.secureUrl}">
-
-                            ${nac.monta.macho.nombre} - ${nac.monta.hembra.nombre} (${fechaFormateada})
-                        </option>`;
-        }
-    });
-
-    const bloque = document.createElement('div');
-    bloque.classList.add('mb-4', 'border', 'p-3', 'rounded');
-    bloque.dataset.nacimientoIndex = nacimientoIndex;
-
-    bloque.innerHTML = `
-        <div class="d-flex justify-content-between align-items-start mb-2">
-
-            <select id="nacimiento-${nacimientoIndex}" class="form-select" required 
-                onchange="guardarNacimiento(this.value);
-                mostrarEjemplaresExistentes(this.value, ${nacimientoIndex})">
-                
-                ${opciones}
-            </select>
-
-            <button type="button" class="btn btn-danger btn-sm mx-2" 
-                onclick="eliminarNacimiento(this); 
-                agregarNacimientoEliminado(this)">
-                
-                <i class="bi bi-x-lg"></i>
-            </button>
-
-        </div>
-
-        <div id="ejemplares-${nacimientoIndex}">
-            <!-- Aqui van los ejemplares dinámicamente -->
-        </div>
-    `;
-
-    contenedor.appendChild(bloque);
-
-    // Inicializar Select2 en el nuevo select creado
-    $(`#nacimiento-${nacimientoIndex}`).select2({
-        templateResult: formatOption,
-        templateSelection: formatOption,
-        minimumResultsForSearch: -1
-    });
-
-    // Invocar el método manualmente porque no se ejecuta por progrmación
-    const select = bloque.querySelector('select');
-    if (select.value) {
-        mostrarEjemplaresExistentes(select.value, nacimientoIndex);
-
-        // Agregar el ID del nacimiento a nacimientosSeleccionados si no está
-        const nacimientoId = parseInt(select.value);
-        if (!nacimientosSeleccionados.includes(nacimientoId)) {
-            nacimientosSeleccionados.push(nacimientoId);
-            console.log("Nacimiento agregado manualmente al final: ", nacimientoId);
-        }
-    }
-}
-
-function mostrarEjemplaresExistentes(nacimientoId, nacimientoIndex) {
-    console.log("id nacimiento con ejemplares vendidos: ", nacimientoId);
-
-    const contenedor = document.getElementById(`ejemplares-${nacimientoIndex}`);
-    contenedor.innerHTML = ''; // Limpiar contenido anterior
-
-    const row = document.createElement('div');
-    row.classList.add('row', 'g-3'); // g-3 para espacio entre columnas
-
-    // Obtener nacimiento
-    const nacimiento = listaNacimientos.find(nac => nac.id == nacimientoId);
-    if(!nacimiento) return;
-
-    // Mostrar o crear ejemplares venta del nacimiento
-    nacimiento.ejemplares.forEach(ejemplar => {
-        const col = document.createElement('div');
-        col.classList.add('col-md-6', 'col-lg-4'); // 2 o 3 columnas dependiendo del tamaño de pantalla
-
-        // Comprobar disponibilidad del ejemplar
-        const ejemplarVenta = ejemplaresVenta.find(ejeV => ejeV.ejemplar.id == ejemplar.id);
-        
-        // Mostrar ejemplar vendido
-        if(ejemplarVenta){
-            col.innerHTML = `
-                <div class="p-2 border rounded">
-                    <input type="hidden" name="ejemplaresVenta[${contEjemplar}].id" value="${ejemplarVenta.id}">
-                    <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplarVenta.ejemplar.id}">
-
-                    <input class="form-check-input mb-2" 
-                        type="checkbox" 
-                        name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" 
-                        ${ejemplarVenta.ejemplar.vendido ? 'checked' : ''}
-                        onchange="onCheckboxChange(this)">
-
-                    <a href="${ejemplarVenta.ejemplar.secureUrl || 'default.jpg'}"  target="_blank">
-                        <img src="${ejemplarVenta.ejemplar.secureUrl || 'default.jpg'}"  
-                            class="img-thumbnail vista-previa" 
-                            style="max-width: 100px; max-height: 100px; object-fit: cover;"/>
-                    </a>
-
-                    <div>
-                        <p class="mb-1"><strong>Sexo:</strong> ${ejemplarVenta.ejemplar.sexo}</p>
-
-                        <label class="form-label mb-0">Precio:</label>
-                        <input class="form-control precio-input" 
-                            type="number" 
-                            name="ejemplaresVenta[${contEjemplar}].precio" 
-                            value="${ejemplarVenta.precio ?? ''}"
-                            min="0"
-                            ${!ejemplarVenta.ejemplar.vendido ? 'readonly' : ''}
-                            ${ejemplarVenta.ejemplar.vendido ? 'required' : ''}
-                            oninput="actualizarTotalVenta()">
-                    </div>
-                </div>
-            `;
-
-        // Mostrar ejemplar disponible
-        }else{
-            col.innerHTML = `
-                <div class="p-2 border rounded">
-                    <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplar.id}">
-
-                    <input class="form-check-input mb-2" 
-                        type="checkbox" 
-                        name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" 
-                        value="true"
-                        onchange="onCheckboxChange(this)"
-                        ${ejemplar.vendido ? 'checked' : ''}>
-
-                    <a href="${ejemplar.secureUrl || 'default.jpg'}"  target="_blank">
-                        <img src="${ejemplar.secureUrl || 'default.jpg'}"  
-                            class="img-thumbnail vista-previa" 
-                            style="max-width: 100px; max-height: 100px; object-fit: cover;"/>
-                    </a>
-
-                    <div>
-                        <p class="mb-1"><strong>Sexo:</strong> ${ejemplar.sexo}</p>
-
-                        <label class="form-label mb-0">Precio:</label>
-                        <input class="form-control precio-input" 
-                            type="number" 
-                            name="ejemplaresVenta[${contEjemplar}].precio"
-                            min="0"
-                            ${!ejemplar.vendido ? 'readonly' : ''}
-                            ${ejemplar.vendido ? 'required' : ''}
-                            oninput="actualizarTotalVenta()">
-                    </div>
-                </div>
-            `;
-        }
-
-        row.appendChild(col);
-        contEjemplar++;
-    });
-
-    contenedor.appendChild(row); // Agrega la fila completa
-}*/
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //VISTA PREVIA (IMG)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -870,25 +600,8 @@ document.getElementById("formVenta").addEventListener("submit", function () {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//ACTUALIZAR SUBTOTAL Y VENTA TOTAL
+//ACTUALIZAR SUBTOTAL, VENTA TOTAL Y RESTANTE
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// function actualizarSubtotal(element) {
-//     const row = element.closest('tr');
-//     const cantidad = parseInt(row.querySelector('input[type=number]').value) || 0;
-//     const precio = parseFloat(row.querySelector('select').selectedOptions[0]?.dataset.precio || 0);
-//     const subtotalInput = row.querySelector('input[readonly]');
-
-//     // Si cantidad es null o 0, el subtotal es 0 y se actualiza el total
-//     if (!cantidad) {
-//         subtotalInput.value = 0;
-//         actualizarTotalVenta();
-//         return;
-//     }
-
-//     subtotalInput.value = (cantidad * precio).toFixed(2);
-//     actualizarTotalVenta();
-// }
 
 function actualizarSubtotal(element) {
     const row = element.closest('tr');
@@ -931,12 +644,11 @@ function calcularRestante() {
     const total = parseFloat(document.getElementById('totalVenta').value) || 0;
     const adelanto = parseFloat(document.getElementById('adelanto').value) || 0;
     const restante = total - adelanto;
+
     document.getElementById('restante').value = restante.toFixed(2);
 }
 
-// Escuchamos cambios en ambos campos
-document.getElementById('totalVenta').addEventListener('input', calcularRestante); // sin uso porque input = readonly
-document.getElementById('adelanto').addEventListener('input', calcularRestante);
-
-// Llamar al cargar el formulario por si hay valores iniciales
+// Calcular restante al abrir el formulario o input del adelanto
 window.addEventListener('DOMContentLoaded', calcularRestante);
+document.getElementById('adelanto').addEventListener('input', calcularRestante);
+document.getElementById('totalVenta').addEventListener('input', calcularRestante); // sin uso porque input = readonly

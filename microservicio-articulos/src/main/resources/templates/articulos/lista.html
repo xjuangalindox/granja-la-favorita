@@ -65,7 +65,7 @@
             </thead>
             <tbody>
               <tr class="text-center align-middle" th:each="item : ${listaArticulos}"
-                th:classappend="${item.stock == true} ? 'table-success' : 'table-warning'">
+                th:classappend="${item.stock == true} ? 'table-success' : 'table-danger'">
 
                 <!-- Nombre -->
                 <td th:text="${item.nombre}"></td>

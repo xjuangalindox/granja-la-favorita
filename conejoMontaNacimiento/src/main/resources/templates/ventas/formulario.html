@@ -35,14 +35,13 @@
 
                         <!-- COLUMNA IZQUIERDA: Datos de la venta -->
                         <div class="col-md-4 border-end pe-4">
-                        <!-- <div class="col-md-4"> -->
                             <div class="mb-3">
                                 <label class="form-label">Cliente<span class="text-danger">*</span></label>
                                 <input type="text" th:field="*{nombreCliente}" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="telefono" class="form-label">Teléfono</label>
-                                <input id="telefono" type="text" th:field="*{telefono}" class="form-control" inputmode="numeric" maxlength="20" placeholder="10 dígitos">
+                                <input id="telefono" type="text" th:field="*{telefono}" class="form-control" inputmode="numeric" maxlength="20">
                             </div>
 
                             <div class="mb-3">
