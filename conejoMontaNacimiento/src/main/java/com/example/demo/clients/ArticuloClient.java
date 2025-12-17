@@ -12,6 +12,7 @@ import com.example.demo.controllers.dto.ArticuloDTO;
 @FeignClient(name = "microservicio-articulos")
 public interface ArticuloClient {
 
+    // Obtener acticulos del RestControllerArticulo, donde stock = true
     @GetMapping("/api/articulos")
     List<ArticuloDTO> obtenerArticulos();
 

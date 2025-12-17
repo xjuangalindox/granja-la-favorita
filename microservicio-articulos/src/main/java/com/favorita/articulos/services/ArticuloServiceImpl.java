@@ -36,7 +36,18 @@ public class ArticuloServiceImpl implements IArticuloService{
     private ArchivoUtil archivoUtil;
 
     @Override
+    public List<ArticuloDTO> obtenerArticulosStockTrue() {
+        List<ArticuloModel> articulos = (List<ArticuloModel>) articuloRepository.findByStockTrue();
+        articulos.sort(Comparator.comparing(ArticuloModel::getNombre));
+
+        return articulos.stream()
+            .map(model -> modelMapper.map(model, ArticuloDTO.class))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<ArticuloDTO> obtenerArticulos() {
+        // List<ArticuloModel> articulos = (List<ArticuloModel>) articuloRepository.findByStockTrue();
         List<ArticuloModel> articulos = (List<ArticuloModel>) articuloRepository.findAll();
         articulos.sort(Comparator.comparing(ArticuloModel::getNombre));
 
@@ -166,6 +177,7 @@ public class ArticuloServiceImpl implements IArticuloService{
         articuloModel.setDescripcion(articuloDTO.getDescripcion());
         articuloModel.setPresentacion(articuloDTO.getPresentacion());
         articuloModel.setPrecio(articuloDTO.getPrecio());
+        articuloModel.setStock(articuloDTO.getStock());
 
         // Persistir y retornar
         articuloModel = articuloRepository.save(articuloModel);

@@ -60,13 +60,13 @@ public class ArticuloServiceTest {
     @BeforeEach
     void setup(){
         campiconejo = new ArticuloModel(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
         
         heno = new ArticuloModel(2L, "Heno de avena con grano", "Complemento de comida, ideal para desgastar los dientes y mantener la digestión saludable.", 
-        "Bolsa (200 g)", 20.0, "public_id", "secure_url");
+        "Bolsa (200 g)", 20.0, null, "public_id", "secure_url");
         
         aserrin = new ArticuloModel(3L, "Aserrín", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
     }
 
     @Test
@@ -91,9 +91,9 @@ public class ArticuloServiceTest {
     void testObtenerArticuloPorId(){
         // given
         ArticuloModel model = new ArticuloModel(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
-        ArticuloDTO dto = new ArticuloDTO(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
         "KG", 20.0, null, "public_id", "secure_url");
+        ArticuloDTO dto = new ArticuloDTO(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
+        "KG", 20.0, null, null, "public_id", "secure_url");
 
         given(articuloRepository.findById(1L)).willReturn(Optional.of(model));
         given(modelMapper.map(model, ArticuloDTO.class)).willReturn(dto);
@@ -110,7 +110,7 @@ public class ArticuloServiceTest {
     void testEliminarArticuloPorId(){
         // given
         ArticuloModel model = new ArticuloModel(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
 
         when(articuloRepository.findById(anyLong())).thenReturn(Optional.of(model));
         when(articuloVentaClient.existsByArticuloId(anyLong())).thenReturn(false);
@@ -140,7 +140,7 @@ public class ArticuloServiceTest {
     void testEliminarArticuloPorId_AlreadyExists(){
         // given
         ArticuloModel model = new ArticuloModel(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
         when(articuloRepository.findById(anyLong())).thenReturn(Optional.of(model));
         when(articuloVentaClient.existsByArticuloId(anyLong())).thenReturn(true);
 
@@ -157,14 +157,14 @@ public class ArticuloServiceTest {
         MockMultipartFile imagen = new MockMultipartFile("imagen", new byte[]{1, 2, 3});
 
         ArticuloDTO dto = new ArticuloDTO(null, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, imagen, "public_id", "secure_url");
+        "KG", 20.0, null, imagen, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(null, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
 
         ArticuloModel modelSaved = new ArticuloModel(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
         ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, imagen, "public_id", "secure_url");
+        "KG", 20.0, null, imagen, "public_id", "secure_url");
 
         when(articuloRepository.existsByNombre(anyString())).thenReturn(false);
 
@@ -191,7 +191,7 @@ public class ArticuloServiceTest {
         MockMultipartFile imagen = new MockMultipartFile("imagen", new byte[]{1, 2, 3});
 
         ArticuloDTO dto = new ArticuloDTO(null, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, imagen, "public_id", "secure_url");
+        "KG", 20.0, null, imagen, "public_id", "secure_url");
 
         when(articuloRepository.existsByNombre(dto.getNombre())).thenReturn(true);
 
@@ -205,7 +205,7 @@ public class ArticuloServiceTest {
         MockMultipartFile imagen = new MockMultipartFile("imagen", new byte[]{1, 2, 3});
 
         ArticuloDTO dto = new ArticuloDTO(null, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, imagen, "public_id", "secure_url");
+        "KG", 20.0, null, imagen, "public_id", "secure_url");
 
         when(articuloRepository.existsByNombre(dto.getNombre())).thenReturn(false);
         when(archivoUtil.subirImagenCloudinary(any(), anyString(), any())).thenThrow(new RuntimeException("Error al subir la imagen"));
@@ -222,9 +222,9 @@ public class ArticuloServiceTest {
         MockMultipartFile imagen = new MockMultipartFile("imagen", new byte[]{1, 2, 3});
 
         ArticuloDTO dto = new ArticuloDTO(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, imagen, "public_id", "secure_url");
+        "KG", 20.0, null, imagen, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Campiconejo", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
 
         // when
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model));
@@ -253,14 +253,14 @@ public class ArticuloServiceTest {
         MockMultipartFile imagen = new MockMultipartFile("imagen", new byte[]{1, 2, 3});
 
         ArticuloDTO dto = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, imagen, "public_id", "secure_url");
+        "KG", 20.0, null, imagen, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
         
         ArticuloModel modelSaved = new ArticuloModel(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
         ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, imagen, "public_id", "secure_url");
+        "KG", 20.0, null, imagen, "public_id", "secure_url");
 
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model)); // encontrado
         when(articuloRepository.existsByNombre(dto.getNombre())).thenReturn(false); // no registrado
@@ -287,14 +287,14 @@ public class ArticuloServiceTest {
     void testEditarArticulo_SuccessDiferentNameWithoutImage(){
         // given
         ArticuloDTO dto = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, null, "public_id", "secure_url");
+        "KG", 20.0, null, null, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
         
         ArticuloModel modelSaved = new ArticuloModel(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, "public_id", "secure_url");
-        ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
         "KG", 20.0, null, "public_id", "secure_url");
+        ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
+        "KG", 20.0, null, null, "public_id", "secure_url");
 
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model));
         when(articuloRepository.existsByNombre(anyString())).thenReturn(false);
@@ -331,9 +331,9 @@ public class ArticuloServiceTest {
     @Test
     void testEditarArticulo_Error_Existing(){
         ArticuloDTO dto = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, null, "public_id", "secure_url");
+        "KG", 20.0, null, null, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
 
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model));
         when(articuloRepository.existsByNombre(anyString())).thenReturn(true);
@@ -349,9 +349,9 @@ public class ArticuloServiceTest {
         MockMultipartFile imagen = new MockMultipartFile("imagen", new byte[]{1, 2, 3});
 
         ArticuloDTO dto = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, imagen, "public_id", "secure_url");
+        "KG", 20.0, null, imagen, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
         
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model));
         when(articuloRepository.existsByNombre(anyString())).thenReturn(false);
@@ -368,9 +368,9 @@ public class ArticuloServiceTest {
     @Test
     void testEditarArticulo_Error_RenameImage(){
         ArticuloDTO dto = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, null, "public_id", "secure_url");
+        "KG", 20.0, null, null, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
 
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model));
         when(articuloRepository.existsByNombre(anyString())).thenReturn(false);
@@ -387,9 +387,9 @@ public class ArticuloServiceTest {
         MockMultipartFile imagen = new MockMultipartFile("imagen", new byte[]{1, 2, 3});
 
         ArticuloDTO dto = new ArticuloDTO(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, imagen, "public_id", "secure_url");
+        "KG", 20.0, null, imagen, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
 
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model));
         doNothing().when(archivoUtil).eliminarImagenCloudinary(anyString());
@@ -407,14 +407,14 @@ public class ArticuloServiceTest {
         MockMultipartFile imagenVacia = new MockMultipartFile("imagenVacia", new byte[0]);
 
         ArticuloDTO dto = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, imagenVacia, "public_id", "secure_url");
+        "KG", 20.0, null, imagenVacia, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
 
         ArticuloModel modelSaved = new ArticuloModel(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
-        "KG", 20.0, "public_id", "secure_url");
-        ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
         "KG", 20.0, null, "public_id", "secure_url");
+        ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Aserrin", "Mantiene el lugar limpio, ayuda a evitar malos olores y previene la presencia de moscas.", 
+        "KG", 20.0, null, null, "public_id", "secure_url");
 
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model));
         when(articuloRepository.existsByNombre(anyString())).thenReturn(false);
@@ -438,14 +438,14 @@ public class ArticuloServiceTest {
         MockMultipartFile imagenVacia = new MockMultipartFile("imagenVacia", new byte[0]);
 
         ArticuloDTO dto = new ArticuloDTO(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, imagenVacia, "public_id", "secure_url");
+        "KG", 20.0, null, imagenVacia, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
 
         ArticuloModel modelSaved = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
-        ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
         "KG", 20.0, null, "public_id", "secure_url");
+        ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
+        "KG", 20.0, null, null, "public_id", "secure_url");
 
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model));
         
@@ -463,14 +463,14 @@ public class ArticuloServiceTest {
         // MockMultipartFile imagenVacia = new MockMultipartFile("imagenVacia", new byte[0]);
 
         ArticuloDTO dto = new ArticuloDTO(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, null, "public_id", "secure_url");
+        "KG", 20.0, null, null, "public_id", "secure_url");
         ArticuloModel model = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
+        "KG", 20.0, null, "public_id", "secure_url");
 
         ArticuloModel modelSaved = new ArticuloModel(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
-        "KG", 20.0, "public_id", "secure_url");
-        ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
         "KG", 20.0, null, "public_id", "secure_url");
+        ArticuloDTO dtoSaved = new ArticuloDTO(1L, "Alimento", "Alimento diario completo, balanceado para el crecimiento y mantenimiento de tus conejos.", 
+        "KG", 20.0, null, null, "public_id", "secure_url");
 
         when(articuloRepository.findById(dto.getId())).thenReturn(Optional.of(model));
         
