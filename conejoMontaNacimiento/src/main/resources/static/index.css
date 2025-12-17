@@ -4,6 +4,20 @@
     box-sizing: border-box;
 }
 
+/* Diseño de botones Ejemplares, Artículos */
+.btn-green-soft {
+    background-color: #5cbf9a;
+    color: #000000;        /* texto negro */
+    font-weight: 600;      /* negrita elegante */
+    border: none;
+}
+
+.btn-green-soft:hover {
+    background-color: #4fb089;
+    color: #000000;        /* mantener negro */
+}
+/* FIN Diseño de botones Ejemplares, Artículos */
+
 .carousel-container {
     position: relative;
     margin: 50px auto;

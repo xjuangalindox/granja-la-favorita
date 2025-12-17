@@ -16,6 +16,7 @@ public class ArticuloDTO {
     private String descripcion;
     private String presentacion;
     private Double precio;
+    private Boolean stock;
 
     private MultipartFile imagen; // Unicamente para recibir la imagen del formulario
     private String publicId;

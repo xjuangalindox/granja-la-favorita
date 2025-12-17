@@ -69,9 +69,9 @@ public class ArticuloControllerTest{
         request.addHeader("X-Forwarded-Proto", "https"); // proto
         request.addHeader("X-Forwarded-Host", "granjalafavorita.com"); // host
 
-        art1 = new ArticuloDTO(1L, "Campiconejo", "Comida diaria", "KG", 20.0, null, "123abc", "https://cloudinary/campiconejo.png");
-        art2 = new ArticuloDTO(2L, "Heno", "Complemento de comida", "Bolsa (200 g)", 20.0, null, "123abc", "https://cloudinary/heno.png");
-        art3 = new ArticuloDTO(3L, "Aserrin", "Limpieza", "KG", 20.0, null, "123abc", "https://cloudinary/asserin.png");
+        art1 = new ArticuloDTO(1L, "Campiconejo", "Comida diaria", "KG", 20.0, null, null, "123abc", "https://cloudinary/campiconejo.png");
+        art2 = new ArticuloDTO(2L, "Heno", "Complemento de comida", "Bolsa (200 g)", 20.0, null, null, "123abc", "https://cloudinary/heno.png");
+        art3 = new ArticuloDTO(3L, "Aserrin", "Limpieza", "KG", 20.0, null, null, "123abc", "https://cloudinary/asserin.png");
 
         imagen = new MockMultipartFile("imagen", "campiconejo.png", "image/png", "fake-image-content".getBytes());
     }

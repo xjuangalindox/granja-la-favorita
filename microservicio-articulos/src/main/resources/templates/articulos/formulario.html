@@ -57,14 +57,20 @@
                                 <label for="presentacion" class="form-label">Presentación</label>
                                 <input type="text" th:field="*{presentacion}" class="form-control" id="presentacion" required>
                             </div>
+                            <!-- descripcion -->
                             <div class="mb-3">
                                 <label for="descripcion" class="form-label">Descripción</label>
-                                <!-- <input type="text" th:field="*{descripcion}" class="form-control" id="descripcion" required> -->
                                 <textarea th:field="*{descripcion}" class="form-control" id="descripcion" rows="3" maxlength="500" required></textarea>
                             </div>
+                            <!-- precio -->
                             <div class="mb-3">
                                 <label for="precio" class="form-label">Precio</label>
                                 <input type="number" th:field="*{precio}" class="form-control" id="precio" min="0" step="1" required>
+                            </div>
+                            <!-- stock -->
+                            <div class="mb-3 text-center">
+                                <label for="stock" class="form-label">¿Existe stock?</label>
+                                <input id="stock" type="checkbox" th:field="*{stock}" class="form-check-input ms-2">
                             </div>
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary">Guardar Artículo</button>
