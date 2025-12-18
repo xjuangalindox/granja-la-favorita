@@ -1,11 +1,14 @@
 package com.example.demo.controllers;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.models.RecreoModel;
+import com.cloudinary.http5.api.Response;
 import com.example.demo.controllers.dto.RecreoDTO;
 import com.example.demo.services.IRecreoService;
 
@@ -78,7 +83,7 @@ public class RecreoRestController {
     }
 
     @PostMapping
-    public ResponseEntity<RecreoDTO> saveRecreo(@RequestBody @Valid RecreoDTO recreoDTO){
+    public ResponseEntity<RecreoDTO> saveFromHTML(@RequestBody @Valid RecreoDTO recreoDTO){
         RecreoDTO saved = recreoService.saveRecreo(recreoDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -86,9 +91,38 @@ public class RecreoRestController {
     @PutMapping("/{id}")
     public ResponseEntity<RecreoDTO> updateRecreo(@PathVariable("id") Long id, @RequestBody @Valid RecreoDTO recreoDTO){
         RecreoDTO saved = recreoService.updateRecreo(id, recreoDTO);
-        return ResponseEntity.ok(saved);
-        // return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        
+        return ResponseEntity.status(HttpStatus.OK).body(saved);
     }
+
+    // Grafana Endpoints
+    @PostMapping("/grafana")
+    public ResponseEntity<RecreoDTO> saveFromGrafana(@RequestBody RecreoDTO recreoDTO){
+        recreoDTO.setInicioRecreo(LocalDateTime.now(ZoneId.of("America/Mexico_City")));
+        
+        RecreoDTO saved = recreoService.saveRecreo(recreoDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @PutMapping("/grafana/{recreo_id}")
+    public ResponseEntity<RecreoDTO> updateFromGrafana(@PathVariable("recreo_id") Long id){
+        RecreoDTO recreoDTO = recreoService.findById(id);
+        recreoDTO.setFinRecreo(LocalDateTime.now(ZoneId.of("America/Mexico_City")));
+
+        recreoDTO = recreoService.updateRecreo(id, recreoDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(recreoDTO);
+    }
+
+    // Extra (por si @PutMapping("/grafana/{recreo_id}") no funciona)
+    @PutMapping("/grafana")
+    public ResponseEntity<RecreoDTO> updateFromGrafana(@RequestBody RecreoDTO recreoDTO){
+        RecreoDTO recreo = recreoService.findById(recreoDTO.getId());
+        recreo.setFinRecreo(LocalDateTime.now(ZoneId.of("America/Mexico_City")));
+
+        recreo = recreoService.updateRecreo(recreoDTO.getId(), recreo);
+        return ResponseEntity.status(HttpStatus.OK).body(recreo);
+    }
+    // Fin Grafana Endpoints
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable("id") Long id){
