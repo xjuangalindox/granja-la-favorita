@@ -82,6 +82,7 @@ public class SecurityConfig {
     public SecurityWebFilterChain webSecurity(ServerHttpSecurity http) {
         return http
                 // CSRF activo (correcto para formularios)
+                .csrf(csrf -> csrf.disable()) // No recomendado para formularios
                 .authorizeExchange(exchanges -> exchanges
                     .pathMatchers(publicEndpoints()).permitAll()
                     .anyExchange().authenticated()
