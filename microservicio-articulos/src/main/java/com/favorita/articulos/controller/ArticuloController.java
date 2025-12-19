@@ -104,7 +104,7 @@ public class ArticuloController {
             model.addAttribute("articuloDTO", articuloDTO);
             model.addAttribute("titulo", "Editar Articulo");
             model.addAttribute("accion", "/articulos/update/"+id);
-            model.addAttribute("error", "Ocurrio un error al modificar el articulo");
+            model.addAttribute("error", e.getMessage());
             return "articulos/formulario";
         }
     }

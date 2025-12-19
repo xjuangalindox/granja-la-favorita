@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.management.RuntimeErrorException;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,14 +22,8 @@ import com.favorita.articulos.util.ArchivoUtil;
 @Service
 public class ArticuloServiceImpl implements IArticuloService{
 
-    // private final ModelMapper modelMapper;
-
     @Autowired
     private IArticuloRepository articuloRepository;
-
-    // ArticuloServiceImpl(ModelMapper modelMapper) {
-    //     this.modelMapper = modelMapper;
-    // }
 
     @Autowired
     private ModelMapper modelMapper;
@@ -65,21 +61,17 @@ public class ArticuloServiceImpl implements IArticuloService{
     @Override
     @Transactional
     public ArticuloDTO guardarArticulo(ArticuloDTO articuloDTO) {
+        String nombreDTO = articuloDTO.getNombre();
+
         // ¿El articulo ya existe?
-        if(articuloRepository.existsByNombre(articuloDTO.getNombre())){
-            String msg = "El articulo "+articuloDTO.getNombre()+" ya se encuentra registrado";
-            throw new RuntimeException(msg);
-        }
+        if(articuloRepository.existsByNombre(nombreDTO)) throw new RuntimeException("El artículo "+nombreDTO+" ya se encuentra registrado");
 
         // ¿Se guardo la imagen en CLOUDINARY?
         try {
-            Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(articuloDTO.getImagen(), "articulos", Optional.of(articuloDTO.getNombre()));    
+            Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(articuloDTO.getImagen(), "articulos", Optional.empty());
             String publicId = resultUpload.get("public_id").toString();
             articuloDTO.setPublicId(publicId);
             articuloDTO.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
-            
-            // articuloDTO.setPublicId(resultUpload.get("public_id").toString());
-            // articuloDTO.setSecureUrl(resultUpload.get("secure_url").toString());
 
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -94,95 +86,139 @@ public class ArticuloServiceImpl implements IArticuloService{
     @Override
     @Transactional
     public ArticuloDTO editarArticulo(Long id, ArticuloDTO articuloDTO) {
-        // ¿Existe el articulo?
-        Optional<ArticuloModel> articuloOpt = articuloRepository.findById(id);
-        if(articuloOpt.isEmpty()){
-            String msg = "El articulo con id "+id+" no fue encontrado.";
-            throw new RuntimeException(msg);
+        ArticuloModel articuloModel = articuloRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("El articulo con id "+id+" no fue encontrado"));
+
+        String nombreDTO = articuloDTO.getNombre();
+
+        // Se cambio el nombre
+        if(!nombreDTO.equalsIgnoreCase(articuloModel.getNombre())){
+            // Articulo existente
+            if(articuloRepository.existsByNombre(nombreDTO)) throw new RuntimeException("El articulo "+nombreDTO+" ya se encuentra registrado");
+
+            // Setear nombre al model
+            articuloModel.setNombre(nombreDTO);
         }
 
-        // Informacion original del articulo
-        ArticuloModel articuloModel = articuloOpt.get();
+        // Se cambio la imagen
+        if(articuloDTO.getImagen() != null && !articuloDTO.getImagen().isEmpty()){
+            try {
+                // Eliminar imagen
+                archivoUtil.eliminarImagenCloudinary(articuloModel.getPublicId());
+                // Subir nueva imagen
+                Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(articuloDTO.getImagen(), "articulos", Optional.empty());
+                String publicId = resultUpload.get("public_id").toString();
 
-        // SE CAMBIO EL NOMBRE DEL ARTICULO EN EL FORMULARIO
-        if(!articuloDTO.getNombre().equalsIgnoreCase(articuloModel.getNombre())){
+                // Setear publicId al model
+                articuloModel.setPublicId(publicId);
+                articuloModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
 
-            // ¿EL ARTICULO YA ESTA REGISTRADO?
-            if(articuloRepository.existsByNombre(articuloDTO.getNombre())){
-                String msg = "El articulo "+articuloDTO.getNombre()+" ya se encuentra registrado.";
-                throw new RuntimeException(msg);
-            }
-
-            // SE CAMBIO LA IMAGEN DEL ARTICULO
-            if(articuloDTO.getImagen() != null && !articuloDTO.getImagen().isEmpty()){
-                // SUBIR NUEVA IMAGEN Y ELIMINAR ANTIGUA (CLOUDINARY)
-                try {
-                    archivoUtil.eliminarImagenCloudinary(articuloModel.getPublicId());
-
-                    Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(articuloDTO.getImagen(), "articulos", Optional.of(articuloDTO.getNombre()));
-                    String publicId = resultUpload.get("public_id").toString();
-                    articuloModel.setPublicId(publicId);
-                    articuloModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
-                    
-                    // articuloModel.setPublicId(resultUpload.get("public_id").toString());
-                    // articuloModel.setSecureUrl(resultUpload.get("secure_url").toString());
-
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
-                }
-            
-            // NO SE CAMBIO LA IMAGEN DEL ARTICULO
-            }else{
-                // RENOMBRAR IMAGEN DEL ARTICULO
-                try {
-                    Map<String, Object> resultRename = archivoUtil.renombrarImagenCloudinary(articuloModel.getPublicId(), "articulos", articuloDTO.getNombre());
-                    String publicId = resultRename.get("public_id").toString();
-                    articuloModel.setPublicId(publicId);
-                    articuloModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
-                    
-                    // articuloModel.setPublicId(resultRename.get("public_id").toString());
-                    // articuloModel.setSecureUrl(resultRename.get("secure_url").toString());    
-
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
-                }
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
             }
         }
 
-        // NO SE CAMBIO EL NOMBRE DEL ARTICULO EN EL FORMULARIO
-        if(articuloDTO.getNombre().equalsIgnoreCase(articuloModel.getNombre())){
-
-            // SE CAMBIO LA IMAGEN DEL ARTICULO
-            if(articuloDTO.getImagen() != null && !articuloDTO.getImagen().isEmpty()){
-                // ELIMINAR IMAGEN ANTIGUA Y SUBIR NUEVA IMAGEN (CLOUDINARY)
-                try {
-                    archivoUtil.eliminarImagenCloudinary(articuloModel.getPublicId());
-                    
-                    Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(articuloDTO.getImagen(), "articulos", Optional.of(articuloDTO.getNombre()));
-                    String publicId = resultUpload.get("public_id").toString();
-                    articuloModel.setPublicId(publicId);
-                    articuloModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
-                    
-                    // articuloModel.setPublicId(resultUpload.get("public_id").toString());
-                    // articuloModel.setSecureUrl(resultUpload.get("secure_url").toString());                    
-
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
-                }
-            }
-        }
-        
-        // Settear nueva informacion al articulo original
-        articuloModel.setNombre(articuloDTO.getNombre());
-        articuloModel.setDescripcion(articuloDTO.getDescripcion());
+        // Setear informacion al model
         articuloModel.setPresentacion(articuloDTO.getPresentacion());
+        articuloModel.setDescripcion(articuloDTO.getDescripcion());
         articuloModel.setPrecio(articuloDTO.getPrecio());
         articuloModel.setStock(articuloDTO.getStock());
 
-        // Persistir y retornar
         articuloModel = articuloRepository.save(articuloModel);
         return modelMapper.map(articuloModel, ArticuloDTO.class);
     }
+
+    //     // -------------------------------------------------------------------------------
+
+    //     // ¿Existe el articulo?
+    //     Optional<ArticuloModel> articuloOpt = articuloRepository.findById(id);
+    //     if(articuloOpt.isEmpty()){
+    //         String msg = "El articulo con id "+id+" no fue encontrado.";
+    //         throw new RuntimeException(msg);
+    //     }
+
+    //     // Informacion original del articulo
+    //     ArticuloModel articuloModel = articuloOpt.get();
+
+    //     // SE CAMBIO EL NOMBRE DEL ARTICULO EN EL FORMULARIO
+    //     if(!articuloDTO.getNombre().equalsIgnoreCase(articuloModel.getNombre())){
+
+    //         // ¿EL ARTICULO YA ESTA REGISTRADO?
+    //         if(articuloRepository.existsByNombre(articuloDTO.getNombre())){
+    //             String msg = "El articulo "+articuloDTO.getNombre()+" ya se encuentra registrado.";
+    //             throw new RuntimeException(msg);
+    //         }
+
+    //         // SE CAMBIO LA IMAGEN DEL ARTICULO
+    //         if(articuloDTO.getImagen() != null && !articuloDTO.getImagen().isEmpty()){
+    //             // SUBIR NUEVA IMAGEN Y ELIMINAR ANTIGUA (CLOUDINARY)
+    //             try {
+    //                 archivoUtil.eliminarImagenCloudinary(articuloModel.getPublicId());
+
+    //                 Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(articuloDTO.getImagen(), "articulos", Optional.of(articuloDTO.getNombre()));
+    //                 String publicId = resultUpload.get("public_id").toString();
+    //                 articuloModel.setPublicId(publicId);
+    //                 articuloModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
+                    
+    //                 // articuloModel.setPublicId(resultUpload.get("public_id").toString());
+    //                 // articuloModel.setSecureUrl(resultUpload.get("secure_url").toString());
+
+    //             } catch (Exception e) {
+    //                 throw new RuntimeException(e.getMessage());
+    //             }
+            
+    //         // NO SE CAMBIO LA IMAGEN DEL ARTICULO
+    //         }else{
+    //             // RENOMBRAR IMAGEN DEL ARTICULO
+    //             try {
+    //                 Map<String, Object> resultRename = archivoUtil.renombrarImagenCloudinary(articuloModel.getPublicId(), "articulos", articuloDTO.getNombre());
+    //                 String publicId = resultRename.get("public_id").toString();
+    //                 articuloModel.setPublicId(publicId);
+    //                 articuloModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
+                    
+    //                 // articuloModel.setPublicId(resultRename.get("public_id").toString());
+    //                 // articuloModel.setSecureUrl(resultRename.get("secure_url").toString());    
+
+    //             } catch (Exception e) {
+    //                 throw new RuntimeException(e.getMessage());
+    //             }
+    //         }
+    //     }
+
+    //     // NO SE CAMBIO EL NOMBRE DEL ARTICULO EN EL FORMULARIO
+    //     if(articuloDTO.getNombre().equalsIgnoreCase(articuloModel.getNombre())){
+
+    //         // SE CAMBIO LA IMAGEN DEL ARTICULO
+    //         if(articuloDTO.getImagen() != null && !articuloDTO.getImagen().isEmpty()){
+    //             // ELIMINAR IMAGEN ANTIGUA Y SUBIR NUEVA IMAGEN (CLOUDINARY)
+    //             try {
+    //                 archivoUtil.eliminarImagenCloudinary(articuloModel.getPublicId());
+                    
+    //                 Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(articuloDTO.getImagen(), "articulos", Optional.of(articuloDTO.getNombre()));
+    //                 String publicId = resultUpload.get("public_id").toString();
+    //                 articuloModel.setPublicId(publicId);
+    //                 articuloModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
+                    
+    //                 // articuloModel.setPublicId(resultUpload.get("public_id").toString());
+    //                 // articuloModel.setSecureUrl(resultUpload.get("secure_url").toString());                    
+
+    //             } catch (Exception e) {
+    //                 throw new RuntimeException(e.getMessage());
+    //             }
+    //         }
+    //     }
+        
+    //     // Settear nueva informacion al articulo original
+    //     articuloModel.setNombre(articuloDTO.getNombre());
+    //     articuloModel.setDescripcion(articuloDTO.getDescripcion());
+    //     articuloModel.setPresentacion(articuloDTO.getPresentacion());
+    //     articuloModel.setPrecio(articuloDTO.getPrecio());
+    //     articuloModel.setStock(articuloDTO.getStock());
+
+    //     // Persistir y retornar
+    //     articuloModel = articuloRepository.save(articuloModel);
+    //     return modelMapper.map(articuloModel, ArticuloDTO.class);
+    // }
 
     @Autowired
     private ArticuloVentaClient articuloVentaClient;
@@ -191,7 +227,7 @@ public class ArticuloServiceImpl implements IArticuloService{
     @Transactional
     public boolean eliminarArticuloPorId(Long id) {
         ArticuloModel articuloModel = articuloRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("El articulo con id "+id+" no fue encontrado."));
+            .orElseThrow(() -> new RuntimeException("El articulo con id "+id+" no fue encontrado"));
 
         // Si existe algún articuloventa con este articulo, no permitir eliminar
         if(articuloVentaClient.existsByArticuloId(id)){

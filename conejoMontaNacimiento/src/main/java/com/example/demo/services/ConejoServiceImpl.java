@@ -203,45 +203,82 @@ public class ConejoServiceImpl implements IConejoService{
     @Override
     @Transactional
     public ConejoDTO guardarConejo(ConejoDTO conejoDTO) {
+        ConejoModel conejoModel = new ConejoModel();
+
+        // Conejo ya registrado
+        if(conejoRepository.existsByNombre(conejoDTO.getNombre())) throw new RuntimeException("El conejo "+conejoDTO.getNombre()+" ya se encuentra registrado");
+
+        try {
+            Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(conejoDTO.getImagen(), "conejos", Optional.empty());
+            String publicId = resultUpload.get("public_id").toString();
+
+            conejoModel.setPublicId(publicId); // Setear publicId
+            conejoModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId)); // Setear secureUrl
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        RazaDTO razaDTO = razaClient.obtenerRazaPorId(conejoDTO.getRaza().getId());
+        conejoModel.setRazaId(razaDTO.getId());
+
+        conejoModel.setNombre(conejoDTO.getNombre());
+        conejoModel.setSexo(conejoDTO.getSexo());
+        conejoModel.setPeso(conejoDTO.getPeso());
+        conejoModel.setActivo(conejoDTO.isActivo());
+        conejoModel.setNota(conejoDTO.getNota());
+        // conejoModel.setFechaNacimiento(conejoDTO.getFechaNacimiento());
+        // conejoModel.setTotalGazapos(conejoDTO.getTotalGazapos());
+        // conejoModel.setTotalNacimientos(conejoDTO.getTotalNacimientos());
+
+        conejoModel = conejoRepository.save(conejoModel);
+        
+        ConejoDTO saved = modelMapper.map(conejoModel, ConejoDTO.class);
+        saved.setRaza(razaDTO);
+
+        return saved;
+    }
+
+        // --------------------------------------------------------------
 
         // ¿El conejo ya esta registrado?
         // if(existsByNombre(conejoDTO.getNombre())){
-        if(conejoRepository.existsByNombre(conejoDTO.getNombre())){ // Corregido para el test
-            String msg = "El conejo "+conejoDTO.getNombre()+" ya se encuentra registrado";
-            logger.error(msg);
-            throw new RuntimeException(msg);
-        }
+    //     if(conejoRepository.existsByNombre(conejoDTO.getNombre())){ // Corregido para el test
+    //         String msg = "El conejo "+conejoDTO.getNombre()+" ya se encuentra registrado";
+    //         logger.error(msg);
+    //         throw new RuntimeException(msg);
+    //     }
 
-        // ¿Se subio la imagen a CLOUDIINARY.COM?
-        try {
-            Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(conejoDTO.getImagen(), "conejos", Optional.of(conejoDTO.getNombre()));
-            String publicId = resultUpload.get("public_id").toString();
-            conejoDTO.setPublicId(publicId);
-            conejoDTO.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
-            // conejoDTO.setSecureUrl(resultUpload.get("secure_url").toString());
+    //     // ¿Se subio la imagen a CLOUDIINARY.COM?
+    //     try {
+    //         Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(conejoDTO.getImagen(), "conejos", Optional.of(conejoDTO.getNombre()));
+    //         String publicId = resultUpload.get("public_id").toString();
+    //         conejoDTO.setPublicId(publicId);
+    //         conejoDTO.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
+    //         // conejoDTO.setSecureUrl(resultUpload.get("secure_url").toString());
 
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw new RuntimeException(e.getMessage());
-        } 
+    //     } catch (Exception e) {
+    //         logger.error(e.getMessage());
+    //         throw new RuntimeException(e.getMessage());
+    //     } 
 
-        // Obtener RazaDTO para mapear
-        RazaDTO razaDTO = razaClient.obtenerRazaPorId(conejoDTO.getRaza().getId());
-        // RazaDTO razaDTO = razaService.obtenerRazaPorId(conejoDTO.getRaza().getId());
+    //     // Obtener RazaDTO para mapear
+    //     RazaDTO razaDTO = razaClient.obtenerRazaPorId(conejoDTO.getRaza().getId());
+    //     // RazaDTO razaDTO = razaService.obtenerRazaPorId(conejoDTO.getRaza().getId());
 
-        // Mapeo con razaId
-        ConejoModel conejoModel = modelMapper.map(conejoDTO, ConejoModel.class);
-        conejoModel.setRazaId(razaDTO.getId());
+    //     // Mapeo con razaId
+    //     ConejoModel conejoModel = modelMapper.map(conejoDTO, ConejoModel.class);
+    //     conejoModel.setRazaId(razaDTO.getId());
 
-        // Persistir
-        conejoModel = conejoRepository.save(conejoModel);
+    //     // Persistir
+    //     conejoModel = conejoRepository.save(conejoModel);
 
-        // Mapeo con RazaDTO
-        ConejoDTO conejo = modelMapper.map(conejoModel, ConejoDTO.class);
-        conejo.setRaza(razaDTO);
+    //     // Mapeo con RazaDTO
+    //     ConejoDTO conejo = modelMapper.map(conejoModel, ConejoDTO.class);
+    //     conejo.setRaza(razaDTO);
 
-        return conejo;
-    }
+    //     return conejo;
+    // }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,109 +286,156 @@ public class ConejoServiceImpl implements IConejoService{
     @Override
     @Transactional
     public ConejoDTO editarConejo(Long id, ConejoDTO conejoDTO) {
-        // ¿Existe el conejo?
-        ConejoDTO conejoOriginal = obtenerConejoById(id)
-            .orElseThrow(() -> {
-                String msg = "El conejo con id "+id+" no fue encontrado.";
-                logger.error(msg);
-                return new RuntimeException(msg);
-            });
+        ConejoModel conejoModel = conejoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("El conejo con id "+id+" no fue encontrado"));
 
+        String nombreDTO = conejoDTO.getNombre();
 
-        // SE CAMBIO EL NOMBRE DEL CONEJO EN EL FORMULARIO
-        if(!conejoDTO.getNombre().equals(conejoOriginal.getNombre())){
-            
-            // ¿EL CONEJO YA SE ENCUENTRA REGISTRADO?
-            if(conejoRepository.existsByNombre(conejoDTO.getNombre())){
-                String msg = "El conejo "+conejoDTO.getNombre()+" ya se encuentra registrado";
-                logger.error(msg);
-                throw new RuntimeException(msg);
-            }
+        // Se cambio el nombre
+        if(!nombreDTO.equalsIgnoreCase(conejoModel.getNombre())){
+            if(conejoRepository.existsByNombre(nombreDTO)) throw new RuntimeException("El conejo "+nombreDTO+" ya se encuentra registrado");
+            conejoModel.setNombre(nombreDTO); // Setear nombre
+        }
 
-            // if(existsByNombre(conejoDTO.getNombre())){
-            //     String msg = "El conejo "+conejoDTO.getNombre()+" ya se encuentra registrado";
-            //     logger.error(msg);
-            //     throw new RuntimeException(msg);
-            // }
+        // Se cambio la imagen
+        if(conejoDTO.getImagen() != null && !conejoDTO.getImagen().isEmpty()){
+            try {
+                archivoUtil.eliminarImagenCloudinary(conejoModel.getPublicId());
+                Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(conejoDTO.getImagen(), "conejos", Optional.empty());
+                String publicId = resultUpload.get("public_id").toString();
 
-            // SE CAMBIO LA IMAGEN DEL CONEJO EN EL FORMULARIO (funcionando)
-            if(conejoDTO.getImagen() != null && !conejoDTO.getImagen().isEmpty()){
-                try {
-                    // Subir imagen nueva a CLOUDINARY.COM
-                    Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(conejoDTO.getImagen(), "conejos", Optional.of(conejoDTO.getNombre()));
-                    String publicId = resultUpload.get("public_id").toString();
-                    conejoDTO.setPublicId(publicId);
-                    conejoDTO.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
-                    // conejoDTO.setSecureUrl(resultUpload.get("secure_url").toString());
-                    
-                    // Eliminar imagen antigua en CLOUDINARY.COM
-                    archivoUtil.eliminarImagenCloudinary(conejoOriginal.getPublicId());
+                conejoModel.setPublicId(publicId); // Setear publicId
+                conejoModel.setSecureUrl(archivoUtil.getUrlWithPagina(publicId)); // Setear secureUrl
 
-                } catch (Exception e) {
-                    logger.error(e.getMessage());
-                    throw new RuntimeException(e.getMessage());
-                }
-            
-            // NO SE CAMBIO LA IMAGEN DEL CONEJO EN EL FORMULARIO
-            }else{
-                try {
-                    // Crear copia de la imagen antigua
-                    Map<String, Object> resultRename = archivoUtil.renombrarImagenCloudinary(conejoOriginal.getPublicId(), "conejos", conejoDTO.getNombre());
-                    // conejoDTO.setPublicId(resultRename.get("public_id").toString());
-                    // conejoDTO.setSecureUrl(resultRename.get("secure_url").toString());
-
-                    String publicId = resultRename.get("public_id").toString();
-                    conejoDTO.setPublicId(publicId);
-                    conejoDTO.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
-                    
-
-                } catch (Exception e) {
-                    logger.error(e.getMessage());
-                    throw new RuntimeException(e.getMessage());
-                }
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
             }
         }
 
-        // NO SE CAMBIO EL NOMBRE DEL CONEJO EN EL FORMULARIO
-        if(conejoDTO.getNombre().equals(conejoOriginal.getNombre())){
-
-            // SE CAMBIO LA IMAGEN DEL CONEJO EN EL FORMULARIO (funcionando)
-            if(conejoDTO.getImagen() != null && !conejoDTO.getImagen().isEmpty()){
-                try {
-                    // Eliminar imagen antigua del conejo
-                    archivoUtil.eliminarImagenCloudinary(conejoDTO.getPublicId());
-
-                    // Crear nueva imagen
-                    Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(conejoDTO.getImagen(), "conejos", Optional.of(conejoDTO.getNombre()));
-                    String publicId = resultUpload.get("public_id").toString();
-                    conejoDTO.setPublicId(publicId);
-                    conejoDTO.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
-                    // conejoDTO.setSecureUrl(resultUpload.get("secure_url").toString());
-
-                } catch (Exception e) {
-                    logger.error(e.getMessage());
-                    throw new RuntimeException(e.getMessage());
-                }
-            }
-        }
-
-        // Obtener RazaDTO para mapear
         RazaDTO razaDTO = razaClient.obtenerRazaPorId(conejoDTO.getRaza().getId());
-        // RazaDTO razaDTO = razaService.obtenerRazaPorId(conejoDTO.getRaza().getId());
-
-        // Mapeo con razaId
-        ConejoModel conejoModel = modelMapper.map(conejoDTO, ConejoModel.class);
         conejoModel.setRazaId(razaDTO.getId());
 
-        // Persistir
+        conejoModel.setSexo(conejoDTO.getSexo());
+        conejoModel.setPeso(conejoDTO.getPeso());
+        conejoModel.setActivo(conejoDTO.isActivo());
+        conejoModel.setNota(conejoDTO.getNota());
+        // conejoModel.setFechaNacimiento(conejoDTO.getFechaNacimiento());
+        // conejoModel.setTotalGazapos(conejoDTO.getTotalGazapos());
+        // conejoModel.setTotalNacimientos(conejoDTO.getTotalNacimientos());
+        
         conejoModel = conejoRepository.save(conejoModel);
+        
+        ConejoDTO saved = modelMapper.map(conejoModel, ConejoDTO.class);
+        saved.setRaza(razaDTO);
 
-        // Mapeo con RazaDTO
-        ConejoDTO conejo = modelMapper.map(conejoModel, ConejoDTO.class);
-        conejo.setRaza(razaDTO);
-
-        return conejo;
+        return saved;
     }
+
+        // -------------------------------------------------------------------
+
+        // ¿Existe el conejo?
+    //     ConejoDTO conejoOriginal = obtenerConejoById(id)
+    //         .orElseThrow(() -> {
+    //             String msg = "El conejo con id "+id+" no fue encontrado.";
+    //             logger.error(msg);
+    //             return new RuntimeException(msg);
+    //         });
+
+
+    //     // SE CAMBIO EL NOMBRE DEL CONEJO EN EL FORMULARIO
+    //     if(!conejoDTO.getNombre().equals(conejoOriginal.getNombre())){
+            
+    //         // ¿EL CONEJO YA SE ENCUENTRA REGISTRADO?
+    //         if(conejoRepository.existsByNombre(conejoDTO.getNombre())){
+    //             String msg = "El conejo "+conejoDTO.getNombre()+" ya se encuentra registrado";
+    //             logger.error(msg);
+    //             throw new RuntimeException(msg);
+    //         }
+
+    //         // if(existsByNombre(conejoDTO.getNombre())){
+    //         //     String msg = "El conejo "+conejoDTO.getNombre()+" ya se encuentra registrado";
+    //         //     logger.error(msg);
+    //         //     throw new RuntimeException(msg);
+    //         // }
+
+    //         // SE CAMBIO LA IMAGEN DEL CONEJO EN EL FORMULARIO (funcionando)
+    //         if(conejoDTO.getImagen() != null && !conejoDTO.getImagen().isEmpty()){
+    //             try {
+    //                 // Subir imagen nueva a CLOUDINARY.COM
+    //                 Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(conejoDTO.getImagen(), "conejos", Optional.of(conejoDTO.getNombre()));
+    //                 String publicId = resultUpload.get("public_id").toString();
+    //                 conejoDTO.setPublicId(publicId);
+    //                 conejoDTO.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
+    //                 // conejoDTO.setSecureUrl(resultUpload.get("secure_url").toString());
+                    
+    //                 // Eliminar imagen antigua en CLOUDINARY.COM
+    //                 archivoUtil.eliminarImagenCloudinary(conejoOriginal.getPublicId());
+
+    //             } catch (Exception e) {
+    //                 logger.error(e.getMessage());
+    //                 throw new RuntimeException(e.getMessage());
+    //             }
+            
+    //         // NO SE CAMBIO LA IMAGEN DEL CONEJO EN EL FORMULARIO
+    //         }else{
+    //             try {
+    //                 // Crear copia de la imagen antigua
+    //                 Map<String, Object> resultRename = archivoUtil.renombrarImagenCloudinary(conejoOriginal.getPublicId(), "conejos", conejoDTO.getNombre());
+    //                 // conejoDTO.setPublicId(resultRename.get("public_id").toString());
+    //                 // conejoDTO.setSecureUrl(resultRename.get("secure_url").toString());
+
+    //                 String publicId = resultRename.get("public_id").toString();
+    //                 conejoDTO.setPublicId(publicId);
+    //                 conejoDTO.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
+                    
+
+    //             } catch (Exception e) {
+    //                 logger.error(e.getMessage());
+    //                 throw new RuntimeException(e.getMessage());
+    //             }
+    //         }
+    //     }
+
+    //     // NO SE CAMBIO EL NOMBRE DEL CONEJO EN EL FORMULARIO
+    //     if(conejoDTO.getNombre().equals(conejoOriginal.getNombre())){
+
+    //         // SE CAMBIO LA IMAGEN DEL CONEJO EN EL FORMULARIO (funcionando)
+    //         if(conejoDTO.getImagen() != null && !conejoDTO.getImagen().isEmpty()){
+    //             try {
+    //                 // Eliminar imagen antigua del conejo
+    //                 archivoUtil.eliminarImagenCloudinary(conejoDTO.getPublicId());
+
+    //                 // Crear nueva imagen
+    //                 Map<String, Object> resultUpload = archivoUtil.subirImagenCloudinary(conejoDTO.getImagen(), "conejos", Optional.of(conejoDTO.getNombre()));
+    //                 String publicId = resultUpload.get("public_id").toString();
+    //                 conejoDTO.setPublicId(publicId);
+    //                 conejoDTO.setSecureUrl(archivoUtil.getUrlWithPagina(publicId));
+    //                 // conejoDTO.setSecureUrl(resultUpload.get("secure_url").toString());
+
+    //             } catch (Exception e) {
+    //                 logger.error(e.getMessage());
+    //                 throw new RuntimeException(e.getMessage());
+    //             }
+    //         }
+    //     }
+
+    //     // Obtener RazaDTO para mapear
+    //     RazaDTO razaDTO = razaClient.obtenerRazaPorId(conejoDTO.getRaza().getId());
+    //     // RazaDTO razaDTO = razaService.obtenerRazaPorId(conejoDTO.getRaza().getId());
+
+    //     // Mapeo con razaId
+    //     ConejoModel conejoModel = modelMapper.map(conejoDTO, ConejoModel.class);
+    //     conejoModel.setRazaId(razaDTO.getId());
+
+    //     // Persistir
+    //     conejoModel = conejoRepository.save(conejoModel);
+
+    //     // Mapeo con RazaDTO
+    //     ConejoDTO conejo = modelMapper.map(conejoModel, ConejoDTO.class);
+    //     conejo.setRaza(razaDTO);
+
+    //     return conejo;
+    // }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

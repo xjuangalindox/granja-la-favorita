@@ -26,41 +26,28 @@ public class ArchivoUtil {
 	@Value("${marca.agua.pagina}")
 	private String marcaAguaPagina;
 
-    // private final Cloudinary cloudinary;
-
-    // public ArchivoUtil(Cloudinary cloudinary){
-    //     this.cloudinary = cloudinary;
-    // }
-
 	// Subir imagen a CLOUDINARY.COM
-	public Map<String, Object> subirImagenCloudinary(MultipartFile imagen, String folder, Optional<String> nombreArticulo){	
+	public Map<String, Object> subirImagenCloudinary(MultipartFile imagen, String folder, Optional<String> publicId){	
 		List<String> allowedExtensionts = Arrays.asList("jpg", "jpeg", "png", "webp", "avif");
 		String extension = ArchivoUtil.obtenerExtensionImagen(imagen);
 
 		// ¿La extensión de la imagen es valida?
-		if(!allowedExtensionts.contains(extension)){
-            String msg = "La entension "+extension+" de la imagen no es valida."; 
-            throw new RuntimeException(msg);
-		}
+		if(!allowedExtensionts.contains(extension)) throw new RuntimeException("La extensión "+extension+" de la imagen es inavlida");
 
 		// Preparar parametros del mapa para subir imagen a CLOUDINARYY.COM
 		Map<String, Object> params = new HashMap<>();
 		params.put("folder", folder);
+		if(publicId.isPresent()) params.put("public_id", publicId.get());
 
-		if(nombreArticulo.isPresent()){
-			params.put("public_id", nombreArticulo.get());
-		}
-
-        // ¿Se subio la imagen a CLOUDINARY.COM?
+        // Subir imagen a Cloudinary
 		try {
 			Map<String, Object> resultUpload = cloudinary.uploader().upload(imagen.getBytes(), params);
 			return resultUpload;
 
 		} catch (Exception e) {
-            String msg = "Ocurrio un error al subir la imagen a CLOUDINARY."; 
-			throw new RuntimeException(msg);
+			throw new RuntimeException("Ocurrio un error al subir la imagen a CLOUDINARY");
 		}
-	}    
+	}
 
 	// Eliminar imagen de CLOUDINARY.COM
 	public void eliminarImagenCloudinary(String publicId){
@@ -68,8 +55,7 @@ public class ArchivoUtil {
 			cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap()); // Funcionando para modulo conejo
 
 		} catch (Exception e) {
-			String msg = "Ocurrio un error al eliminar la imagen en CLOUDINARY.";
-			throw new RuntimeException(msg);
+			throw new RuntimeException("Ocurrio un error al eliminar la imagen en CLOUDINARY");
 		}
 	}
 
@@ -80,8 +66,7 @@ public class ArchivoUtil {
 			return resultRename;
 
 		} catch (Exception e) {
-			String msg = "Ocurrio un error renombrar o mover la imagen en CLOUDINARY.";
-			throw new RuntimeException(msg);
+			throw new RuntimeException("Ocurrio un error renombrar o mover la imagen en CLOUDINARY.");
 		}
 	}
 
@@ -102,7 +87,7 @@ public class ArchivoUtil {
 		return cloudinary.url()
 				.transformation(new Transformation<>()
 						.overlay(marcaAgua)
-						.gravity("center")  // Cambiado a centro
+						.gravity("center")  // Centrar marca de agua
 						.opacity(70)
 						.color("#FFFFFF")
 						// .x(20)

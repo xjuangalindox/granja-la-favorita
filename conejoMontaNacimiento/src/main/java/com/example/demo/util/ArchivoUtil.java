@@ -16,13 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
-import com.cloudinary.transformation.AbstractLayer;
-import com.cloudinary.transformation.Layer;
 import com.cloudinary.transformation.TextLayer;
 import com.cloudinary.utils.ObjectUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 
 @Component
 public class ArchivoUtil {
@@ -55,15 +52,8 @@ public class ArchivoUtil {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// Cloudinary para almacenamiento
 	@Autowired
 	private Cloudinary cloudinary;
-
-	// Instancia solo para acceder a los metodos desde el servicio
-	//@Autowired
-	// public ArchivoUtil(Cloudinary cloudinary){
-	// 	this.cloudinary = cloudinary;
-	// }
 
 	@Value("${marca.agua.pagina}")
 	private String marcaAguaPagina;
@@ -72,32 +62,25 @@ public class ArchivoUtil {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Subir imagen a CLOUDINARY.COM
-	public Map<String, Object> subirImagenCloudinary(MultipartFile imagen, String folder, Optional<String> nombreConejo){	
+	public Map<String, Object> subirImagenCloudinary(MultipartFile imagen, String folder, Optional<String> publicId){	
 		List<String> allowedExtensionts = Arrays.asList("jpg", "jpeg", "png", "webp", "avif");
 		String extension = ArchivoUtil.obtenerExtensionImagen(imagen);
 
 		// ¿La extensión de la imagen es valida?
-		if(!allowedExtensionts.contains(extension)){
-            String msg = "La entension "+extension+" de la imagen no es valida"; 
-            throw new RuntimeException(msg);
-		}
+		if(!allowedExtensionts.contains(extension)) throw new RuntimeException("La extensión "+extension+" de la imagen es inavlida");
 
 		// Preparar parametros del mapa para subir imagen a CLOUDINARYY.COM
 		Map<String, Object> params = new HashMap<>();
 		params.put("folder", folder);
+		if(publicId.isPresent()) params.put("public_id", publicId.get());
 
-		if(nombreConejo.isPresent()){
-			params.put("public_id", nombreConejo.get());
-		}
-
-        // ¿Se subio la imagen a CLOUDINARY.COM?
+        // Subir imagen a Cloudinary
 		try {
 			Map<String, Object> resultUpload = cloudinary.uploader().upload(imagen.getBytes(), params);
 			return resultUpload;
 
 		} catch (Exception e) {
-            String msg = "Ocurrio un error al subir la imagen a CLOUDINARY"; 
-			throw new RuntimeException(msg);
+			throw new RuntimeException("Ocurrio un error al subir la imagen a CLOUDINARY");
 		}
 	}
 		
@@ -107,8 +90,7 @@ public class ArchivoUtil {
 			cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap()); // Funcionando para modulo conejo
 
 		} catch (Exception e) {
-			String msg = "Ocurrio un error al eliminar la imagen en CLOUDINARY";
-			throw new RuntimeException(msg);
+			throw new RuntimeException("Ocurrio un error al eliminar la imagen en CLOUDINARY");
 		}
 	}
 
@@ -119,8 +101,7 @@ public class ArchivoUtil {
 			return resultRename;
 
 		} catch (Exception e) {
-			String msg = "Ocurrio un error renombrar o mover la imagen en CLOUDINARY.";
-			throw new RuntimeException(msg);
+			throw new RuntimeException("Ocurrio un error renombrar o mover la imagen en CLOUDINARY.");
 		}
 	}
 
@@ -136,7 +117,7 @@ public class ArchivoUtil {
 		return cloudinary.url()
 				.transformation(new Transformation<>()
 						.overlay(marcaAgua)
-						.gravity("center")  // Cambiado a centro
+						.gravity("center")  // Centrar marca de agua
 						.opacity(70)
 						.color("#FFFFFF")
 						// .x(20)
@@ -153,14 +134,6 @@ public class ArchivoUtil {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // public String getBaseUrl(HttpServletRequest request){
-    //     String proto = request.getHeader("X-Forwarded-Proto"); // http o https
-    //     String host = request.getHeader("X-Forwarded-Host"); // dominio o IP
-    //     String port = request.getHeader("X-Forwarded-Port"); // puerto visible
-        
-    //     return proto +"://"+ host +":" + port;
-    // }
 
     public String getBaseUrlNginx(HttpServletRequest request){
         String proto = request.getHeader("X-Forwarded-Proto"); // http o https
