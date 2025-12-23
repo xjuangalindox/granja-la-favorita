@@ -3,12 +3,26 @@ pipeline {                  // Define que este job es un pipeline declarativo
 
     stages {                // Bloque que contiene todas las etapas del pipeline
 
-        stage('Checkout repos') { // Etapa: clonar los repositorios
-            steps {
-                // Repo principal (ya lo hace Jenkins, pero es buena práctica)
-                checkout scm
+        // stage('Checkout repos') { // Etapa: clonar los repositorios
+        //     steps {
+        //         // Repo principal (ya lo hace Jenkins, pero es buena práctica)
+        //         checkout scm
 
-                // Segundo repo (credentials)
+        //         // Segundo repo (credentials)
+        //         dir('credentials') {
+        //             git url: 'https://github.com/xjuangalindox/credentials.git',
+        //                 branch: 'master',
+        //                 credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
+        //         }
+        //     }
+        // }
+
+        stage('Checkout repos') {
+            steps {
+                git url: 'https://github.com/xjuangalindox/granja-la-favorita.git',
+                    branch: 'master',
+                    credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
+
                 dir('credentials') {
                     git url: 'https://github.com/xjuangalindox/credentials.git',
                         branch: 'master',
@@ -30,16 +44,16 @@ pipeline {                  // Define que este job es un pipeline declarativo
             }
         }        
 
-        stage('Build') {
-            steps {
-                sh 'echo "Build inicial OK"'
-            }
-        }
+        // stage('Build') {
+        //     steps {
+        //         sh 'echo "Build inicial OK"'
+        //     }
+        // }
 
-        stage('Levantar MySQL') { // Etapa: levantar el contenedor MySQL
-            steps {
-                sh 'docker-compose --env-file credentials/.env.local up -d db-granja' // Levanta SOLO el servicio db-granja en segundo plano
-            }
-        }
+        // stage('Levantar MySQL') { // Etapa: levantar el contenedor MySQL
+        //     steps {
+        //         sh 'docker-compose --env-file credentials/.env.local up -d db-granja' // Levanta SOLO el servicio db-granja en segundo plano
+        //     }
+        // }
     }
 }
