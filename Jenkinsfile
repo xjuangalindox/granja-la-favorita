@@ -17,7 +17,7 @@ pipeline {                  // Define que este job es un pipeline declarativo
 
         stage('Levantar MySQL') { // Etapa: levantar el contenedor MySQL
             steps {
-                sh 'docker-compose --env-file ../credentials/.env.local up -d db-granja' // Levanta SOLO el servicio db-granja en segundo plano
+                sh 'docker-compose --env-file credentials/.env.local up -d db-granja' // Levanta SOLO el servicio db-granja en segundo plano
             }
         }
     }
