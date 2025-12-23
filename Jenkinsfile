@@ -22,6 +22,12 @@ pipeline {                  // Define que este job es un pipeline declarativo
                 sh 'ls -la'
                 sh 'ls -la credentials || echo "credentials NO existe"'
             }
+        }
+
+        stage('Docker test') {
+            steps {
+                sh 'docker ps'
+            }
         }        
 
         stage('Build') {
