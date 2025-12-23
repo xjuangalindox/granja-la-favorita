@@ -3,26 +3,12 @@ pipeline {                  // Define que este job es un pipeline declarativo
 
     stages {                // Bloque que contiene todas las etapas del pipeline
 
-        // stage('Checkout repos') { // Etapa: clonar los repositorios
-        //     steps {
-        //         // Repo principal (ya lo hace Jenkins, pero es buena práctica)
-        //         checkout scm
-
-        //         // Segundo repo (credentials)
-        //         dir('credentials') {
-        //             git url: 'https://github.com/xjuangalindox/credentials.git',
-        //                 branch: 'master',
-        //                 credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
-        //         }
-        //     }
-        // }
-
-        stage('Checkout repos') {
+        stage('Checkout repos') { // Etapa: clonar los repositorios
             steps {
-                git url: 'https://github.com/xjuangalindox/granja-la-favorita.git',
-                    branch: 'master',
-                    credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
+                // Repo principal (ya lo hace Jenkins, pero es buena práctica)
+                checkout scm
 
+                // Segundo repo (credentials)
                 dir('credentials') {
                     git url: 'https://github.com/xjuangalindox/credentials.git',
                         branch: 'master',
