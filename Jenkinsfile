@@ -3,11 +3,26 @@ pipeline {                  // Define que este job es un pipeline declarativo
 
     stages {                // Bloque que contiene todas las etapas del pipeline
 
-        stage('Checkout') { // Etapa: clonar el repositorio
-            steps {         // Acciones que se ejecutan en esta etapa
-                checkout scm // Jenkins clona el repo definido en "Pipeline from SCM"
+        stage('Checkout repos') { // Etapa: clonar los repositorios
+            steps {
+                // Repo principal (ya lo hace Jenkins, pero es buena práctica)
+                checkout scm
+
+                // Segundo repo (credentials)
+                dir('credentials') {
+                    git url: 'https://github.com/xjuangalindox/credentials.git',
+                        branch: 'master',
+                        credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
+                }
             }
         }
+
+        stage('Debug workspace') {
+            steps {
+                sh 'ls -la'
+                sh 'ls -la credentials || echo "credentials NO existe"'
+            }
+        }        
 
         stage('Build') {
             steps {
