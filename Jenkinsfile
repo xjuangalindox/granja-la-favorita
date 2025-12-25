@@ -3,12 +3,12 @@ pipeline {                  // Define que este job es un pipeline declarativo
 
     stages {                // Bloque que contiene todas las etapas del pipeline
 
-        // stage('Docker test') {
-        //     steps {
-        //         sh 'docker version'
-        //         sh 'docker ps'
-        //     }
-        // }  
+        stage('Docker test') {
+            steps {
+                sh 'docker version'
+                sh 'docker ps'
+            }
+        }  
 
         stage('Checkout repos') { // Etapa: clonar los repositorios
             steps {
