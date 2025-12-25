@@ -1,21 +1,16 @@
-pipeline {                  // Define que este job es un pipeline declarativo
-    agent any               // Ejecuta el pipeline en cualquier agente (nodo Jenkins disponible)
+pipeline {
+    agent any // Ejecuta el pipeline en cualquier agente (nodo Jenkins disponible)
 
-    stages {                // Bloque que contiene todas las etapas del pipeline
+    stages {
 
+        // Clonar repo granja-la-favorita
         stage('Checkout main repo') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Docker test') {
-            steps {
-                sh 'docker version'
-                sh 'docker ps'
-            }
-        }
-
+        // Clonar repo credentials en carpeta credentials
         stage('Checkout credentials repo') {
             steps {
                 dir('credentials') {
@@ -25,6 +20,31 @@ pipeline {                  // Define que este job es un pipeline declarativo
                 }
             }
         }
+
+        // Levantar servicio db-granja
+        stage('Levantar MySQL'){
+            steps{
+                sh 'docker-compose --env-file credentials/.env.local up -d db-granja'
+                sh 'docker ps'
+            }
+        }
+        
+        // Levantar servicio grafana
+        stage('Levantar Grafana'){
+            steps{
+                sh '''
+                    docker-compose --env-file credentials/.env.local up -d grafana
+                    docker ps
+                '''
+            }
+        }
+
+        // stage('Docker test') {
+        //     steps {
+        //         sh 'docker version'
+        //         sh 'docker ps'
+        //     }
+        // }
 
         // stage('Checkout repos') { // Etapa: clonar los repositorios
         //     steps {
