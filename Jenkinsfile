@@ -1,11 +1,17 @@
 pipeline {
     agent any // Ejecuta el pipeline en cualquier agente (nodo Jenkins disponible)
 
+    // 👉 Agrega la hora a cada línea del log del pipeline.
+    options {
+        timestamps()
+    }
+
     stages {
 
         // Clonar repo granja-la-favorita
         stage('Checkout main repo') {
             steps {
+                echo 'Clonando repositorio principal...'
                 checkout scm
             }
         }
@@ -13,6 +19,7 @@ pipeline {
         // Clonar repo credentials en carpeta credentials
         stage('Checkout credentials repo') {
             steps {
+                echo 'Clonando repo de credenciales...'
                 dir('credentials') {
                     git url: 'https://github.com/xjuangalindox/credentials.git',
                         branch: 'master',
@@ -24,60 +31,85 @@ pipeline {
         // Levantar servicio db-granja
         stage('Levantar MySQL'){
             steps{
-                sh 'docker-compose --env-file credentials/.env.local up -d db-granja'
-                sh 'docker ps'
+                script{
+                    try{
+                        echo 'Levantando MySQL...'
+                        sh 'docker-compose --env-file credentials/.env.local up -d db-granja'
+                        sh 'docker ps'
+
+                    }catch(Exception e){
+                        echo 'Error levantando MySQL'
+                        // currentBuild.result = 'FAILURE' // No necesario
+                        throw e
+                    }
+                }
+                
+                
             }
         }
         
         // Levantar servicio grafana
         stage('Levantar Grafana'){
+            when {
+                branch 'main'
+            }
             steps{
-                sh '''
-                    docker-compose --env-file credentials/.env.local up -d grafana
-                    docker ps
-                '''
+                script{
+                    try{
+                        echo 'Levantando Grafana...'
+                        sh '''
+                            docker-compose --env-file credentials/.env.local up -d grafana
+                            docker ps
+                        '''
+
+                    }catch(Exception e){
+                        echo 'Error al levantar Grafana'
+                        // currentBuild.result = 'FAILURE' // No necesario
+                        throw e
+                    }
+                    
+                }
             }
         }
+    }
 
-        // stage('Docker test') {
-        //     steps {
-        //         sh 'docker version'
-        //         sh 'docker ps'
-        //     }
-        // }
+    post {
+        success{
+            echo 'Pipeline ejecutado correctamente ✅'
+            emailext(
+                subject: "✅ Pipeline OK - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    El pipeline terminó correctamente.
 
-        // stage('Checkout repos') { // Etapa: clonar los repositorios
-        //     steps {
-        //         checkout scm // Clonar repo que contiene Jenkinsfile
+                    Job: ${env.JOB_NAME}
+                    Build: ${env.BUILD_NUMBER}
+                    Rama: ${env.BRANCH_NAME}
+                    URL: ${env.BUILD_URL}
+                """,
+                to: 'xjuangalindox@gmail.com'
+            )
+        }
 
-        //         // Segundo repo (credentials)
-        //         dir('credentials') { // Descargar repo en directorio en el servidor Jenkins
-        //             git url: 'https://github.com/xjuangalindox/credentials.git',
-        //                 branch: 'master',
-        //                 credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429' // credentials configurados en UI de Jenkins
-        //         }
-        //     }
-        // }
+        failure{
+            echo 'Pipeline falló ❌'
+            emailext(
+                subject: "❌ Pipeline FALLÓ - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    Ocurrió un error en el pipeline.
 
-        // stage('Docker test') {
-        //     steps {
-        //         sh 'docker version'
-        //         sh 'docker ps'
-        //     }
-        // } 
+                    Job: ${env.JOB_NAME}
+                    Build: ${env.BUILD_NUMBER}
+                    Rama: ${env.BRANCH_NAME}
+                    URL: ${env.BUILD_URL}
 
-        // stage('Levantar MySQL') { // Etapa: levantar el contenedor MySQL
-        //     steps {
-        //         sh '''
-        //             docker-compose --env-file credentials/.env.local up -d db-granja
-        //         '''
-        //     }
-        // }
+                    Revisa los logs en Jenkins.
+                """,
+                to: 'xjuangalindox@gmail.com'
+            )            
+        }
 
-        // stage('Levantar Grafana') { // Etapa: levantar el contenedor MySQL
-        //     steps {
-        //         sh 'docker-compose --env-file credentials/.env.local up -d grafana'
-        //     }
-        // }
+        always{
+            echo 'Fin del pipeline 🧹'
+        }
     }
 }
