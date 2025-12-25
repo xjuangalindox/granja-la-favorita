@@ -12,7 +12,7 @@ pipeline {                  // Define que este job es un pipeline declarativo
 
         stage('Checkout repos') { // Etapa: clonar los repositorios
             steps {
-                checkout scm // Clonar repo que contiene Jenkinsfile
+                // checkout scm // Clonar repo que contiene Jenkinsfile
 
                 // Segundo repo (credentials)
                 dir('credentials') { // Descargar repo en directorio en el servidor Jenkins
