@@ -75,6 +75,7 @@ pipeline {
 
     post {
         success{
+            mail bcc: '', body: 'Testing Jenkins', cc: '', from: '', replyTo: '', subject: 'Successful testing of pipeline', to: 'xjuangalindox@gmail.com'
             echo 'Pipeline ejecutado correctamente ✅'
             emailext(
                 from: 'Jenkins <xjuangalindox@gmail.com>',
@@ -92,6 +93,7 @@ pipeline {
         }
 
         failure{
+            mail bcc: '', body: 'Testing Jenkins', cc: '', from: '', replyTo: '', subject: 'Successful testing of pipeline', to: 'xjuangalindox@gmail.com'
             echo 'Pipeline falló ❌'
             emailext(
                 from: 'Jenkins <xjuangalindox@gmail.com>',
@@ -102,7 +104,7 @@ pipeline {
 
                     Job: ${env.JOB_NAME}
                     Build: ${env.BUILD_NUMBER}
-                    Rama: ${env.BRANCH_NAME}
+                    Rama: ${env.BRANCH_NAME ?: 'N/A'}
                     URL: ${env.BUILD_URL}
 
                     Revisa los logs en Jenkins.
@@ -115,3 +117,5 @@ pipeline {
         }
     }
 }
+
+// mail bcc: '', body: '', cc: '', from: '', replyTo: '', subject: '', to: ''
