@@ -77,6 +77,8 @@ pipeline {
         success{
             echo 'Pipeline ejecutado correctamente ✅'
             emailext(
+                from: 'Jenkins <xjuangalindox@gmail.com>',
+                to: 'xjuangalindox@gmail.com',                
                 subject: "✅ Pipeline OK - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
                     El pipeline terminó correctamente.
@@ -85,14 +87,15 @@ pipeline {
                     Build: ${env.BUILD_NUMBER}
                     Rama: ${env.BRANCH_NAME}
                     URL: ${env.BUILD_URL}
-                """,
-                to: 'xjuangalindox@gmail.com'
+                """
             )
         }
 
         failure{
             echo 'Pipeline falló ❌'
             emailext(
+                from: 'Jenkins <xjuangalindox@gmail.com>',
+                to: 'xjuangalindox@gmail.com',
                 subject: "❌ Pipeline FALLÓ - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
                     Ocurrió un error en el pipeline.
@@ -103,8 +106,7 @@ pipeline {
                     URL: ${env.BUILD_URL}
 
                     Revisa los logs en Jenkins.
-                """,
-                to: 'xjuangalindox@gmail.com'
+                """
             )            
         }
 
