@@ -42,16 +42,15 @@ pipeline {
                         // currentBuild.result = 'FAILURE' // No necesario
                         throw e
                     }
-                }
-                
-                
+                } 
             }
         }
         
         // Levantar servicio grafana
         stage('Levantar Grafana'){
+            // Levantar Grafana si el push se hizo en master branch (configurar Trigger)
             when {
-                branch 'main'
+                branch 'master'
             }
             steps{
                 script{
@@ -67,7 +66,6 @@ pipeline {
                         // currentBuild.result = 'FAILURE' // No necesario
                         throw e
                     }
-                    
                 }
             }
         }
@@ -78,27 +76,28 @@ pipeline {
             echo 'Pipeline ejecutado correctamente ✅'
 
             mail(
-                bcc: '', 
-                body: 'Testing Jenkins', 
-                cc: '', 
-                from: 'Jenkins <xjuangalindox@gmail.com>', 
-                replyTo: '', 
-                subject: '✅ Pipeline SUCCESSFUL', 
-                to: 'xjuangalindox@gmail.com'
-            )
-            
-            // emailext(
-            mail(
                 from: 'Jenkins <xjuangalindox@gmail.com>',
                 to: 'xjuangalindox@gmail.com',                
-                subject: "✅ Pipeline OK - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: "🚀 Nueva versión disponible - Granja La Favorita",
                 body: """
-                    El pipeline terminó correctamente.
+                ¡Despliegue exitoso!
 
-                    Job: ${env.JOB_NAME}
-                    Build: ${env.BUILD_NUMBER}
-                    Rama: ${env.BRANCH_NAME}
-                    URL: ${env.BUILD_URL}
+                La nueva versión de *Granja La Favorita* ya se encuentra disponible.
+                
+                🌐 Accede aquí:
+                https://granjalafavorita.com
+
+                Detalles del despliegue:
+                - Job: ${env.JOB_NAME}
+                - Build: ${env.BUILD_NUMBER}
+                - Rama: ${env.BRANCH_NAME ?: 'N/A'}
+                - Fecha: ${new Date()}
+                - URL del build: ${env.BUILD_URL}
+
+                Puedes comenzar a usar la nueva versión con normalidad.
+
+                Saludos,
+                Jenkins 🤖
                 """
             )
         }
@@ -107,31 +106,26 @@ pipeline {
             echo 'Pipeline falló ❌'
 
             mail(
-                bcc: '', 
-                body: 'Testing Jenkins', 
-                cc: '', 
-                from: 'Jenkins <xjuangalindox@gmail.com>', 
-                replyTo: '', 
-                subject: '❌ Pipeline FAILED', 
-                to: 'xjuangalindox@gmail.com'
-            )
-            
-            // emailext(
-            mail(
                 from: 'Jenkins <xjuangalindox@gmail.com>',
                 to: 'xjuangalindox@gmail.com',
-                subject: "❌ Pipeline FALLÓ - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: "❌ Error en despliegue - Granja La Favorita",
                 body: """
-                    Ocurrió un error en el pipeline.
+                ¡Despliegue fallido!
 
-                    Job: ${env.JOB_NAME}
-                    Build: ${env.BUILD_NUMBER}
-                    Rama: ${env.BRANCH_NAME ?: 'N/A'}
-                    URL: ${env.BUILD_URL}
+                La nueva versión de *Granja La Favorita* NO está disponible debido a un error durante el proceso.
 
-                    Revisa los logs en Jenkins.
+                Detalles del error:
+                - Job: ${env.JOB_NAME}
+                - Build: ${env.BUILD_NUMBER}
+                - Rama: ${env.BRANCH_NAME ?: 'N/A'}
+                - Fecha: ${new Date()}
+                - URL del build: ${env.BUILD_URL}
+
+                Se requiere revisión del pipeline y los logs para corregir el problema.
+
+                Jenkins 🤖
                 """
-            )            
+            )           
         }
 
         always{
@@ -140,5 +134,4 @@ pipeline {
     }
 }
 
-// mail bcc: '', body: 'Testing Jenkins', cc: '', from: 'Jenkins <xjuangalindox@gmail.com>', replyTo: '', subject: 'Successful testing of pipeline', to: 'xjuangalindox@gmail.com'
 // mail bcc: '', body: '', cc: '', from: '', replyTo: '', subject: '', to: ''
