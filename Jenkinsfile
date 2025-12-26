@@ -75,9 +75,20 @@ pipeline {
 
     post {
         success{
-            mail bcc: '', body: 'Testing Jenkins', cc: '', from: '', replyTo: '', subject: 'Successful testing of pipeline', to: 'xjuangalindox@gmail.com'
             echo 'Pipeline ejecutado correctamente ✅'
-            emailext(
+
+            mail(
+                bcc: '', 
+                body: 'Testing Jenkins', 
+                cc: '', 
+                from: 'Jenkins <xjuangalindox@gmail.com>', 
+                replyTo: '', 
+                subject: '✅ Pipeline SUCCESSFUL', 
+                to: 'xjuangalindox@gmail.com'
+            )
+            
+            // emailext(
+            mail(
                 from: 'Jenkins <xjuangalindox@gmail.com>',
                 to: 'xjuangalindox@gmail.com',                
                 subject: "✅ Pipeline OK - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
@@ -93,9 +104,20 @@ pipeline {
         }
 
         failure{
-            mail bcc: '', body: 'Testing Jenkins', cc: '', from: '', replyTo: '', subject: 'Successful testing of pipeline', to: 'xjuangalindox@gmail.com'
             echo 'Pipeline falló ❌'
-            emailext(
+
+            mail(
+                bcc: '', 
+                body: 'Testing Jenkins', 
+                cc: '', 
+                from: 'Jenkins <xjuangalindox@gmail.com>', 
+                replyTo: '', 
+                subject: '❌ Pipeline FAILED', 
+                to: 'xjuangalindox@gmail.com'
+            )
+            
+            // emailext(
+            mail(
                 from: 'Jenkins <xjuangalindox@gmail.com>',
                 to: 'xjuangalindox@gmail.com',
                 subject: "❌ Pipeline FALLÓ - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
@@ -118,4 +140,5 @@ pipeline {
     }
 }
 
+// mail bcc: '', body: 'Testing Jenkins', cc: '', from: 'Jenkins <xjuangalindox@gmail.com>', replyTo: '', subject: 'Successful testing of pipeline', to: 'xjuangalindox@gmail.com'
 // mail bcc: '', body: '', cc: '', from: '', replyTo: '', subject: '', to: ''
