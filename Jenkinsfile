@@ -30,6 +30,8 @@ pipeline {
 
         // Levantar servicio db-granja
         stage('Levantar MySQL'){
+            when {branch 'master'}
+
             steps{
                 script{
                     try{
@@ -48,10 +50,8 @@ pipeline {
         
         // Levantar servicio grafana
         stage('Levantar Grafana'){
-            // Levantar Grafana si el push se hizo en master branch (configurar Trigger)
-            when {
-                branch 'master'
-            }
+            when {branch 'master'}
+            
             steps{
                 script{
                     try{
@@ -72,6 +72,11 @@ pipeline {
     }
 
     post {
+        always{
+            echo 'Fin del pipeline 🧹'
+        }
+
+        // SUCCESS    
         success{
             echo 'Pipeline ejecutado correctamente ✅'
 
@@ -102,6 +107,7 @@ pipeline {
             )
         }
 
+        // FAILURE
         failure{
             echo 'Pipeline falló ❌'
 
@@ -126,10 +132,6 @@ pipeline {
                 Jenkins 🤖
                 """
             )           
-        }
-
-        always{
-            echo 'Fin del pipeline 🧹'
         }
     }
 }
