@@ -66,7 +66,7 @@ pipeline {
         }
 
         stage('********** Levantar Config-Server **********'){
-            when{branch: 'master'}
+            when {branch 'master'}
 
             steps{
                 script{
@@ -84,7 +84,7 @@ pipeline {
         }
 
         stage('********** Levantar Eureka-Server **********'){
-            when{branch: 'master'}
+            when {branch 'master'}
 
             steps{
                 script{
@@ -102,7 +102,7 @@ pipeline {
         }
 
         stage('********** Levantar Microservicio-Principal **********'){
-            when{branch: 'master'}
+            when {branch 'master'}
 
             steps{
                 script{
@@ -120,7 +120,7 @@ pipeline {
         }
 
         stage('********** Levantar Microservicio-Razas **********'){
-            when{branch: 'master'}
+            when {branch 'master'}
 
             steps{
                 script{
@@ -138,7 +138,7 @@ pipeline {
         }
 
         stage('********** Levantar Microservicio-Articulos **********'){
-            when{branch: 'master'}
+            when {branch 'master'}
 
             steps{
                 script{
@@ -156,7 +156,7 @@ pipeline {
         }  
 
         stage('********** Levantar Gateway-Service **********'){
-            when{branch: 'master'}
+            when {branch 'master'}
 
             steps{
                 script{
@@ -174,7 +174,7 @@ pipeline {
         }     
 
         stage('********** Levantar Nginx **********'){
-            when{branch: 'master'}
+            when {branch 'master'}
 
             steps{
                 script{
