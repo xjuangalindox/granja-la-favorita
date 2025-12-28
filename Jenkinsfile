@@ -14,6 +14,10 @@ def tagAsStable(images, appVersion, stableTag) {
     }
 }
 
+def deleteOldImages(){
+
+}
+
 def rollback() {
     echo '********** 🔄 Rollback a última versión estable **********'
 
@@ -159,8 +163,10 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build config-server'
-                        sh 'docker ps'
+                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
+                            sh 'docker-compose --env-file credentials/.env.local up -d --build config-server'
+                            sh 'docker ps'
+                        }
 
                     }catch(Exception e){
                         showLastLogs('config-server')
@@ -176,8 +182,10 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build eureka-server'
-                        sh 'docker ps'
+                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
+                            sh 'docker-compose --env-file credentials/.env.local up -d --build eureka-server'
+                            sh 'docker ps'
+                        }
 
                     }catch(Exception e){
                         showLastLogs('eureka-server')
@@ -193,8 +201,10 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-principal'
-                        sh 'docker ps'
+                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
+                            sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-principal'
+                            sh 'docker ps'
+                        }
 
                     }catch(Exception e){
                         showLastLogs('microservicio-principal')
@@ -210,8 +220,10 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-razas'
-                        sh 'docker ps'
+                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
+                            sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-razas'
+                            sh 'docker ps'
+                        }
 
                     }catch(Exception e){
                         showLastLogs('microservicio-razas')
@@ -227,8 +239,10 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos'
-                        sh 'docker ps'
+                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
+                            sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos'
+                            sh 'docker ps'
+                        }
 
                     }catch(Exception e){
                         showLastLogs('microservicio-articulos')
@@ -244,8 +258,10 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build gateway-service'
-                        sh 'docker ps'
+                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
+                            sh 'docker-compose --env-file credentials/.env.local up -d --build gateway-service'
+                            sh 'docker ps'
+                        }
 
                     }catch(Exception e){
                         showLastLogs('gateway-service')
