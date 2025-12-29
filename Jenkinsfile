@@ -304,6 +304,15 @@ pipeline {
             }
         }     
 
+        stage('🔎 Verificar nginx config') {
+            steps {
+                sh '''
+                ls -l nginx/
+                cat nginx/nginx.local.conf
+                '''
+            }
+        }
+
         stage('********** 🔀 Levantar Nginx **********'){
             // when {branch 'master'}
 
