@@ -79,7 +79,7 @@ def deleteOldImages(images, appVersion, stableTag){
     images.each { image ->
         sh """
         docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
-        | grep -v ":${appVersion}-${stableTag}$" \
+        | grep -v ":${appVersion}-${stableTag}\\$" \
         | xargs -r docker rmi || true
         """
     }
