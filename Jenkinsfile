@@ -15,14 +15,13 @@ def tagAsStable(images, appVersion, stableTag) {
 }
 
 def deleteOldImages(){
-
 }
 
 def rollback() {
     echo '********** 🔄 Rollback a última versión estable **********'
 
     sh 'docker-compose down || true' // aunque falle, continúa
-    sh 'APP_VERSION=stable docker-compose up -d' // usa imágenes ya existentes (las stable)
+    // sh 'APP_VERSION=stable docker-compose up -d' // usa imágenes ya existentes (las stable)
 }
 
 def showLastLogs(service) {
@@ -179,12 +178,12 @@ pipeline {
         }
 
         stage('********** 📡 Levantar Eureka-Server **********'){
-            when {branch 'master'}
+            // when {branch 'master'}
 
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build eureka-server'
+                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build eureka-server"
                         sh 'docker ps'
                         
                     }catch(Exception e){
@@ -196,12 +195,12 @@ pipeline {
         }
 
         stage('********** 🧠 Levantar Microservicio-Principal **********'){
-            when {branch 'master'}
+            // when {branch 'master'}
 
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-principal'
+                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-principal"
                         sh 'docker ps'
                         
                     }catch(Exception e){
@@ -213,12 +212,12 @@ pipeline {
         }
 
         stage('********** 🐇 Levantar Microservicio-Razas **********'){
-            when {branch 'master'}
+            // when {branch 'master'}
 
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-razas'
+                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-razas"
                         sh 'docker ps'
                         
                     }catch(Exception e){
@@ -230,12 +229,12 @@ pipeline {
         }
 
         stage('********** 📦 Levantar Microservicio-Articulos **********'){
-            when {branch 'master'}
+            // when {branch 'master'}
 
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos'
+                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos"
                         sh 'docker ps'
                         
                     }catch(Exception e){
@@ -247,12 +246,12 @@ pipeline {
         }  
 
         stage('********** 🚪 Levantar Gateway-Service **********'){
-            when {branch 'master'}
+            // when {branch 'master'}
 
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d --build gateway-service'
+                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build gateway-service"
                         sh 'docker ps'
                         
                     }catch(Exception e){
