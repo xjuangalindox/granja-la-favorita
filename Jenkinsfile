@@ -310,7 +310,7 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d nginx'
+                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d nginx"
                         sh 'docker ps'
 
                     }catch(Exception e){
