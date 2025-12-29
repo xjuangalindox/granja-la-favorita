@@ -79,10 +79,12 @@ def deleteOldImages(images, appVersion, stableTag){
     images.each { image ->
         sh """
         docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
-        | grep -v ":${appVersion}-${stableTag}\\$" \
+        | grep -v "${stableTag}\$" \
         | xargs -r docker rmi || true
         """
     }
+    // | grep -v ":${appVersion}-${stableTag}" | grep -v stable \
+    // | grep -v ":${appVersion}-${stableTag}\\$" \
 }
 
 def rollback(services, stableTag) {
