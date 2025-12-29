@@ -163,10 +163,12 @@ pipeline {
             steps{
                 script{
                     try{
-                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
-                            sh 'docker-compose --env-file credentials/.env.local up -d --build config-server'
-                            sh 'docker ps'
-                        }
+                        sh """
+                            export APP_VERSION=${APP_VERSION}
+                            docker-compose --env-file credentials/.env.local up -d --build config-server
+                        """
+                        // sh 'docker-compose --env-file credentials/.env.local up -d --build config-server'
+                        // sh 'docker ps'
 
                     }catch(Exception e){
                         showLastLogs('config-server')
@@ -182,11 +184,9 @@ pipeline {
             steps{
                 script{
                     try{
-                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
-                            sh 'docker-compose --env-file credentials/.env.local up -d --build eureka-server'
-                            sh 'docker ps'
-                        }
-
+                        sh 'docker-compose --env-file credentials/.env.local up -d --build eureka-server'
+                        sh 'docker ps'
+                        
                     }catch(Exception e){
                         showLastLogs('eureka-server')
                         throw e
@@ -201,11 +201,9 @@ pipeline {
             steps{
                 script{
                     try{
-                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
-                            sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-principal'
-                            sh 'docker ps'
-                        }
-
+                        sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-principal'
+                        sh 'docker ps'
+                        
                     }catch(Exception e){
                         showLastLogs('microservicio-principal')
                         throw e
@@ -220,11 +218,9 @@ pipeline {
             steps{
                 script{
                     try{
-                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
-                            sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-razas'
-                            sh 'docker ps'
-                        }
-
+                        sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-razas'
+                        sh 'docker ps'
+                        
                     }catch(Exception e){
                         showLastLogs('microservicio-razas')
                         throw e
@@ -239,11 +235,9 @@ pipeline {
             steps{
                 script{
                     try{
-                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
-                            sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos'
-                            sh 'docker ps'
-                        }
-
+                        sh 'docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos'
+                        sh 'docker ps'
+                        
                     }catch(Exception e){
                         showLastLogs('microservicio-articulos')
                         throw e
@@ -258,11 +252,9 @@ pipeline {
             steps{
                 script{
                     try{
-                        withEnv(["APP_VERSION=${env.BUILD_NUMBER}"]) {
-                            sh 'docker-compose --env-file credentials/.env.local up -d --build gateway-service'
-                            sh 'docker ps'
-                        }
-
+                        sh 'docker-compose --env-file credentials/.env.local up -d --build gateway-service'
+                        sh 'docker ps'
+                        
                     }catch(Exception e){
                         showLastLogs('gateway-service')
                         throw e
