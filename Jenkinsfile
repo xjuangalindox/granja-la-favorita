@@ -1,35 +1,5 @@
-    // showLastLogs('config-server')
-    // showLastLogs('eureka-server')
-    // showLastLogs('microservicio-principal')
-    // showLastLogs('microservicio-razas')
-    // showLastLogs('microservicio-articulos')
-    // showLastLogs('gateway-service')
-
-// ================== FUNCIONES ==================
-def tagAsStable(images, appVersion, stableTag) {
-    echo "********** 🏷️ Marcando imágenes como versión estable: ${images} **********"
-
-    images.each { image ->
-        sh "docker tag ${image}:${appVersion} ${image}:${stableTag}"
-    }
-}
-
-def deleteOldImages(){
-}
-
-def rollback() {
-    echo '********** 🔄 Rollback a última versión estable **********'
-
-    sh 'docker-compose down || true' // aunque falle, continúa
-    // sh 'APP_VERSION=stable docker-compose up -d' // usa imágenes ya existentes (las stable)
-}
-
-def showLastLogs(service) {
-    echo "********** 🔍 Mostrando últimos 50 logs del servicio: ${service} **********"
-    
-    sh "docker-compose logs --tail=50 ${service}"
-}
-
+// ================== MAILS ==================
+// ===========================================
 def sendSuccessMail() {
     echo '********** ✅📧 Enviando correo de DEPLOY EXITOSO **********'
 
@@ -37,10 +7,11 @@ def sendSuccessMail() {
         from: 'Jenkins <xjuangalindox@gmail.com>',
         to: 'xjuangalindox@gmail.com',
         subject: "🚀 Nueva versión disponible - Granja La Favorita",
-        body: """
-        ¡Despliegue exitoso! 🎉
+        body: 
+"""
+¡Despliegue exitoso! 🎉
 
-    La nueva versión de Granja La Favorita ya se encuentra disponible.
+La nueva versión de Granja La Favorita ya se encuentra disponible.
 
 🌐 Accede aquí:
 https://granjalafavorita.com
@@ -67,10 +38,11 @@ def sendFailureMail() {
         from: 'Jenkins <xjuangalindox@gmail.com>',
         to: 'xjuangalindox@gmail.com',
         subject: "❌ Error en despliegue - Granja La Favorita",
-        body: """
-        ¡Despliegue fallido! ❌
+        body: 
+"""
+¡Despliegue fallido! ❌
 
-    La nueva versión de Granja La Favorita no está disponible debido a un error durante el proceso.
+La nueva versión de Granja La Favorita no está disponible debido a un error durante el proceso.
 
 🌐 Pipeline:
 ${env.BUILD_URL}
@@ -90,7 +62,70 @@ Jenkins 🤖
     )
 }
 
+// ================== FUNCIONES ==================
+// ===============================================
+def tagAsStable(images, appVersion, stableTag) {
+    echo "********** 🏷️ Marcando imágenes como versión estable: ${images} **********"
+
+    images.each { image ->
+        sh "docker tag ${image}:${appVersion} ${image}:${appVersion}-${stableTag}"
+    }
+}
+
+def deleteOldImages(images, appVersion, stableTag){
+    echo '********** 🧹 Eliminando imágenes antiguas (solo queda image:appVersion-stableTag) **********'
+
+    // Para cada imagen, lista sus tags → quita stable (ejecutandose) → borra el resto → no rompas el pipeline
+    images.each { image ->
+        sh """
+        docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
+        | grep -v ":${appVersion}-${stableTag}$" \
+        | xargs -r docker rmi || true
+        """
+    }
+}
+
+def rollback(services, stableTag) {
+    echo '********** 🔄 Rollback a última versión estable **********'
+
+    // 1️⃣ Bajar todos los contenedores
+    sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
+
+    // 2️⃣ Por cada servicio, levantar su última imagen estable
+    services.each { service ->
+
+        def imageName = "granja/${service}"
+
+        // Buscar la última versión estable para esta imagen
+        def stableImage = sh(
+            script: """
+                docker images --format '{{.Repository}}:{{.Tag}}' \
+                | grep '^${imageName}:' \
+                | grep '${stableTag}\$' \
+                | sort -V \
+                | tail -1
+            """,
+            returnStdout: true
+        ).trim()
+    
+        if (stableImage) {  
+            def tagOnly = stableImage.split(':')[1]
+            sh "TAG_VERSION=${tagOnly} docker-compose --env-file credentials/.env.local up -d ${service}"
+
+        } else {
+            echo "⚠️ No se encontró imagen estable para ${service}, se omite"
+        }
+    }
+}
+
+def showLastLogs(service) {
+    echo "********** 🔍 Mostrando últimos 50 logs del servicio: ${service} **********"
+    
+    sh "docker-compose logs --tail=50 ${service}"
+}
+
 // ================== PIPELINE ===================
+// ===============================================
 pipeline {
     agent any // Ejecuta el pipeline en cualquier agente (nodo Jenkins disponible)
 
@@ -122,8 +157,17 @@ pipeline {
             }
         }
 
+        stage('********** 📦 Bajar contenedores actuales **********') {
+            // when {branch 'master'}
+
+            steps{
+                sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
+                sh 'docker ps'
+            }
+        }
+
         stage('********** 🗄️ Levantar MySQL **********'){
-            when {branch 'master'}
+            // when {branch 'master'}
 
             steps{
                 script{
@@ -140,7 +184,7 @@ pipeline {
         }
         
         stage('********** 📊 Levantar Grafana **********'){
-            when {branch 'master'}
+            // when {branch 'master'}
 
             steps{
                 script{
@@ -162,11 +206,7 @@ pipeline {
             steps{
                 script{
                     try{
-                        // sh "docker build -t granja/config-server:${env.APP_VERSION} ./config-service"
-                        // sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d config-server"
-
-                        // sh "export APP_VERSION=${env.APP_VERSION} && docker-compose --env-file credentials/.env.local up -d --build config-server"
-                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build config-server"
+                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build config-server"
                         sh 'docker ps'
 
                     }catch(Exception e){
@@ -183,7 +223,7 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build eureka-server"
+                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build eureka-server"
                         sh 'docker ps'
                         
                     }catch(Exception e){
@@ -200,7 +240,7 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-principal"
+                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-principal"
                         sh 'docker ps'
                         
                     }catch(Exception e){
@@ -217,7 +257,7 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-razas"
+                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-razas"
                         sh 'docker ps'
                         
                     }catch(Exception e){
@@ -234,7 +274,7 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos"
+                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos"
                         sh 'docker ps'
                         
                     }catch(Exception e){
@@ -251,7 +291,7 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build gateway-service"
+                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build gateway-service"
                         sh 'docker ps'
                         
                     }catch(Exception e){
@@ -263,7 +303,7 @@ pipeline {
         }     
 
         stage('********** 🔀 Levantar Nginx **********'){
-            when {branch 'master'}
+            // when {branch 'master'}
 
             steps{
                 script{
@@ -292,20 +332,37 @@ pipeline {
 
         success {
             echo '********** ✅ POST: SUCCESS **********'
+            
             script {
                 def images = [
                     'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
                     'granja/microservicio-razas', 'granja/microservicio-articulos','granja/gateway-service'
                     ]
+                    
+                // 1️⃣ Marcar como stable
                 tagAsStable(images, env.APP_VERSION, env.STABLE_TAG)
+
+                // 2️⃣ Limpiar imágenes viejas
+                deleteOldImages(images, env.APP_VERSION, env.STABLE_TAG)
             }
-            sendSuccessMail() // Enviar success mail
+
+            // sendSuccessMail() // Enviar success mail
         }
 
         failure {
             echo '********** 💥 POST: FAILURE **********'
-            rollback()
-            sendFailureMail() // Enviar failure mail
+
+            script{
+                def services = [
+                    'config-server', 'eureka-server', 'microservicio-principal',
+                    'microservicio-razas', 'microservicio-articulos', 'gateway-service'
+                ]
+                
+                // 1️⃣ Levantar versiones estables
+                rollback(services, env.STABLE_TAG)
+            }
+            
+            // sendFailureMail() // Enviar failure mail
         }
     }
 }

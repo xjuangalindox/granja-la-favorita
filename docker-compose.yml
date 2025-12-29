@@ -67,7 +67,7 @@ services:
 ####################################################################################################################
   config-server:
     container_name: config-server
-    image: granja/config-server:${APP_VERSION}
+    image: granja/config-server:${TAG_VERSION}
     build: ./config-service
     # ports:
     #   - "8888:8888"
@@ -99,7 +99,7 @@ services:
 # ###################################################################################################################
   eureka-server:
     container_name: eureka-server
-    image: granja/eureka-server:${APP_VERSION}
+    image: granja/eureka-server:${TAG_VERSION}
     build: ./eureka-service
     # ports:
     #   - "8761:8761"
@@ -124,7 +124,7 @@ services:
 # ####################################################################################################################
   microservicio-principal:
     container_name: microservicio-principal
-    image: granja/microservicio-principal:${APP_VERSION}
+    image: granja/microservicio-principal:${TAG_VERSION}
     build: ./conejoMontaNacimiento
     # mem_limit: 512m
     environment:
@@ -165,7 +165,7 @@ services:
 # ####################################################################################################################
   microservicio-razas:
     container_name: microservicio-razas
-    image: granja/microservicio-razas:${APP_VERSION}
+    image: granja/microservicio-razas:${TAG_VERSION}
     build: ./microservicio-razas
     # mem_limit: 256m
     environment:
@@ -200,7 +200,7 @@ services:
 # ####################################################################################################################
   microservicio-articulos:
     container_name: microservicio-articulos
-    image: granja/microservicio-articulos:${APP_VERSION}
+    image: granja/microservicio-articulos:${TAG_VERSION}
     build: ./microservicio-articulos
     # mem_limit: 256m
     environment:
@@ -241,7 +241,7 @@ services:
 # ####################################################################################################################
   gateway-service:
     container_name: gateway-service
-    image: granja/gateway-service:${APP_VERSION}
+    image: granja/gateway-service:${TAG_VERSION}
     build: ./gateway-service
     # mem_limit: 256m
     # ports:
