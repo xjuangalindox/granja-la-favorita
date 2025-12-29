@@ -68,7 +68,7 @@ services:
   config-server:
     container_name: config-server
     image: granja/config-server:${APP_VERSION}
-    build: ./config-service
+    # build: ./config-service
     # ports:
     #   - "8888:8888"
     environment:

@@ -163,11 +163,11 @@ pipeline {
             steps{
                 script{
                     try{
-                        // sh "docker build -t granja/config-server:${env.BUILD_NUMBER} ./config-service" // Crear imagen del servicio
-                        // sh 'docker-compose --env-file credentials/.env.local up -d config-server' // Levantar contenedor, usar la imagen creada
+                        sh "docker build -t granja/config-server:${env.APP_VERSION} ./config-service"
+                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d config-server"
 
                         // sh "export APP_VERSION=${env.APP_VERSION} && docker-compose --env-file credentials/.env.local up -d --build config-server"
-                        sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build config-server"
+                        // sh "APP_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build config-server"
                         sh 'docker ps'
 
                     }catch(Exception e){
