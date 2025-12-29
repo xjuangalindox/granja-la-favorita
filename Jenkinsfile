@@ -354,15 +354,18 @@ pipeline {
         failure {
             echo '********** 💥 POST: FAILURE **********'
 
-            script{
-                def services = [
-                    'config-server', 'eureka-server', 'microservicio-principal',
-                    'microservicio-razas', 'microservicio-articulos', 'gateway-service'
-                ]
+            // 1️⃣ Bajar todos los contenedores
+            sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
+
+            // script{
+            //     def services = [
+            //         'config-server', 'eureka-server', 'microservicio-principal',
+            //         'microservicio-razas', 'microservicio-articulos', 'gateway-service'
+            //     ]
                 
-                // 1️⃣ Levantar versiones estables
-                rollback(services, env.STABLE_TAG)
-            }
+            //     // 1️⃣ Levantar versiones estables
+            //     rollback(services, env.STABLE_TAG)
+            // }
             
             // sendFailureMail() // Enviar failure mail
         }
