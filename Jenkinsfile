@@ -163,7 +163,7 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh "docker build -t granja/config-server:${APP_VERSION} ./config-service" // Crear imagen del servicio
+                        sh "docker build -t granja/config-server:${env.BUILD_NUMBER} ./config-service" // Crear imagen del servicio
                         sh 'docker-compose --env-file credentials/.env.local up -d config-server' // Levantar contenedor, usar la imagen creada
 
                         // sh 'docker-compose --env-file credentials/.env.local up -d --build config-server'
