@@ -163,10 +163,9 @@ pipeline {
             steps{
                 script{
                     try{
-                        sh """
-                            export APP_VERSION=${APP_VERSION}
-                            docker-compose --env-file credentials/.env.local up -d --build config-server
-                        """
+                        sh "docker build -t granja/config-server:${APP_VERSION} ./config-service" // Crear imagen del servicio
+                        sh 'docker-compose --env-file credentials/.env.local up -d config-server' // Levantar contenedor, usar la imagen creada
+
                         // sh 'docker-compose --env-file credentials/.env.local up -d --build config-server'
                         // sh 'docker ps'
 
