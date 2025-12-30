@@ -132,7 +132,10 @@ pipeline {
     agent any // Ejecuta el pipeline en cualquier agente (nodo Jenkins disponible)
 
     environment {
-        APP_VERSION = "${env.BUILD_NUMBER}" // Cada deploy tiene su versión
+        PROFILE = "${env.PROFILE}" // parameterized
+        DEPLOY_BRANCH = "${env.DEPLOY_BRANCH}" // parameterized
+
+        APP_VERSION = "${env.BUILD_NUMBER}"
         STABLE_TAG = "stable"
     }
 
@@ -143,6 +146,18 @@ pipeline {
     }
 
     stages {
+        stage('********** 🐞 DEBUG DEV **********') {
+            steps {
+                echo "PROFILE=${env.PROFILE}"
+                echo "DEPLOY_BRANCH=${env.DEPLOY_BRANCH}"
+
+                echo "BRANCH_NAME=${env.BRANCH_NAME}"
+                
+                echo "APP_VERSION=${env.APP_VERSION}"
+                echo "STABLE_TAG=${env.STABLE_TAG}"
+            }
+        }
+
         stage('********** 📥 Checkout main repo **********') {
             steps {
                 checkout scm
