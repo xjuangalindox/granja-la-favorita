@@ -345,7 +345,7 @@ pipeline {
             script {
                 def images = [
                     'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
-                    'granja/microservicio-razas', 'granja/microservicio-articulos','granja/gateway-service'
+                    'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
                     ]
                     
                 // 1️⃣ Marcar como stable
@@ -362,17 +362,17 @@ pipeline {
             echo '********** 💥 POST: FAILURE **********'
 
             // 1️⃣ Bajar todos los contenedores
-            sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
+            // sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
 
-            // script{
-            //     def services = [
-            //         'config-server', 'eureka-server', 'microservicio-principal',
-            //         'microservicio-razas', 'microservicio-articulos', 'gateway-service'
-            //     ]
+            script{
+                def services = [
+                    'config-server', 'eureka-server', 'microservicio-principal',
+                    'microservicio-razas', 'microservicio-articulos', 'gateway-service', 'nginx'
+                ]
                 
-            //     // 1️⃣ Levantar versiones estables
-            //     rollback(services, env.STABLE_TAG)
-            // }
+                // 1️⃣ Levantar versiones estables
+                rollback(services, env.STABLE_TAG)
+            }
             
             // sendFailureMail() // Enviar failure mail
         }
