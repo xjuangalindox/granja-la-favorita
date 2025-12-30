@@ -76,15 +76,23 @@ def deleteOldImages(images, appVersion, stableTag){
     echo '********** 🧹 Eliminando imágenes antiguas (solo queda image:appVersion-stableTag) **********'
 
     // Para cada imagen, lista sus tags → quita stable (ejecutandose) → borra el resto → no rompas el pipeline
-    images.each { image ->
+    // images.each { image ->
+    //     sh """
+    //     docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
+    //     | grep -v "${stableTag}\$" \
+    //     | xargs -r docker rmi || true
+    //     """
+    // }
+
+    images.each{ image ->
+        def stableImage = "${image}:${appVersion}-${stableTag}"
+
         sh """
-        docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
-        | grep -v "${stableTag}\$" \
-        | xargs -r docker rmi || true
+            docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
+            | grep -vF "${stableImage}" \
+            | xargs -r docker rmi || true
         """
     }
-    // | grep -v ":${appVersion}-${stableTag}" | grep -v stable \
-    // | grep -v ":${appVersion}-${stableTag}\\$" \
 }
 
 def rollback(services, stableTag) {
