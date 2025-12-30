@@ -146,176 +146,181 @@ pipeline {
     }
 
     stages {
-        when {
-            expression { env.DEPLOY_BRANCH == 'develop' }
-        }
-
-        stage('********** 📥 Checkout main repo **********') {
-            steps {
-                checkout scm
+        stage('🚦 Control Deploy Branch') {
+            when {
+                expression { env.DEPLOY_BRANCH == 'develop' }
             }
-        }
 
-        stage('********** 📥 Checkout credentials repo **********') {
-            steps {
-                dir('credentials') {
-                    git url: 'https://github.com/xjuangalindox/credentials.git',
-                        branch: 'master',
-                        credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
-                }
-            }
-        }
+            stages {
 
-        stage('********** 📦 Bajar contenedores actuales **********') {
-            steps{
-                sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
-                sh 'docker ps'
-            }
-        }
-
-        stage('********** 🗄️ Levantar MySQL **********'){
-
-            steps{
-                script{
-                    try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d db-granja'
-                        sh 'docker ps'
-
-                    }catch(Exception e){
-                        showLastLogs('db-granja')
-                        throw e
-                    }
-                } 
-            }
-        }
-        
-        stage('********** 📊 Levantar Grafana **********'){
-
-            steps{
-                script{
-                    try{
-                        sh 'docker-compose --env-file credentials/.env.local up -d grafana'
-                        sh 'docker ps'
-
-                    }catch(Exception e){
-                        showLastLogs('grafana')
-                        throw e
+                stage('********** 📥 Checkout main repo **********') {
+                    steps {
+                        checkout scm
                     }
                 }
+
+                stage('********** 📥 Checkout credentials repo **********') {
+                    steps {
+                        dir('credentials') {
+                            git url: 'https://github.com/xjuangalindox/credentials.git',
+                                branch: 'master',
+                                credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
+                        }
+                    }
+                }
+
+                stage('********** 📦 Bajar contenedores actuales **********') {
+                    steps{
+                        sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
+                        sh 'docker ps'
+                    }
+                }
+
+                stage('********** 🗄️ Levantar MySQL **********'){
+
+                    steps{
+                        script{
+                            try{
+                                sh 'docker-compose --env-file credentials/.env.local up -d db-granja'
+                                sh 'docker ps'
+
+                            }catch(Exception e){
+                                showLastLogs('db-granja')
+                                throw e
+                            }
+                        } 
+                    }
+                }
+                
+                stage('********** 📊 Levantar Grafana **********'){
+
+                    steps{
+                        script{
+                            try{
+                                sh 'docker-compose --env-file credentials/.env.local up -d grafana'
+                                sh 'docker ps'
+
+                            }catch(Exception e){
+                                showLastLogs('grafana')
+                                throw e
+                            }
+                        }
+                    }
+                }
+
+                stage('********** ⚙️ Levantar Config-Server **********'){
+
+                    steps{
+                        script{
+                            try{
+                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build config-server"
+                                sh 'docker ps'
+
+                            }catch(Exception e){
+                                showLastLogs('config-server')
+                                throw e
+                            }
+                        }
+                    }
+                }
+
+                stage('********** 📡 Levantar Eureka-Server **********'){
+
+                    steps{
+                        script{
+                            try{
+                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build eureka-server"
+                                sh 'docker ps'
+                                
+                            }catch(Exception e){
+                                showLastLogs('eureka-server')
+                                throw e
+                            }
+                        }
+                    }
+                }
+
+                stage('********** 🧠 Levantar Microservicio-Principal **********'){
+
+                    steps{
+                        script{
+                            try{
+                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-principal"
+                                sh 'docker ps'
+                                
+                            }catch(Exception e){
+                                showLastLogs('microservicio-principal')
+                                throw e
+                            }
+                        }
+                    }
+                }
+
+                stage('********** 🐇 Levantar Microservicio-Razas **********'){
+
+                    steps{
+                        script{
+                            try{
+                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-razas"
+                                sh 'docker ps'
+                                
+                            }catch(Exception e){
+                                showLastLogs('microservicio-razas')
+                                throw e
+                            }
+                        }
+                    }
+                }
+
+                stage('********** 📦 Levantar Microservicio-Articulos **********'){
+
+                    steps{
+                        script{
+                            try{
+                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos"
+                                sh 'docker ps'
+                                
+                            }catch(Exception e){
+                                showLastLogs('microservicio-articulos')
+                                throw e
+                            }
+                        }
+                    }
+                }  
+
+                stage('********** 🚪 Levantar Gateway-Service **********'){
+
+                    steps{
+                        script{
+                            try{
+                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build gateway-service"
+                                sh 'docker ps'
+                                
+                            }catch(Exception e){
+                                showLastLogs('gateway-service')
+                                throw e
+                            }
+                        }
+                    }
+                }
+
+                stage('********** 🔀 Levantar Nginx **********'){
+
+                    steps{
+                        script{
+                            try{
+                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d nginx"
+                                sh 'docker ps'
+
+                            }catch(Exception e){
+                                showLastLogs('nginx')
+                                throw e
+                            }
+                        }
+                    }
+                }                               
             }
         }
-
-        stage('********** ⚙️ Levantar Config-Server **********'){
-
-            steps{
-                script{
-                    try{
-                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build config-server"
-                        sh 'docker ps'
-
-                    }catch(Exception e){
-                        showLastLogs('config-server')
-                        throw e
-                    }
-                }
-            }
-        }
-
-        stage('********** 📡 Levantar Eureka-Server **********'){
-
-            steps{
-                script{
-                    try{
-                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build eureka-server"
-                        sh 'docker ps'
-                        
-                    }catch(Exception e){
-                        showLastLogs('eureka-server')
-                        throw e
-                    }
-                }
-            }
-        }
-
-        stage('********** 🧠 Levantar Microservicio-Principal **********'){
-
-            steps{
-                script{
-                    try{
-                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-principal"
-                        sh 'docker ps'
-                        
-                    }catch(Exception e){
-                        showLastLogs('microservicio-principal')
-                        throw e
-                    }
-                }
-            }
-        }
-
-        stage('********** 🐇 Levantar Microservicio-Razas **********'){
-
-            steps{
-                script{
-                    try{
-                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-razas"
-                        sh 'docker ps'
-                        
-                    }catch(Exception e){
-                        showLastLogs('microservicio-razas')
-                        throw e
-                    }
-                }
-            }
-        }
-
-        stage('********** 📦 Levantar Microservicio-Articulos **********'){
-
-            steps{
-                script{
-                    try{
-                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos"
-                        sh 'docker ps'
-                        
-                    }catch(Exception e){
-                        showLastLogs('microservicio-articulos')
-                        throw e
-                    }
-                }
-            }
-        }  
-
-        stage('********** 🚪 Levantar Gateway-Service **********'){
-
-            steps{
-                script{
-                    try{
-                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build gateway-service"
-                        sh 'docker ps'
-                        
-                    }catch(Exception e){
-                        showLastLogs('gateway-service')
-                        throw e
-                    }
-                }
-            }
-        }
-
-        stage('********** 🔀 Levantar Nginx **********'){
-
-            steps{
-                script{
-                    try{
-                        sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d nginx"
-                        sh 'docker ps'
-
-                    }catch(Exception e){
-                        showLastLogs('nginx')
-                        throw e
-                    }
-                }
-            }
-        }                               
     }
 
     post {
