@@ -137,6 +137,8 @@ pipeline {
 
         APP_VERSION = "${env.BUILD_NUMBER}"
         STABLE_TAG = "stable"
+
+        IS_DEPLOY_BRANCH = "${env.BRANCH_NAME == env.DEPLOY_BRANCH}"
     }
 
     options {
@@ -148,7 +150,6 @@ pipeline {
     stages {
         stage('🚦 Control Deploy Branch') {
             when {
-                // expression { env.DEPLOY_BRANCH == 'develop' }
                 expression {env.BRANCH_NAME == env.DEPLOY_BRANCH}
             }
 
@@ -326,54 +327,70 @@ pipeline {
 
     post {
         always{
-            echo '********** 🧹 POST: ALWAYS **********'
+            script {
+                if (env.IS_DEPLOY_BRANCH == 'true') {
+                    echo '********** 🧹 POST: ALWAYS **********'
+                    echo "El job/pipeline ${env.JOB_NAME} ha finalizado."
+                }
+            }
+
         }
 
         aborted {
-            echo '********** ⛔ POST: ABORTED **********'
-            echo 'El pipeline fue cancelado por el usuario o excedió el tiempo máximo permitido (30 minutos).'
+            script {
+                if (env.IS_DEPLOY_BRANCH == 'true') {
+                    echo '********** ⛔ POST: ABORTED **********'
+                    echo 'El pipeline fue cancelado por el usuario o excedió el tiempo máximo permitido (30 minutos).'                
+                }
+            }
         }
 
         success {
-            echo '********** ✅ POST: SUCCESS **********'
-            
             script {
-                def images = [
-                    'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
-                    'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
-                    ]
+                if (env.IS_DEPLOY_BRANCH == 'true') {
+                    echo '********** ✅ POST: SUCCESS **********'
                     
-                // 1️⃣ Marcar como stable
-                tagAsStable(images, env.APP_VERSION, env.STABLE_TAG)
+                    def images = [
+                        'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
+                        'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
+                        ]
+                        
+                    // 1️⃣ Marcar como stable
+                    tagAsStable(images, env.APP_VERSION, env.STABLE_TAG)
 
-                // 2️⃣ Limpiar imágenes viejas
-                deleteOldImages(images, env.APP_VERSION, env.STABLE_TAG)
+                    // 2️⃣ Limpiar imágenes viejas
+                    deleteOldImages(images, env.APP_VERSION, env.STABLE_TAG)
+                    
+                    // 3️⃣ Enviar success mail
+                    // sendSuccessMail()
+                }
             }
-
-            // sendSuccessMail() // Enviar success mail
         }
 
         failure {
-            echo '********** 💥 POST: FAILURE **********'
+            script {
+                if (env.IS_DEPLOY_BRANCH == 'true') {
+                    echo '********** 💥 POST: FAILURE **********'
 
-            // 1️⃣ Bajar todos los contenedores
-            // sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
-
-            script{
-                def services = [
-                    'config-server', 'eureka-server', 'microservicio-principal',
-                    'microservicio-razas', 'microservicio-articulos', 'gateway-service', 'nginx'
-                ]
-                
-                // 1️⃣ Levantar versiones estables
-                rollback(services, env.STABLE_TAG)
+                    def services = [
+                        'config-server', 'eureka-server', 'microservicio-principal',
+                        'microservicio-razas', 'microservicio-articulos', 'gateway-service', 'nginx'
+                    ]
+                    
+                    // 1️⃣ Levantar versiones estables
+                    rollback(services, env.STABLE_TAG)
+                    
+                    // 2️⃣ Enviar failure mail
+                    // sendFailureMail()                 
+                }
             }
-            
-            // sendFailureMail() // Enviar failure mail
         }
     }
 }
 
+// ---------------------------------------------------------------------------
+// 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣
+// 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟
 // ---------------------------------------------------------------------------
 // mail bcc: '', body: '', cc: '', from: '', replyTo: '', subject: '', to: ''
 // ---------------------------------------------------------------------------
