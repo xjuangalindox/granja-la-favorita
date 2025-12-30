@@ -346,6 +346,8 @@ pipeline {
         }
 
         success {
+            sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
+            
             script {
                 if (env.IS_DEPLOY_BRANCH == 'true') {
                     echo '********** ✅ POST: SUCCESS **********'
