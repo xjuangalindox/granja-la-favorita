@@ -148,7 +148,7 @@ pipeline {
     }
 
     stages {
-        stage('🚦 Control Deploy Branch') {
+        stage('********** 🚦 Control Deploy Branch **********') {
             when {
                 expression {env.BRANCH_NAME == env.DEPLOY_BRANCH}
             }
