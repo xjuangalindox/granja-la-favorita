@@ -76,14 +76,6 @@ def deleteOldImages(images, appVersion, stableTag){
     echo '********** 🧹 Eliminando imágenes antiguas (solo queda image:appVersion-stableTag) **********'
 
     // Para cada imagen, lista sus tags → quita stable (ejecutandose) → borra el resto → no rompas el pipeline
-    // images.each { image ->
-    //     sh """
-    //     docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
-    //     | grep -v "${stableTag}\$" \
-    //     | xargs -r docker rmi || true
-    //     """
-    // }
-
     images.each{ image ->
         def stableImage = "${image}:${appVersion}-${stableTag}"
 
@@ -314,15 +306,13 @@ pipeline {
 
         stage('🔎 Verificar nginx config') {
             steps {
-                sh '''
-                ls -l nginx/
-                cat nginx/nginx.local.conf
-                '''
+                sh 'ls -l nginx/' // Mostrar archivos del directorio (con detalles)
+                sh 'cat nginx/nginx.local.conf' // Abrir archivo
             }
         }
 
         stage('********** 🔀 Levantar Nginx **********'){
-            when {branch 'master'}
+            // when {branch 'master'}
 
             steps{
                 script{
