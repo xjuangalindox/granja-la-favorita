@@ -301,21 +301,18 @@ services:
 #   # nginx - test
 # ####################################################################################################################
   nginx:
-    # 1️⃣ Nombre del contenedor
     container_name: nginx
-    
-    # 2️⃣ Nombre y versión de la imagen
     image: granja/nginx:${TAG_VERSION}
+    
+    build: 
+      context: ./nginx # Directorio donde está el Dockerfile
+      args:
+        NGINX_CONF_FILE: ${NGINX_CONF_FILE} # Pasar la variable de entorno al Dockerfile
 
-    # 3️⃣ Construye la imagen usando el Dockerfile de ./nginx
-    build: ./nginx
-
-    # 4️⃣ Expone Nginx al host
     ports:
       - "80:80"
       - "443:443"
 
-    # 4️⃣ Arranca solo cuando el gateway esté sano
     depends_on:
       gateway-service:
         condition: service_healthy
