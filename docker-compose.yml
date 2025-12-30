@@ -276,27 +276,49 @@ services:
 # ####################################################################################################################
 #   # nginx - 80 - 58.9s
 # ####################################################################################################################
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
+
+  #   restart: always
+  #   depends_on:
+  #     gateway-service:
+  #       condition: service_healthy
+
+  #   healthcheck:
+  #     test: ["CMD", "pidof", "nginx"]
+  #     interval: 10s          # Cada 5 segundos hace la comprobación
+  #     timeout: 5s           # Espera máximo 3 segundos para la respuesta
+  #     retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+  #     start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+
+# ####################################################################################################################
+#   # nginx - test
+# ####################################################################################################################
   nginx:
-    image: nginx:latest
+    # 1️⃣ Nombre del contenedor
     container_name: nginx
+    
+    # 2️⃣ Nombre y versión de la imagen
+    image: granja/nginx:${TAG_VERSION}
+
+    # 3️⃣ Construye la imagen usando el Dockerfile de ./nginx
+    build: ./nginx
+
+    # 4️⃣ Expone Nginx al host
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      # - ./${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
-      - ./nginx/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
 
-    restart: always
+    # 4️⃣ Arranca solo cuando el gateway esté sano
     depends_on:
       gateway-service:
         condition: service_healthy
-
-    healthcheck:
-      test: ["CMD", "pidof", "nginx"]
-      interval: 10s          # Cada 5 segundos hace la comprobación
-      timeout: 5s           # Espera máximo 3 segundos para la respuesta
-      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 ####################################################################################################################
   # volumes
