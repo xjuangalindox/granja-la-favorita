@@ -146,16 +146,8 @@ pipeline {
     }
 
     stages {
-        stage('********** 🐞 DEBUG DEV **********') {
-            steps {
-                echo "PROFILE=${env.PROFILE}"
-                echo "DEPLOY_BRANCH=${env.DEPLOY_BRANCH}"
-
-                echo "BRANCH_NAME=${env.BRANCH_NAME}"
-                
-                echo "APP_VERSION=${env.APP_VERSION}"
-                echo "STABLE_TAG=${env.STABLE_TAG}"
-            }
+        when {
+            expression { env.DEPLOY_BRANCH == 'develop' }
         }
 
         stage('********** 📥 Checkout main repo **********') {
@@ -175,8 +167,6 @@ pipeline {
         }
 
         stage('********** 📦 Bajar contenedores actuales **********') {
-            // when {branch 'master'}
-
             steps{
                 sh 'docker-compose --env-file credentials/.env.local down --remove-orphans || true'
                 sh 'docker ps'
@@ -184,7 +174,6 @@ pipeline {
         }
 
         stage('********** 🗄️ Levantar MySQL **********'){
-            // when {branch 'master'}
 
             steps{
                 script{
@@ -201,7 +190,6 @@ pipeline {
         }
         
         stage('********** 📊 Levantar Grafana **********'){
-            // when {branch 'master'}
 
             steps{
                 script{
@@ -218,7 +206,6 @@ pipeline {
         }
 
         stage('********** ⚙️ Levantar Config-Server **********'){
-            // when {branch 'master'}
 
             steps{
                 script{
@@ -235,7 +222,6 @@ pipeline {
         }
 
         stage('********** 📡 Levantar Eureka-Server **********'){
-            // when {branch 'master'}
 
             steps{
                 script{
@@ -252,7 +238,6 @@ pipeline {
         }
 
         stage('********** 🧠 Levantar Microservicio-Principal **********'){
-            // when {branch 'master'}
 
             steps{
                 script{
@@ -269,7 +254,6 @@ pipeline {
         }
 
         stage('********** 🐇 Levantar Microservicio-Razas **********'){
-            // when {branch 'master'}
 
             steps{
                 script{
@@ -286,7 +270,6 @@ pipeline {
         }
 
         stage('********** 📦 Levantar Microservicio-Articulos **********'){
-            // when {branch 'master'}
 
             steps{
                 script{
@@ -303,7 +286,6 @@ pipeline {
         }  
 
         stage('********** 🚪 Levantar Gateway-Service **********'){
-            // when {branch 'master'}
 
             steps{
                 script{
@@ -317,17 +299,9 @@ pipeline {
                     }
                 }
             }
-        }     
-
-        stage('🔎 Verificar nginx config') {
-            steps {
-                sh 'ls -l nginx/' // Mostrar archivos del directorio (con detalles)
-                sh 'cat nginx/nginx.local.conf' // Abrir archivo
-            }
         }
 
         stage('********** 🔀 Levantar Nginx **********'){
-            // when {branch 'master'}
 
             steps{
                 script{
