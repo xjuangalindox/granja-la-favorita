@@ -148,7 +148,8 @@ pipeline {
     stages {
         stage('🚦 Control Deploy Branch') {
             when {
-                expression { env.DEPLOY_BRANCH == 'develop' }
+                // expression { env.DEPLOY_BRANCH == 'develop' }
+                expression {env.BRANCH_NAME == env.DEPLOY_BRANCH}
             }
 
             stages {
