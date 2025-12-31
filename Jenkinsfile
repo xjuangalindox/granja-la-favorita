@@ -316,7 +316,6 @@ pipeline {
 
     post {
         always{
-            // --remove-orphans || true"
             sh "docker-compose --env-file credentials/.env.${env.PROFILE} down --remove-orphans || true"
             script {
                 if (env.BRANCH_NAME == env.BRANCH_PIPELINE) {
@@ -327,6 +326,7 @@ pipeline {
         }
 
         aborted {
+            sh "docker-compose --env-file credentials/.env.${env.PROFILE} down --remove-orphans || true"
             script {
                 if (env.BRANCH_NAME == env.BRANCH_PIPELINE) {
                     echo '********** ⛔ POST: ABORTED **********'
