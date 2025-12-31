@@ -95,17 +95,17 @@ pipeline {
 
     stages {
         stage('********** 🚦 Control Deploy Branch **********') {
-            
-            stage('Debug branches'){
-                steps{
-                    echo "${env.BRANCH_NAME}"
-                    echo "${env.BRANCH_PIPELINE}"
-                }
-            }
-
-when {expression {env.BRANCH_NAME == env.BRANCH_PIPELINE}}
+            // when {expression {env.BRANCH_NAME == env.BRANCH_PIPELINE}}
 
             stages {
+
+                stage('DEBUG BRANCHES'){
+                    steps{
+                        echo "${env.BRANCH_NAME}"
+                        echo "${env.BRANCH_PIPELINE}"
+                    }
+                }
+
                 stage('********** 🧹 Clean workspace **********') {
                     steps{
                         deleteDir()
