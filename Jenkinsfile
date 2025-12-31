@@ -110,7 +110,8 @@ pipeline {
                 stage('********** 🧹 Clean workspace **********') {
                     steps{
                         deleteDir()
-                        sh 'ls -la'
+                        sh 'ls'
+                        // sh 'ls -la'
                     }
                 }
 
@@ -135,6 +136,8 @@ pipeline {
                                 branch: 'profiles',
                                 credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
                         }
+
+                        sh 'ls'
                     }
                 }
 
