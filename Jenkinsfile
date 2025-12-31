@@ -167,7 +167,7 @@ pipeline {
                         script{
                             try{
                                 sh """
-                                    TAG_VERSION=${env.APP_VERSION} 
+                                    TAG_VERSION=${env.APP_VERSION} \
                                     docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build config-server
                                 """
                                 sh 'docker ps'
@@ -186,8 +186,8 @@ pipeline {
                         script{
                             try{
                                 sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
-                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
+                                    TAG_VERSION=${env.APP_VERSION} \
                                     docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build eureka-server
                                 """
                                 sh 'docker ps'
@@ -206,8 +206,8 @@ pipeline {
                         script{
                             try{
                                 sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
-                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
+                                    TAG_VERSION=${env.APP_VERSION} \
                                     docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build microservicio-principal
                                 """
                                 sh 'docker ps'
@@ -226,8 +226,8 @@ pipeline {
                         script{
                             try{
                                 sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
-                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
+                                    TAG_VERSION=${env.APP_VERSION} \
                                     docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build microservicio-razas
                                 """
                                 sh 'docker ps'
@@ -246,8 +246,8 @@ pipeline {
                         script{
                             try{
                                 sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
-                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
+                                    TAG_VERSION=${env.APP_VERSION} \
                                     docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build microservicio-articulos
                                 """
                                 sh 'docker ps'
@@ -266,8 +266,8 @@ pipeline {
                         script{
                             try{
                                 sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
-                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
+                                    TAG_VERSION=${env.APP_VERSION} \
                                     docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build gateway-service
                                 """
                                 sh 'docker ps'
@@ -286,7 +286,7 @@ pipeline {
                         script{
                             try{
                                 sh """
-                                    TAG_VERSION=${env.APP_VERSION} 
+                                    TAG_VERSION=${env.APP_VERSION} \
                                     docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build nginx
                                 """
                                 sh 'docker ps'
