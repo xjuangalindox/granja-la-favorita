@@ -53,7 +53,7 @@ def rollback(services, stableTag) {
         if (stableImage) {  
             def tagOnly = stableImage.split(':')[1]
             sh """
-                TAG_VERSION=${tagOnly} \ 
+                TAG_VERSION=${tagOnly} \
                 docker-compose --env-file credentials/.env.${env.PROFILE} up -d ${service}
             """
 
