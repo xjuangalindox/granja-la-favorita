@@ -103,6 +103,7 @@ pipeline {
                     steps{
                         echo "${env.BRANCH_NAME}"
                         echo "${env.BRANCH_PIPELINE}"
+                        echo "${env.GIT_BRANCH}"
                     }
                 }
 
@@ -123,7 +124,7 @@ pipeline {
                 stage('********** 📥 Checkout (manual) granja-la-favorita **********') {
                     steps {
                         git url: 'https://github.com/xjuangalindox/granja-la-favorita.git',
-                            branch: env.DEPLOY_BRANCH
+                            branch: env.BRANCH_PIPELINE
                     }
                 }
 
@@ -312,6 +313,8 @@ pipeline {
 
     post {
         always{
+            // --remove-orphans || true"
+            sh "docker-compose --env-file credentials/.env.${env.PROFILE} down --remove-orphans || true"
             script {
                 if (env.BRANCH_NAME == env.BRANCH_PIPELINE) {
                     echo '********** 🧹 POST: ALWAYS **********'
