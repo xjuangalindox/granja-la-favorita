@@ -104,6 +104,9 @@ services:
     # ports:
     #   - "8761:8761"
     environment:
+      # 👉 PERFIL SPRING
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+
       # Credenciales GitHub (config-server)
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
 
@@ -128,6 +131,9 @@ services:
     build: ./conejoMontaNacimiento
     # mem_limit: 512m
     environment:
+      # 👉 PERFIL SPRING
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+
       # Credenciales GitHub (config-server)
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
 
@@ -169,6 +175,9 @@ services:
     build: ./microservicio-razas
     # mem_limit: 256m
     environment:
+      # 👉 PERFIL SPRING
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+
       # Credenciales GitHub (config-server)
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
 
@@ -204,6 +213,9 @@ services:
     build: ./microservicio-articulos
     # mem_limit: 256m
     environment:
+      # 👉 PERFIL SPRING
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+
       # Credenciales GitHub (config-server)
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
 
@@ -247,6 +259,9 @@ services:
     # ports:
     #   - "8080:8080"
     environment:
+      # 👉 PERFIL SPRING
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+
       # Credenciales GitHub (config-server)
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
 

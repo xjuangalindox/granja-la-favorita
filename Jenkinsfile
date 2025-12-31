@@ -215,7 +215,10 @@ pipeline {
                     steps{
                         script{
                             try{
-                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build config-server"
+                                sh """
+                                    TAG_VERSION=${env.APP_VERSION} 
+                                    docker-compose --env-file credentials/.env.local up -d --build config-server
+                                """
                                 sh 'docker ps'
 
                             }catch(Exception e){
@@ -231,7 +234,11 @@ pipeline {
                     steps{
                         script{
                             try{
-                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build eureka-server"
+                                sh """
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
+                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    docker-compose --env-file credentials/.env.local up -d --build eureka-server
+                                """
                                 sh 'docker ps'
                                 
                             }catch(Exception e){
@@ -247,7 +254,11 @@ pipeline {
                     steps{
                         script{
                             try{
-                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-principal"
+                                sh """
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
+                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    docker-compose --env-file credentials/.env.local up -d --build microservicio-principal
+                                """
                                 sh 'docker ps'
                                 
                             }catch(Exception e){
@@ -263,7 +274,11 @@ pipeline {
                     steps{
                         script{
                             try{
-                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-razas"
+                                sh """
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
+                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    docker-compose --env-file credentials/.env.local up -d --build microservicio-razas
+                                """
                                 sh 'docker ps'
                                 
                             }catch(Exception e){
@@ -279,7 +294,11 @@ pipeline {
                     steps{
                         script{
                             try{
-                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos"
+                                sh """
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
+                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    docker-compose --env-file credentials/.env.local up -d --build microservicio-articulos
+                                """
                                 sh 'docker ps'
                                 
                             }catch(Exception e){
@@ -295,7 +314,11 @@ pipeline {
                     steps{
                         script{
                             try{
-                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d --build gateway-service"
+                                sh """
+                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \ 
+                                    TAG_VERSION=${env.APP_VERSION} \ 
+                                    docker-compose --env-file credentials/.env.local up -d --build gateway-service
+                                """
                                 sh 'docker ps'
                                 
                             }catch(Exception e){
@@ -311,7 +334,10 @@ pipeline {
                     steps{
                         script{
                             try{
-                                sh "TAG_VERSION=${env.APP_VERSION} docker-compose --env-file credentials/.env.local up -d nginx"
+                                sh """
+                                    TAG_VERSION=${env.APP_VERSION} 
+                                    docker-compose --env-file credentials/.env.local up -d --build nginx
+                                """
                                 sh 'docker ps'
 
                             }catch(Exception e){
