@@ -132,7 +132,7 @@ pipeline {
                     steps {
                         dir('credentials') {
                             git url: 'https://github.com/xjuangalindox/credentials.git',
-                                branch: 'master',
+                                branch: 'profiles',
                                 credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
                         }
                     }
