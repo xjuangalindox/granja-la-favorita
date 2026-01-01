@@ -323,42 +323,38 @@ pipeline {
 
         success {            
             script {
-                if (env.BRANCH_NAME == env.BRANCH_PIPELINE) {
-                    echo '********** ✅ POST: SUCCESS **********'
+                echo '********** ✅ POST: SUCCESS **********'
+                
+                def images = [
+                    'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
+                    'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
+                    ]
                     
-                    def images = [
-                        'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
-                        'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
-                        ]
-                        
-                    // 1️⃣ Marcar como stable
-                    tagAsStable(images, env.APP_VERSION, env.STABLE_TAG)
+                // 1️⃣ Marcar como stable
+                tagAsStable(images, env.APP_VERSION, env.STABLE_TAG)
 
-                    // 2️⃣ Limpiar imágenes viejas
-                    deleteOldImages(images, env.APP_VERSION, env.STABLE_TAG)
-                    
-                    // 3️⃣ Enviar success mail
-                    // sendSuccessMail()
-                }
+                // 2️⃣ Limpiar imágenes viejas
+                deleteOldImages(images, env.APP_VERSION, env.STABLE_TAG)
+                
+                // 3️⃣ Enviar success mail
+                sendSuccessMail()
             }
         }
 
         failure {
             script {
-                if (env.BRANCH_NAME == env.BRANCH_PIPELINE) {
-                    echo '********** 💥 POST: FAILURE **********'
+                echo '********** 💥 POST: FAILURE **********'
 
-                    def services = [
-                        'config-server', 'eureka-server', 'microservicio-principal',
-                        'microservicio-razas', 'microservicio-articulos', 'gateway-service', 'nginx'
-                    ]
-                    
-                    // 1️⃣ Levantar versiones estables
-                    rollback(services, env.STABLE_TAG)
-                    
-                    // 2️⃣ Enviar failure mail
-                    // sendFailureMail()                 
-                }
+                def services = [
+                    'config-server', 'eureka-server', 'microservicio-principal',
+                    'microservicio-razas', 'microservicio-articulos', 'gateway-service', 'nginx'
+                ]
+                
+                // 1️⃣ Levantar versiones estables
+                rollback(services, env.STABLE_TAG)
+                
+                // 2️⃣ Enviar failure mail
+                sendFailureMail()
             }
         }
     }
