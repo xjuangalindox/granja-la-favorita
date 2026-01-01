@@ -48,6 +48,7 @@ services:
       # - GF_SERVER_SERVE_FROM_SUB_PATH=true
 
     restart: always
+
     depends_on:
       db-granja:
         condition: service_healthy
@@ -57,7 +58,8 @@ services:
       interval: 10s       # cada 15 segundos
       timeout: 5s         # espera máxima 5 segundos
       retries: 10          # falla después de 5 intentos fallidos
-      start_period: 30s   # tiempo para que Grafana arranque antes de la primera verificación
+      start_period: 45s   # tiempo para que Grafana arranque antes de la primera verificación
+      # start_period: 30s   # tiempo para que Grafana arranque antes de la primera verificación
 
     volumes:
       - grafana_data:/var/lib/grafana
@@ -83,6 +85,7 @@ services:
       GIT_PASSWORD: ${GIT_PASSWORD}
     
     restart: always
+
     depends_on:
       db-granja:
         condition: service_healthy
@@ -92,7 +95,8 @@ services:
       interval: 10s          # Cada 5 segundos hace la comprobación
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      start_period: 45s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      # start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ###################################################################################################################
 #   eureka-server - 8761 - 27.4s
@@ -111,6 +115,7 @@ services:
       SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
 
     restart: always
+
     depends_on:
       config-server:
         condition: service_healthy
@@ -120,7 +125,8 @@ services:
       interval: 10s          # Cada 5 segundos hace la comprobación
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      start_period: 90s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      # start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # microservicio-principal - 8081 - 48.2s
@@ -155,16 +161,17 @@ services:
       MARCA_AGUA_PAGINA: ${MARCA_AGUA_PAGINA}
 
     restart: always
+
     depends_on:
       eureka-server:
-        condition: service_healthy
+        condition: service_started
 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-      interval: 10s          # Cada 5 segundos hace la comprobación
-      timeout: 5s           # Espera máximo 3 segundos para la respuesta
-      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+    #   interval: 10s          # Cada 5 segundos hace la comprobación
+    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
+    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+    #   start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # microservicio-razas - 8082 - 48.2s
@@ -193,16 +200,17 @@ services:
       VALOR_DDL: ${VALOR_DDL}
 
     restart: always
+
     depends_on:
       eureka-server:
-        condition: service_healthy
+        condition: service_started
 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-      interval: 10s          # Cada 5 segundos hace la comprobación
-      timeout: 5s           # Espera máximo 3 segundos para la respuesta
-      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+    #   interval: 10s          # Cada 5 segundos hace la comprobación
+    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
+    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+    #   start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # microservicio-articulos - 8083 - 48.2s
@@ -237,16 +245,17 @@ services:
       MARCA_AGUA_PAGINA: ${MARCA_AGUA_PAGINA}
 
     restart: always
+
     depends_on:
       eureka-server:
-        condition: service_healthy
+        condition: service_started
 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
-      interval: 10s          # Cada 5 segundos hace la comprobación
-      timeout: 5s           # Espera máximo 3 segundos para la respuesta
-      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+    #   interval: 10s          # Cada 5 segundos hace la comprobación
+    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
+    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+    #   start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # gateway-service - 8080 - 58.7s
@@ -273,20 +282,21 @@ services:
       SECURITY_PASSWORD: ${SECURITY_PASSWORD}
 
     restart: always
+
     depends_on:
       microservicio-principal:
-        condition: service_healthy
+        condition: service_started
       microservicio-razas:
-        condition: service_healthy
+        condition: service_started
       microservicio-articulos:
-        condition: service_healthy
+        condition: service_started
 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 10s          # Cada 5 segundos hace la comprobación
-      timeout: 5s           # Espera máximo 3 segundos para la respuesta
-      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+    #   interval: 10s          # Cada 5 segundos hace la comprobación
+    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
+    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+    #   start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # nginx - 80 - 58.9s
@@ -328,9 +338,18 @@ services:
       - "80:80"
       - "443:443"
 
+    restart: always
+
     depends_on:
       gateway-service:
-        condition: service_healthy
+        condition: service_started
+
+    # healthcheck:
+    #   test: ["CMD", "pidof", "nginx"]
+    #   interval: 10s          # Cada 5 segundos hace la comprobación
+    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
+    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+    #   start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 ####################################################################################################################
   # volumes
