@@ -79,17 +79,17 @@ pipeline {
     agent any // Ejecuta el pipeline en cualquier agente (nodo Jenkins disponible)
 
     environment {
-        PROFILE = "${env.PROFILE}" // parameterized
-        BRANCH_PIPELINE = "${env.BRANCH_PIPELINE}" // parameterized
+        // PROFILE = "${env.PROFILE}" // parameterized
+        // BRANCH_PIPELINE = "${env.BRANCH_PIPELINE}" // parameterized
 
         APP_VERSION = "${env.BUILD_NUMBER}"
         STABLE_TAG = "stable"
     }
 
     options {
-        skipDefaultCheckout(true) // No hacer el checkout scm automático
+        // skipDefaultCheckout(true) // No hacer el checkout scm automático
         timestamps() // Agregar la hora a cada línea del log
-        disableConcurrentBuilds() // Evitar builds simultáneos
+        // disableConcurrentBuilds() // Evitar builds simultáneos
         timeout(time: 30, unit: 'MINUTES') // Pipeline dura más de 30 minutos -> aborted / failure
     }
 
@@ -102,7 +102,9 @@ pipeline {
                 stage('DEBUG BRANCHES'){
                     steps{
                         echo "${env.BRANCH_NAME}"
-                        echo "${env.BRANCH_PIPELINE}"
+                        echo "${env.BRANCH_NAME}"
+                        // echo "${env.BRANCH_PIPELINE}"
+                        echo "${env.GIT_BRANCH}"
                         echo "${env.GIT_BRANCH}"
                     }
                 }
