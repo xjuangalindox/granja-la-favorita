@@ -81,6 +81,7 @@ pipeline {
     environment {
         // PROFILE = "${env.PROFILE}" // parameterized
         // BRANCH_PIPELINE = "${env.BRANCH_PIPELINE}" // parameterized
+        ENV = ''
 
         APP_VERSION = "${env.BUILD_NUMBER}"
         STABLE_TAG = "stable"
@@ -94,247 +95,230 @@ pipeline {
     }
 
     stages {
-        stage('********** 🚦 Control Deploy Branch **********') {
-            // when {expression {env.BRANCH_NAME == env.BRANCH_PIPELINE}}
-
-            stages {
-
-                stage('DEBUG BRANCHES'){
-                    steps{
-                        echo "${env.BRANCH_NAME}"
-                        echo "${env.BRANCH_NAME}"
-                        // echo "${env.BRANCH_PIPELINE}"
-                        echo "${env.GIT_BRANCH}"
-                        echo "${env.GIT_BRANCH}"
+        stage('🔍 Detect ENV'){
+            steps{
+                script{
+                    if(env.BRANCH_NAME == 'master'){
+                        env.ENV = 'prod'
+                    }else{
+                        env.ENV = 'dev'
                     }
                 }
 
-                stage('********** 🧹 Clean workspace **********') {
-                    steps{
-                        deleteDir()
-                        sh 'ls'
-                        // sh 'ls -la'
-                    }
-                }
-
-                stage('********** 📦 Bajar contenedores actuales **********') {
-                    steps{
-                        sh "docker-compose --env-file credentials/.env.${env.PROFILE} down --remove-orphans || true"
-                        sh 'docker ps'
-                    }
-                }
-
-                stage('********** 📥 Checkout (manual) granja-la-favorita **********') {
-                    steps {
-                        git url: 'https://github.com/xjuangalindox/granja-la-favorita.git',
-                            branch: env.BRANCH_PIPELINE
-                    }
-                }
-
-                stage('********** 📥 Checkout (manual) credentials **********') {
-                    steps {
-                        dir('credentials') {
-                            git url: 'https://github.com/xjuangalindox/credentials.git',
-                                branch: 'profiles',
-                                credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
-                        }
-
-                        sh 'ls'
-                    }
-                }
-
-                stage('********** 🗄️ MySQL **********'){
-
-                    steps{
-                        script{
-                            try{
-                                sh "docker-compose --env-file credentials/.env.${env.PROFILE} up -d db-granja"
-                                sh 'docker ps'
-
-                            }catch(Exception e){
-                                showLastLogs('db-granja')
-                                throw e
-                            }
-                        } 
-                    }
-                }
-                
-                stage('********** 📊 Grafana **********'){
-
-                    steps{
-                        script{
-                            try{
-                                sh "docker-compose --env-file credentials/.env.${env.PROFILE} up -d grafana"
-                                sh 'docker ps'
-
-                            }catch(Exception e){
-                                showLastLogs('grafana')
-                                throw e
-                            }
-                        }
-                    }
-                }
-
-                stage('********** ⚙️ Config-Server **********'){
-
-                    steps{
-                        script{
-                            try{
-                                sh """
-                                    TAG_VERSION=${env.APP_VERSION} \
-                                    docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build config-server
-                                """
-                                sh 'docker ps'
-
-                            }catch(Exception e){
-                                showLastLogs('config-server')
-                                throw e
-                            }
-                        }
-                    }
-                }
-
-                stage('********** 📡 Eureka-Server **********'){
-
-                    steps{
-                        script{
-                            try{
-                                sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
-                                    TAG_VERSION=${env.APP_VERSION} \
-                                    docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build eureka-server
-                                """
-                                sh 'docker ps'
-                                
-                            }catch(Exception e){
-                                showLastLogs('eureka-server')
-                                throw e
-                            }
-                        }
-                    }
-                }
-
-                stage('********** 🧠 Microservicio-Principal **********'){
-
-                    steps{
-                        script{
-                            try{
-                                sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
-                                    TAG_VERSION=${env.APP_VERSION} \
-                                    docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build microservicio-principal
-                                """
-                                sh 'docker ps'
-                                
-                            }catch(Exception e){
-                                showLastLogs('microservicio-principal')
-                                throw e
-                            }
-                        }
-                    }
-                }
-
-                stage('********** 🐇 Microservicio-Razas **********'){
-
-                    steps{
-                        script{
-                            try{
-                                sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
-                                    TAG_VERSION=${env.APP_VERSION} \
-                                    docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build microservicio-razas
-                                """
-                                sh 'docker ps'
-                                
-                            }catch(Exception e){
-                                showLastLogs('microservicio-razas')
-                                throw e
-                            }
-                        }
-                    }
-                }
-
-                stage('********** 📦 Microservicio-Articulos **********'){
-
-                    steps{
-                        script{
-                            try{
-                                sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
-                                    TAG_VERSION=${env.APP_VERSION} \
-                                    docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build microservicio-articulos
-                                """
-                                sh 'docker ps'
-                                
-                            }catch(Exception e){
-                                showLastLogs('microservicio-articulos')
-                                throw e
-                            }
-                        }
-                    }
-                }  
-
-                stage('********** 🚪 Gateway-Service **********'){
-
-                    steps{
-                        script{
-                            try{
-                                sh """
-                                    SPRING_PROFILES_ACTIVE=${env.PROFILE} \
-                                    TAG_VERSION=${env.APP_VERSION} \
-                                    docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build gateway-service
-                                """
-                                sh 'docker ps'
-                                
-                            }catch(Exception e){
-                                showLastLogs('gateway-service')
-                                throw e
-                            }
-                        }
-                    }
-                }
-
-                stage('********** 🔀 Nginx **********'){
-
-                    steps{
-                        script{
-                            try{
-                                sh """
-                                    TAG_VERSION=${env.APP_VERSION} \
-                                    docker-compose --env-file credentials/.env.${env.PROFILE} up -d --build nginx
-                                """
-                                sh 'docker ps'
-
-                            }catch(Exception e){
-                                showLastLogs('nginx')
-                                throw e
-                            }
-                        }
-                    }
-                }                               
+                echo "BRANCH PUSHEADA: ${env.BRANCH_NAME}"
+                echo "ENV: ${env.ENV}"
             }
         }
+
+        stage('🧹 Clean workspace') {
+            steps{
+                deleteDir()
+                sh 'ls'
+            }
+        }
+
+        stage('⬇️ Bajar contenedores actuales') {
+            steps{
+                sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+                sh 'docker ps'
+            }
+        }
+
+        stage('📥 Checkout granja-la-favorita') {
+            steps {
+                checkout scm
+                sh 'ls'
+            }
+        }
+
+        stage('📥 Checkout (manual) credentials') {
+            steps {
+                dir('credentials') {
+                    git url: 'https://github.com/xjuangalindox/credentials.git',
+                        branch: 'profiles',
+                        credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
+                }
+
+                sh 'ls'
+            }
+        }
+
+        stage('🗄️ MySQL'){
+            steps{
+                script{
+                    try{
+                        sh "docker-compose --env-file credentials/.env.${env.ENV} up -d db-granja"
+                        sh 'docker ps'
+
+                    }catch(Exception e){
+                        showLastLogs('db-granja')
+                        throw e
+                    }
+                } 
+            }
+        }
+        
+        stage('📊 Grafana'){
+            steps{
+                script{
+                    try{
+                        sh "docker-compose --env-file credentials/.env.${env.ENV} up -d grafana"
+                        sh 'docker ps'
+
+                    }catch(Exception e){
+                        showLastLogs('grafana')
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('⚙️ Config-Server'){
+            steps{
+                script{
+                    try{
+                        sh """
+                            TAG_VERSION=${env.APP_VERSION} \
+                            docker-compose --env-file credentials/.env.${env.ENV} up -d --build config-server
+                        """
+                        sh 'docker ps'
+
+                    }catch(Exception e){
+                        showLastLogs('config-server')
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('📡 Eureka-Server'){
+            steps{
+                script{
+                    try{
+                        sh """
+                            SPRING_PROFILES_ACTIVE=${env.ENV} \
+                            TAG_VERSION=${env.APP_VERSION} \
+                            docker-compose --env-file credentials/.env.${env.ENV} up -d --build eureka-server
+                        """
+                        sh 'docker ps'
+                        
+                    }catch(Exception e){
+                        showLastLogs('eureka-server')
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('🧠 Microservicio-Principal'){
+            steps{
+                script{
+                    try{
+                        sh """
+                            SPRING_PROFILES_ACTIVE=${env.ENV} \
+                            TAG_VERSION=${env.APP_VERSION} \
+                            docker-compose --env-file credentials/.env.${env.ENV} up -d --build microservicio-principal
+                        """
+                        sh 'docker ps'
+                        
+                    }catch(Exception e){
+                        showLastLogs('microservicio-principal')
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('🐇 Microservicio-Razas'){
+            steps{
+                script{
+                    try{
+                        sh """
+                            SPRING_PROFILES_ACTIVE=${env.ENV} \
+                            TAG_VERSION=${env.APP_VERSION} \
+                            docker-compose --env-file credentials/.env.${env.ENV} up -d --build microservicio-razas
+                        """
+                        sh 'docker ps'
+                        
+                    }catch(Exception e){
+                        showLastLogs('microservicio-razas')
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('📦 Microservicio-Articulos'){
+            steps{
+                script{
+                    try{
+                        sh """
+                            SPRING_PROFILES_ACTIVE=${env.ENV} \
+                            TAG_VERSION=${env.APP_VERSION} \
+                            docker-compose --env-file credentials/.env.${env.ENV} up -d --build microservicio-articulos
+                        """
+                        sh 'docker ps'
+                        
+                    }catch(Exception e){
+                        showLastLogs('microservicio-articulos')
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('🚪 Gateway-Service'){
+            steps{
+                script{
+                    try{
+                        sh """
+                            SPRING_PROFILES_ACTIVE=${env.ENV} \
+                            TAG_VERSION=${env.APP_VERSION} \
+                            docker-compose --env-file credentials/.env.${env.ENV} up -d --build gateway-service
+                        """
+                        sh 'docker ps'
+                        
+                    }catch(Exception e){
+                        showLastLogs('gateway-service')
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('🔀 Nginx'){
+            steps{
+                script{
+                    try{
+                        sh """
+                            TAG_VERSION=${env.APP_VERSION} \
+                            docker-compose --env-file credentials/.env.${env.ENV} up -d --build nginx
+                        """
+                        sh 'docker ps'
+
+                    }catch(Exception e){
+                        showLastLogs('nginx')
+                        throw e
+                    }
+                }
+            }
+        }                               
     }
+
 
     post {
         always{
-            sh "docker-compose --env-file credentials/.env.${env.PROFILE} down --remove-orphans || true"
-            script {
-                if (env.BRANCH_NAME == env.BRANCH_PIPELINE) {
-                    echo '********** 🧹 POST: ALWAYS **********'
-                    echo "El job/pipeline ${env.JOB_NAME} ha finalizado."
-                }
-            }
+            echo '********** 🧹 POST: ALWAYS **********'
+            echo "El pipeline ${env.JOB_NAME} ha finalizado."
+
+            sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
         }
 
         aborted {
+            echo '********** ⛔ POST: ABORTED **********'
+            echo 'El pipeline fue cancelado por el usuario o excedió el tiempo máximo permitido (30 minutos).'   
+
             sh "docker-compose --env-file credentials/.env.${env.PROFILE} down --remove-orphans || true"
-            script {
-                if (env.BRANCH_NAME == env.BRANCH_PIPELINE) {
-                    echo '********** ⛔ POST: ABORTED **********'
-                    echo 'El pipeline fue cancelado por el usuario o excedió el tiempo máximo permitido (30 minutos).'                
-                }
-            }
         }
 
         success {            
