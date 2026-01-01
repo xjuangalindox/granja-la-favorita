@@ -81,7 +81,7 @@ pipeline {
     environment {
         // PROFILE = "${env.PROFILE}" // parameterized
         // BRANCH_PIPELINE = "${env.BRANCH_PIPELINE}" // parameterized
-        ENV = ''
+        // ENV = ''
 
         APP_VERSION = "${env.BUILD_NUMBER}"
         STABLE_TAG = "stable"
