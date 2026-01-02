@@ -161,7 +161,7 @@ services:
 
     depends_on:
       eureka-server:
-        condition: service_healthy
+        condition: service_started
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
@@ -200,7 +200,7 @@ services:
 
     depends_on:
       eureka-server:
-        condition: service_healthy
+        condition: service_started
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
@@ -245,7 +245,7 @@ services:
 
     depends_on:
       eureka-server:
-        condition: service_healthy
+        condition: service_started
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
@@ -282,7 +282,7 @@ services:
 
     depends_on:
       eureka-server:
-        condition: service_healthy
+        condition: service_started
       # microservicio-principal:
       #   condition: service_healthy
       # microservicio-razas:
