@@ -98,10 +98,12 @@ pipeline {
         stage('🧠 Decide deploy'){
             steps{
                 script{
-                    env.DO_DEPLOY = (
-                        (env.DEPLOY_TARGET == 'VPS' && env.BRANCH_NAME == 'master') || 
-                        (env.DEPLOY_TARGET == 'LOCAL' && env.BRANCH_NAME != 'master')
-                    ).toString()
+                    env.DO_DEPLOY = (env.DEPLOY_TARGET == 'VPS' && env.BRANCH_NAME == 'master') ? 'true' : 'false'
+                    
+                    // (
+                    //     (env.DEPLOY_TARGET == 'VPS' && env.BRANCH_NAME == 'master') || 
+                    //     (env.DEPLOY_TARGET == 'LOCAL' && env.BRANCH_NAME != 'master')
+                    // ).toString()
 
                     echo "DEPLOY_TARGET: ${env.DEPLOY_TARGET}" // "VPS" o "LOCAL"
                     echo "BRANCH_NAME  : ${env.BRANCH_NAME}"
