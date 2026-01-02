@@ -88,7 +88,7 @@ pipeline {
     }
 
     options {
-        // skipDefaultCheckout(true) // No hacer el checkout scm automático
+        skipDefaultCheckout(true) // No hacer el checkout scm automático
         timestamps() // Agregar la hora a cada línea del log
         // disableConcurrentBuilds() // Evitar builds simultáneos
         timeout(time: 30, unit: 'MINUTES') // Pipeline dura más de 30 minutos -> aborted / failure
@@ -147,17 +147,17 @@ pipeline {
                 sh 'docker images'
             }
         }
-
-        // stage('📥 Checkout granja-la-favorita') {
-        //     steps {
-        //         checkout scm
-        //         sh 'ls'
-        //     }
-        // }
         
         stage('🧹 Clean workspace') {
             steps{
                 deleteDir()
+                sh 'ls'
+            }
+        }
+
+        stage('📥 Checkout granja-la-favorita') {
+            steps {
+                checkout scm
                 sh 'ls'
             }
         }
