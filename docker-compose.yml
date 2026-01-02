@@ -341,9 +341,9 @@ services:
 
     restart: always
 
-    depends_on:
-      gateway-service:
-        condition: service_healthy
+    # depends_on:
+    #   gateway-service:
+    #     condition: service_healthy
 
     healthcheck:
       test: ["CMD", "pidof", "nginx"]
