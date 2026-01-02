@@ -160,7 +160,7 @@ services:
     restart: always
 
     depends_on:
-      eureka-server:
+      config-server:
         condition: service_started
 
     healthcheck:
@@ -199,7 +199,7 @@ services:
     restart: always
 
     depends_on:
-      eureka-server:
+      config-server:
         condition: service_started
 
     healthcheck:
@@ -244,7 +244,7 @@ services:
     restart: always
 
     depends_on:
-      eureka-server:
+      config-server:
         condition: service_started
 
     healthcheck:
@@ -281,7 +281,7 @@ services:
     restart: always
 
     depends_on:
-      eureka-server:
+      config-server:
         condition: service_started
       # microservicio-principal:
       #   condition: service_healthy
