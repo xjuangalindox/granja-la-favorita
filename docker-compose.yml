@@ -85,9 +85,9 @@ services:
     
     restart: always
 
-    depends_on:
-      db-granja:
-        condition: service_healthy
+    # depends_on:
+    #   db-granja:
+    #     condition: service_healthy
       
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
@@ -165,10 +165,10 @@ services:
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-    #   interval: 10s          # Cada 5 segundos hace la comprobación
-    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
-    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-    #   start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      interval: 10s          # Cada 5 segundos hace la comprobación
+      timeout: 5s           # Espera máximo 3 segundos para la respuesta
+      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+      start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # microservicio-razas - 8082 - 48.2s
@@ -204,10 +204,10 @@ services:
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-    #   interval: 10s          # Cada 5 segundos hace la comprobación
-    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
-    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-    #   start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      interval: 10s          # Cada 5 segundos hace la comprobación
+      timeout: 5s           # Espera máximo 3 segundos para la respuesta
+      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+      start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # microservicio-articulos - 8083 - 48.2s
@@ -249,10 +249,10 @@ services:
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
-    #   interval: 10s          # Cada 5 segundos hace la comprobación
-    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
-    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-    #   start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      interval: 10s          # Cada 5 segundos hace la comprobación
+      timeout: 5s           # Espera máximo 3 segundos para la respuesta
+      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+      start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # gateway-service - 8080 - 58.7s
@@ -281,19 +281,22 @@ services:
     restart: always
 
     depends_on:
-      microservicio-principal:
+      eureka-server:
         condition: service_healthy
-      microservicio-razas:
-        condition: service_healthy
-      microservicio-articulos:
-        condition: service_healthy
+      # microservicio-principal:
+      #   condition: service_healthy
+      # microservicio-razas:
+      #   condition: service_healthy
+      # microservicio-articulos:
+      #   condition: service_healthy
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-    #   interval: 10s          # Cada 5 segundos hace la comprobación
-    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
-    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-    #   start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
+      interval: 10s          # Cada 5 segundos hace la comprobación
+      timeout: 5s           # Espera máximo 3 segundos para la respuesta
+      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+      start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      # start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # nginx - 80 - 58.9s
@@ -323,31 +326,31 @@ services:
 #   # nginx - test
 # ####################################################################################################################
 
-  # nginx:
-  #   container_name: nginx
-  #   image: granja/nginx:${TAG_VERSION}
+  nginx:
+    container_name: nginx
+    image: granja/nginx:${TAG_VERSION}
     
-  #   build: 
-  #     context: ./nginx # Directorio donde está el Dockerfile
-  #     args:
-  #       NGINX_CONF_FILE: ${NGINX_CONF_FILE} # Pasar la variable de entorno al Dockerfile
+    build: 
+      context: ./nginx # Directorio donde está el Dockerfile
+      args:
+        NGINX_CONF_FILE: ${NGINX_CONF_FILE} # Pasar la variable de entorno al Dockerfile
 
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
+    ports:
+      - "80:80"
+      - "443:443"
 
-  #   restart: always
+    restart: always
 
-  #   depends_on:
-  #     gateway-service:
-  #       condition: service_healthy
+    # depends_on:
+    #   gateway-service:
+    #     condition: service_healthy
 
-  #   healthcheck:
-  #     test: ["CMD", "pidof", "nginx"]
-    #   interval: 10s          # Cada 5 segundos hace la comprobación
-    #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
-    #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-    #   start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+    healthcheck:
+      test: ["CMD", "pidof", "nginx"]
+      interval: 10s          # Cada 5 segundos hace la comprobación
+      timeout: 5s           # Espera máximo 3 segundos para la respuesta
+      retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
+      start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 ####################################################################################################################
   # volumes
