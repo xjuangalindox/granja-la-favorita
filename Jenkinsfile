@@ -129,13 +129,6 @@ pipeline {
             }
         }
 
-        stage('🧹 Clean workspace') {
-            steps{
-                deleteDir()
-                sh 'ls'
-            }
-        }
-
         stage('⬇️ Stop running containers') {
             steps{
                 sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
@@ -155,9 +148,16 @@ pipeline {
             }
         }
 
-        stage('📥 Checkout granja-la-favorita') {
-            steps {
-                checkout scm
+        // stage('📥 Checkout granja-la-favorita') {
+        //     steps {
+        //         checkout scm
+        //         sh 'ls'
+        //     }
+        // }
+        
+        stage('🧹 Clean workspace') {
+            steps{
+                deleteDir()
                 sh 'ls'
             }
         }
@@ -341,7 +341,7 @@ pipeline {
             echo '********** 🧹 POST: ALWAYS **********'
             echo "El pipeline ${env.JOB_NAME} ha finalizado."
 
-            sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+            // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
         }
 
         aborted {
@@ -368,7 +368,7 @@ pipeline {
                 deleteOldImages(images, env.APP_VERSION, env.STABLE_TAG)
                 
                 // 3️⃣ Enviar success mail
-                sendSuccessMail()
+                // sendSuccessMail()
             }
         }
 
@@ -385,7 +385,7 @@ pipeline {
                 rollback(services, env.STABLE_TAG)
                 
                 // 2️⃣ Enviar failure mail
-                sendFailureMail()
+                // sendFailureMail()
             }
         }
     }
