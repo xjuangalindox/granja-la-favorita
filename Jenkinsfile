@@ -31,7 +31,7 @@ def rollback(services, stableTag) {
     echo '********** 🔄 Rollback a última versión estable **********'
 
     // 1️⃣ Bajar todos los contenedores
-    sh "docker-compose --env-file credentials/.env.${env.PROFILE} down --remove-orphans || true"
+    sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
 
     // 2️⃣ Por cada servicio, levantar su última imagen estable
     services.each { service ->
@@ -54,7 +54,7 @@ def rollback(services, stableTag) {
             def tagOnly = stableImage.split(':')[1]
             sh """
                 TAG_VERSION=${tagOnly} \
-                docker-compose --env-file credentials/.env.${env.PROFILE} up -d ${service}
+                docker-compose --env-file credentials/.env.${env.ENV} up -d ${service}
             """
 
         } else {
@@ -95,18 +95,35 @@ pipeline {
     }
 
     stages {
-        stage('🔍 Detect ENV'){
+        stage('🧠 Decide deploy'){
             steps{
                 script{
-                    if(env.BRANCH_NAME == 'master'){
+                    env.DO_DEPLOY = (
+                        (env.DEPLOY_TARGET == 'VPS' && env.BRANCH_NAME == 'master') || 
+                        (env.DEPLOY_TARGET == 'LOCAL' && env.BRANCH_NAME != 'master')
+                    ).toString()
+
+                    echo "DEPLOY_TARGET: ${env.DEPLOY_TARGET}" // "VPS" o "LOCAL"
+                    echo "BRANCH_NAME  : ${env.BRANCH_NAME}"
+                    echo "DO_DEPLOY    : ${env.DO_DEPLOY}" // "true" o "false"
+                }
+            }
+        }
+
+        stage('🧠 Deploy context'){
+            steps{
+                script{
+                    if(env.DO_DEPLOY == 'true'){
                         env.ENV = 'prod'
+                        env.DOCKER_COMPOSE = "-f docker-compose.yml -f docker-compose.${env.ENV}.yml"
                     }else{
                         env.ENV = 'dev'
+                        env.DOCKER_COMPOSE = ''
                     }
                 }
 
-                echo "BRANCH PUSHEADA: ${env.BRANCH_NAME}"
-                echo "ENV: ${env.ENV}"
+                echo "DOCKER_COMPOSE: ${env.DOCKER_COMPOSE}"
+                echo "ENV           : ${env.ENV}" // "prod" o "dev"
             }
         }
 
@@ -117,10 +134,22 @@ pipeline {
             }
         }
 
-        stage('⬇️ Bajar contenedores actuales') {
+        stage('⬇️ Stop running containers') {
             steps{
                 sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
                 sh 'docker ps'
+            }
+        }
+
+        stage('🧹 Prune Docker images (VPS)'){
+            steps{
+                script{
+                    if(env.DO_DEPLOY == 'true'){
+                        sh 'docker image prune -af'
+                    }
+                }
+
+                sh 'docker images'
             }
         }
 
@@ -131,7 +160,7 @@ pipeline {
             }
         }
 
-        stage('📥 Checkout (manual) credentials') {
+        stage('🔐 Fetch credentials') {
             steps {
                 dir('credentials') {
                     git url: 'https://github.com/xjuangalindox/credentials.git',
@@ -143,7 +172,7 @@ pipeline {
             }
         }
 
-        stage('🗄️ MySQL'){
+        stage('Start MySQL'){
             steps{
                 script{
                     try{
@@ -158,7 +187,7 @@ pipeline {
             }
         }
         
-        stage('📊 Grafana'){
+        stage('📊 Start Grafana'){
             steps{
                 script{
                     try{
@@ -173,7 +202,7 @@ pipeline {
             }
         }
 
-        stage('⚙️ Config-Server'){
+        stage('⚙️ Start Config-Server'){
             steps{
                 script{
                     try{
@@ -191,7 +220,7 @@ pipeline {
             }
         }
 
-        stage('📡 Eureka-Server'){
+        stage('📡 Start Eureka-Server'){
             steps{
                 script{
                     try{
@@ -210,7 +239,7 @@ pipeline {
             }
         }
 
-        stage('🧠 Microservicio-Principal'){
+        stage('🧠 Start Microservicio-Principal'){
             steps{
                 script{
                     try{
@@ -229,7 +258,7 @@ pipeline {
             }
         }
 
-        stage('🐇 Microservicio-Razas'){
+        stage('🐇 Start Microservicio-Razas'){
             steps{
                 script{
                     try{
@@ -248,7 +277,7 @@ pipeline {
             }
         }
 
-        stage('📦 Microservicio-Articulos'){
+        stage('📦 Start Microservicio-Articulos'){
             steps{
                 script{
                     try{
@@ -267,7 +296,7 @@ pipeline {
             }
         }
 
-        stage('🚪 Gateway-Service'){
+        stage('🚪 Start Gateway-Service'){
             steps{
                 script{
                     try{
@@ -286,13 +315,13 @@ pipeline {
             }
         }
 
-        stage('🔀 Nginx'){
+        stage('🔀 Start Nginx'){
             steps{
                 script{
                     try{
                         sh """
                             TAG_VERSION=${env.APP_VERSION} \
-                            docker-compose --env-file credentials/.env.${env.ENV} up -d --build nginx
+                            docker-compose ${env.DOCKER_COMPOSE} --env-file credentials/.env.${env.ENV} up -d --build nginx
                         """
                         sh 'docker ps'
 
@@ -304,7 +333,6 @@ pipeline {
             }
         }                               
     }
-
 
     post {
         always{
@@ -318,7 +346,8 @@ pipeline {
             echo '********** ⛔ POST: ABORTED **********'
             echo 'El pipeline fue cancelado por el usuario o excedió el tiempo máximo permitido (30 minutos).'   
 
-            sh "docker-compose --env-file credentials/.env.${env.PROFILE} down --remove-orphans || true"
+            sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+            sh 'docker ps'
         }
 
         success {            
