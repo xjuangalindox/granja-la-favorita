@@ -341,7 +341,7 @@ pipeline {
             echo '********** 🧹 POST: ALWAYS **********'
             echo "El pipeline ${env.JOB_NAME} ha finalizado."
 
-            // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+            sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
         }
 
         aborted {

@@ -58,8 +58,7 @@ services:
       interval: 10s       # cada 15 segundos
       timeout: 5s         # espera máxima 5 segundos
       retries: 10          # falla después de 5 intentos fallidos
-      start_period: 45s   # tiempo para que Grafana arranque antes de la primera verificación
-      # start_period: 30s   # tiempo para que Grafana arranque antes de la primera verificación
+      start_period: 30s   # tiempo para que Grafana arranque antes de la primera verificación
 
     volumes:
       - grafana_data:/var/lib/grafana
@@ -95,8 +94,7 @@ services:
       interval: 10s          # Cada 5 segundos hace la comprobación
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 45s     # Tiempo para que el contenedor arranque antes de empezar a chequear
-      # start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ###################################################################################################################
 #   eureka-server - 8761 - 27.4s
@@ -125,8 +123,7 @@ services:
       interval: 10s          # Cada 5 segundos hace la comprobación
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 90s     # Tiempo para que el contenedor arranque antes de empezar a chequear
-      # start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # microservicio-principal - 8081 - 48.2s
@@ -164,10 +161,10 @@ services:
 
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
     #   interval: 10s          # Cada 5 segundos hace la comprobación
     #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
     #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
@@ -203,10 +200,10 @@ services:
 
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
     #   interval: 10s          # Cada 5 segundos hace la comprobación
     #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
     #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
@@ -248,10 +245,10 @@ services:
 
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
 
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
     #   interval: 10s          # Cada 5 segundos hace la comprobación
     #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
     #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
@@ -285,14 +282,14 @@ services:
 
     depends_on:
       microservicio-principal:
-        condition: service_started
+        condition: service_healthy
       microservicio-razas:
-        condition: service_started
+        condition: service_healthy
       microservicio-articulos:
-        condition: service_started
+        condition: service_healthy
 
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
     #   interval: 10s          # Cada 5 segundos hace la comprobación
     #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
     #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
@@ -325,27 +322,28 @@ services:
 # ####################################################################################################################
 #   # nginx - test
 # ####################################################################################################################
-  nginx:
-    container_name: nginx
-    image: granja/nginx:${TAG_VERSION}
+
+  # nginx:
+  #   container_name: nginx
+  #   image: granja/nginx:${TAG_VERSION}
     
-    build: 
-      context: ./nginx # Directorio donde está el Dockerfile
-      args:
-        NGINX_CONF_FILE: ${NGINX_CONF_FILE} # Pasar la variable de entorno al Dockerfile
+  #   build: 
+  #     context: ./nginx # Directorio donde está el Dockerfile
+  #     args:
+  #       NGINX_CONF_FILE: ${NGINX_CONF_FILE} # Pasar la variable de entorno al Dockerfile
 
-    ports:
-      - "80:80"
-      - "443:443"
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
 
-    restart: always
+  #   restart: always
 
-    depends_on:
-      gateway-service:
-        condition: service_started
+  #   depends_on:
+  #     gateway-service:
+  #       condition: service_healthy
 
-    # healthcheck:
-    #   test: ["CMD", "pidof", "nginx"]
+  #   healthcheck:
+  #     test: ["CMD", "pidof", "nginx"]
     #   interval: 10s          # Cada 5 segundos hace la comprobación
     #   timeout: 5s           # Espera máximo 3 segundos para la respuesta
     #   retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
