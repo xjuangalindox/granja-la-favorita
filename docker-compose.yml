@@ -90,17 +90,11 @@ services:
     #     condition: service_healthy
       
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8888/actuator/health || echo 'Healthcheck failed'"]
-      # test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
       interval: 10s          # Cada 5 segundos hace la comprobación
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
       start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
-
-    # volumes:
-    #   - ./scripts:/scripts
-    # entrypoint: ["/scripts/wait-for-config-server.sh"]
-
 
 # ###################################################################################################################
 #   eureka-server - 8761 - 27.4s
@@ -116,7 +110,7 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
 
       # Credenciales GitHub (config-server)
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
 
     restart: always
 
@@ -125,8 +119,7 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || echo 'Healthcheck failed'"]
-      # test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 10s          # Cada 5 segundos hace la comprobación
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
@@ -145,7 +138,7 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
 
       # Credenciales GitHub (config-server)
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
 
       # Eureka Server
       ES_HOST: eureka-server
@@ -171,8 +164,7 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8081/actuator/health || echo 'Healthcheck failed'"]
-      # test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
       interval: 10s          # Cada 5 segundos hace la comprobación
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
@@ -195,7 +187,7 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
 
       # Credenciales GitHub (config-server)
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
 
       # Eureka Server
       ES_HOST: eureka-server
@@ -234,7 +226,7 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
 
       # Credenciales GitHub (config-server)
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
 
       # Eureka Server
       ES_HOST: eureka-server
@@ -281,7 +273,7 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
 
       # Credenciales GitHub (config-server)
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
 
       # Eureka Server
       ES_HOST: eureka-server
