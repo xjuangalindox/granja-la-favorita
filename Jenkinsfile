@@ -40,9 +40,9 @@ def rollback(services, stableTag) {
     sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
 
     // 2️⃣ Por cada servicio, levantar su última imagen estable
-    services.each { service ->
+    services.each { service -> // config-server
 
-        def imageName = "granja/${service}"
+        def imageName = "granja/${service}" // granja/config-server
 
         // Buscar la última versión estable para esta imagen
         def stableImage = sh(
@@ -256,6 +256,8 @@ pipeline {
         stage('🧠 Start Microservicio-Principal'){
             steps{
                 script{
+                    throw new Exception("Fallo forzado")
+
                     try{
                         sh """
                             SPRING_PROFILES_ACTIVE=${env.ENV} \
