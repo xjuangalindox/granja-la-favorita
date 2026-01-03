@@ -1,8 +1,12 @@
 // =================================================================================================================================
-// =================================================================================================================================
 // FUNCIONES
 // =================================================================================================================================
-// =================================================================================================================================
+
+def showLastLogs(service) {
+    echo "********** 🔍 Mostrando últimos 50 logs del servicio: ${service} **********"
+    
+    sh "docker-compose logs --tail=50 ${service}"
+}
 
 def tagAsStable(images, appVersion, stableTag) {
     echo "********** 🏷️ Marcando imágenes como versión estable: ${images} **********"
@@ -12,73 +16,77 @@ def tagAsStable(images, appVersion, stableTag) {
     }
 }
 
-def deleteOldImages(images, appVersion, stableTag){
-    echo '********** 🧹 Eliminando imágenes antiguas (solo queda image:appVersion-stableTag) **********'
+def startBaseServices(services){
+    echo '********** 🧱 Start Base Services **********'
 
-    // Para cada imagen, lista sus tags → quita stable (ejecutandose) → borra el resto → no rompas el pipeline
+    services.each{ service ->
+        try{
+            sh "docker-compose --env-file credentials/.env.${env.ENV} up -d ${service}"
+
+        }catch(Exception e){
+            showLastLogs(service)
+            throw e
+        }
+    }
+
+    sh 'docker ps'
+}
+
+def removeUnstableImages(images, stableTag){
+    echo '********** 🧹 Remove Unstable Images **********'
+    
     images.each{ image -> // granja/config-server
-        // def imageName = image.split('/')[1] // config-server
-        def stableImage = "${image}:${appVersion}-${stableTag}" // granja/config-server:22-stable
-
         sh """
-            docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
-            | grep -vF "${stableImage}" \
+            docker images ${image} --format '{{.Repository}}:{{.Tag}}' \
+            | grep '${stableTag}\$' \
             | xargs -r docker rmi || true
         """
-        // sh """
-        //     docker images ${imageName} --format "{{.Repository}}:{{.Tag}}" \
-        //     | grep -vF "${stableImage}" \
-        //     | xargs -r docker rmi || true
-        // """
     }
 }
 
-def rollback(services, stableTag) {
+def startLatestStableImages(images, stableTag){
+    echo '********** 🚀 Start Latest Stable Images **********'
+
+    images.each{ image -> // granja/config-server
+        def serviceName = image.split('/')[1] // config-server
+
+        def stableImage = sh(
+            script: 
+                """
+                docker images ${image} --format '{{.Repository}}:{{.Tag}}' \
+                | grep '${stableTag}\$' \
+                | sort -V \
+                | tail -1
+                """,
+                returnStdout: true
+            ).trim()
+
+        if(stableImage){
+            def tag = stableImage.split(':')[1] // 10-stable
+            sh """
+                TAG_VERSION=${tag} \
+                docker-compose --env-file credentials/.env.${env.ENV} up -d ${serviceName}
+            """
+        }else{
+            echo "⚠️ No se encontró imagen estable para ${serviceName}, se omite"
+        }
+    }
+}
+
+def rollback(images, stableTag) {
     echo '********** 🔄 Rollback a última versión estable **********'
 
     // 1️⃣ Bajar todos los contenedores
     sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
 
-    // 2️⃣ Por cada servicio, levantar su última imagen estable
-    services.each { service -> // config-server
+    // 2️⃣ Remove unstable images
+    removeUnstableImages(images, stableTag)
 
-        def imageName = "granja/${service}" // granja/config-server
+    // 3️⃣ Levantar servicios básicos
+    startBaseServices()
 
-        // Buscar la última versión estable para esta imagen
-        def stableImage = sh(
-            script: """
-                docker images ${imageName} --format '{{.Repository}}:{{.Tag}}' \
-                | grep '${stableTag}\$' \
-                | sort -V \
-                | tail -1
-            """,
-            // script: """
-            //     docker images --format '{{.Repository}}:{{.Tag}}' \
-            //     | grep '^${imageName}:' \
-            //     | grep '${stableTag}\$' \
-            //     | sort -V \
-            //     | tail -1
-            // """,
-            returnStdout: true
-        ).trim()
-    
-        if (stableImage) {  
-            def tagOnly = stableImage.split(':')[1] // 10-stable
-            sh """
-                TAG_VERSION=${tagOnly} \
-                docker-compose --env-file credentials/.env.${env.ENV} up -d ${service}
-            """
-
-        } else {
-            echo "⚠️ No se encontró imagen estable para ${service}, se omite"
-        }
-    }
-}
-
-def showLastLogs(service) {
-    echo "********** 🔍 Mostrando últimos 50 logs del servicio: ${service} **********"
-    
-    sh "docker-compose logs --tail=50 ${service}"
+    // 4️⃣ Levantar ultima version estable de cada imagen
+    startLatestStableImages(images, stableTag)
 }
 
 // =================================================================================================================================
@@ -186,35 +194,29 @@ pipeline {
             }
         }
 
-        stage('Start MySQL'){
+        stage('🧱 Start Base Services'){
             steps{
                 script{
-                    try{
-                        sh "docker-compose --env-file credentials/.env.${env.ENV} up -d db-granja"
-                        sh 'docker ps'
-
-                    }catch(Exception e){
-                        showLastLogs('db-granja')
-                        throw e
-                    }
-                } 
-            }
-        }
-        
-        stage('📊 Start Grafana'){
-            steps{
-                script{
-                    try{
-                        sh "docker-compose --env-file credentials/.env.${env.ENV} up -d grafana"
-                        sh 'docker ps'
-
-                    }catch(Exception e){
-                        showLastLogs('grafana')
-                        throw e
-                    }
+                    def services = ['db-granja', 'grafana']
+                    startBaseServices(services)
                 }
             }
         }
+        
+        // stage('📊 Start Grafana'){
+        //     steps{
+        //         script{
+        //             try{
+        //                 sh "docker-compose --env-file credentials/.env.${env.ENV} up -d grafana"
+        //                 sh 'docker ps'
+
+        //             }catch(Exception e){
+        //                 showLastLogs('grafana')
+        //                 throw e
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('⚙️ Start Config-Server'){
             steps{
@@ -354,8 +356,6 @@ pipeline {
         always{
             echo '********** 🧹 POST: ALWAYS **********'
             echo "El pipeline ${env.JOB_NAME} ha finalizado."
-
-            // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
         }
 
         aborted {
@@ -366,10 +366,10 @@ pipeline {
             sh 'docker ps'
         }
 
-        success {            
-            script {
-                echo '********** ✅ POST: SUCCESS **********'
-                
+        success {   
+            echo '********** ✅ POST: SUCCESS **********'
+
+            script {               
                 def images = [
                     'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
                     'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
@@ -378,8 +378,8 @@ pipeline {
                 // 1️⃣ Marcar como stable
                 tagAsStable(images, env.APP_VERSION, env.STABLE_TAG)
 
-                // 2️⃣ Limpiar imágenes viejas
-                deleteOldImages(images, env.APP_VERSION, env.STABLE_TAG)
+                // 2️⃣ Remover imágenes inestables
+                removeUnstableImages(images, stableTag)
                 
                 // 3️⃣ Enviar success mail
                 if(env.DO_DEPLOY == 'true'){
@@ -389,16 +389,16 @@ pipeline {
         }
 
         failure {
-            script {
-                echo '********** 💥 POST: FAILURE **********'
+            echo '********** 💥 POST: FAILURE **********'
 
-                def services = [
-                    'config-server', 'eureka-server', 'microservicio-principal',
-                    'microservicio-razas', 'microservicio-articulos', 'gateway-service', 'nginx'
-                ]
+            script {
+                def images = [
+                    'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
+                    'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
+                    ]
                 
                 // 1️⃣ Levantar versiones estables
-                rollback(services, env.STABLE_TAG)
+                rollback(images, env.STABLE_TAG)
                 
                 // 2️⃣ Enviar failure mail
                 if(env.DO_DEPLOY == 'true'){
