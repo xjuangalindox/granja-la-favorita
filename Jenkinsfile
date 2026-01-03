@@ -17,19 +17,19 @@ def deleteOldImages(images, appVersion, stableTag){
 
     // Para cada imagen, lista sus tags → quita stable (ejecutandose) → borra el resto → no rompas el pipeline
     images.each{ image -> // granja/config-server
-        def imageName = image.split('/')[1] // config-server
+        // def imageName = image.split('/')[1] // config-server
         def stableImage = "${image}:${appVersion}-${stableTag}" // granja/config-server:22-stable
 
-        // sh """
-        //     docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
-        //     | grep -vF "${stableImage}" \
-        //     | xargs -r docker rmi || true
-        // """
         sh """
-            docker images ${imageName} --format "{{.Repository}}:{{.Tag}}" \
+            docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
             | grep -vF "${stableImage}" \
             | xargs -r docker rmi || true
         """
+        // sh """
+        //     docker images ${imageName} --format "{{.Repository}}:{{.Tag}}" \
+        //     | grep -vF "${stableImage}" \
+        //     | xargs -r docker rmi || true
+        // """
     }
 }
 
