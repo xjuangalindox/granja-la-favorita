@@ -17,7 +17,7 @@ def deleteOldImages(images, appVersion, stableTag){
 
     // Para cada imagen, lista sus tags → quita stable (ejecutandose) → borra el resto → no rompas el pipeline
     images.each{ image ->
-        def imageName = image.split("/"):[1] // config-server
+        def imageName = image.split('/')[1] // config-server
         def stableImage = "${image}:${appVersion}-${stableTag}" // granja/config-server:22-stable
 
         sh """
