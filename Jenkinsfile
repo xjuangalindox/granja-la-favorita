@@ -16,10 +16,15 @@ def deleteOldImages(images, appVersion, stableTag){
     echo '********** 🧹 Eliminando imágenes antiguas (solo queda image:appVersion-stableTag) **********'
 
     // Para cada imagen, lista sus tags → quita stable (ejecutandose) → borra el resto → no rompas el pipeline
-    images.each{ image ->
+    images.each{ image -> // granja/config-server
         def imageName = image.split('/')[1] // config-server
         def stableImage = "${image}:${appVersion}-${stableTag}" // granja/config-server:22-stable
 
+        // sh """
+        //     docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
+        //     | grep -vF "${stableImage}" \
+        //     | xargs -r docker rmi || true
+        // """
         sh """
             docker images ${imageName} --format "{{.Repository}}:{{.Tag}}" \
             | grep -vF "${stableImage}" \
@@ -348,7 +353,7 @@ pipeline {
             echo '********** 🧹 POST: ALWAYS **********'
             echo "El pipeline ${env.JOB_NAME} ha finalizado."
 
-            sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+            // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
         }
 
         aborted {
