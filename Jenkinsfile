@@ -17,10 +17,11 @@ def deleteOldImages(images, appVersion, stableTag){
 
     // Para cada imagen, lista sus tags → quita stable (ejecutandose) → borra el resto → no rompas el pipeline
     images.each{ image ->
-        def stableImage = "${image}:${appVersion}-${stableTag}"
+        def imageName = image.split("/"):[1] // config-server
+        def stableImage = "${image}:${appVersion}-${stableTag}" // granja/config-server:22-stable
 
         sh """
-            docker images ${image} --format "{{.Repository}}:{{.Tag}}" \
+            docker images ${imageName} --format "{{.Repository}}:{{.Tag}}" \
             | grep -vF "${stableImage}" \
             | xargs -r docker rmi || true
         """
@@ -41,17 +42,23 @@ def rollback(services, stableTag) {
         // Buscar la última versión estable para esta imagen
         def stableImage = sh(
             script: """
-                docker images --format '{{.Repository}}:{{.Tag}}' \
-                | grep '^${imageName}:' \
+                docker images ${imageName} --format '{{.Repository}}:{{.Tag}}' \
                 | grep '${stableTag}\$' \
                 | sort -V \
                 | tail -1
             """,
+            // script: """
+            //     docker images --format '{{.Repository}}:{{.Tag}}' \
+            //     | grep '^${imageName}:' \
+            //     | grep '${stableTag}\$' \
+            //     | sort -V \
+            //     | tail -1
+            // """,
             returnStdout: true
         ).trim()
     
         if (stableImage) {  
-            def tagOnly = stableImage.split(':')[1]
+            def tagOnly = stableImage.split(':')[1] // 10-stable
             sh """
                 TAG_VERSION=${tagOnly} \
                 docker-compose --env-file credentials/.env.${env.ENV} up -d ${service}
@@ -139,9 +146,9 @@ pipeline {
         stage('🧹 Prune Docker images (VPS)'){
             steps{
                 script{
-                    // if(env.DO_DEPLOY == 'true'){
+                    if(env.DO_DEPLOY == 'true'){
                         sh 'docker image prune -af'
-                    // }
+                    }
                 }
 
                 sh 'docker images'
@@ -341,7 +348,7 @@ pipeline {
             echo '********** 🧹 POST: ALWAYS **********'
             echo "El pipeline ${env.JOB_NAME} ha finalizado."
 
-            // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+            sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
         }
 
         aborted {
@@ -368,7 +375,9 @@ pipeline {
                 deleteOldImages(images, env.APP_VERSION, env.STABLE_TAG)
                 
                 // 3️⃣ Enviar success mail
-                // sendSuccessMail()
+                if(env.DO_DEPLOY == 'true'){
+                    sendSuccessMail()
+                }
             }
         }
 
@@ -385,7 +394,9 @@ pipeline {
                 rollback(services, env.STABLE_TAG)
                 
                 // 2️⃣ Enviar failure mail
-                // sendFailureMail()
+                if(env.DO_DEPLOY == 'true'){
+                    sendFailureMail()
+                }
             }
         }
     }

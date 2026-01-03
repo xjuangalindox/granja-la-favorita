@@ -70,8 +70,8 @@ services:
     container_name: config-server
     image: granja/config-server:${TAG_VERSION}
     build: ./config-service
-    # ports:
-    #   - "8888:8888"
+    # mem_limit: 512m
+    
     environment:
       # Perfil para despliegue
       SPRING_PROFILES_ACTIVE: default
@@ -103,8 +103,8 @@ services:
     container_name: eureka-server
     image: granja/eureka-server:${TAG_VERSION}
     build: ./eureka-service
-    # ports:
-    #   - "8761:8761"
+    # mem_limit: 512m
+
     environment:
       # 👉 PERFIL SPRING
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -124,7 +124,6 @@ services:
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
       start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
-      # start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # microservicio-principal - 8081 - 48.2s
@@ -134,6 +133,7 @@ services:
     image: granja/microservicio-principal:${TAG_VERSION}
     build: ./conejoMontaNacimiento
     # mem_limit: 512m
+
     environment:
       # 👉 PERFIL SPRING
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -179,6 +179,7 @@ services:
     image: granja/microservicio-razas:${TAG_VERSION}
     build: ./microservicio-razas
     # mem_limit: 256m
+
     environment:
       # 👉 PERFIL SPRING
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -218,6 +219,7 @@ services:
     image: granja/microservicio-articulos:${TAG_VERSION}
     build: ./microservicio-articulos
     # mem_limit: 256m
+
     environment:
       # 👉 PERFIL SPRING
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -263,8 +265,7 @@ services:
     image: granja/gateway-service:${TAG_VERSION}
     build: ./gateway-service
     # mem_limit: 256m
-    # ports:
-    #   - "8080:8080"
+
     environment:
       # 👉 PERFIL SPRING
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
@@ -284,12 +285,6 @@ services:
     # depends_on:
     #   config-server:
     #     condition: service_healthy
-      # microservicio-principal:
-      #   condition: service_healthy
-      # microservicio-razas:
-      #   condition: service_healthy
-      # microservicio-articulos:
-      #   condition: service_healthy
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
@@ -297,34 +292,9 @@ services:
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
       start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
-      # start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # nginx - 80 - 58.9s
-# ####################################################################################################################
-  # nginx:
-  #   image: nginx:latest
-  #   container_name: nginx
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
-
-  #   restart: always
-  #   depends_on:
-  #     gateway-service:
-  #       condition: service_healthy
-
-  #   healthcheck:
-  #     test: ["CMD", "pidof", "nginx"]
-  #     interval: 10s          # Cada 5 segundos hace la comprobación
-  #     timeout: 5s           # Espera máximo 3 segundos para la respuesta
-  #     retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-  #     start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
-
-# ####################################################################################################################
-#   # nginx - test
 # ####################################################################################################################
 
   nginx:
@@ -339,6 +309,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
+
+    # volumes:
+    #   - ./nginx/${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
 
     restart: always
 
@@ -361,6 +334,7 @@ volumes:
   mysql_data:
     external: true
     name: ${MYSQL_VOLUME_NAME}
+
   grafana_data:
     external: true
     name: ${GRAFANA_VOLUME_NAME}
