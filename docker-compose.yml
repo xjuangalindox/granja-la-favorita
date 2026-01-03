@@ -114,16 +114,17 @@ services:
 
     restart: always
 
-    depends_on:
-      config-server:
-        condition: service_healthy
+    # depends_on:
+    #   config-server:
+    #     condition: service_healthy
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 10s          # Cada 5 segundos hace la comprobación
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
-      start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
+      # start_period: 30s     # Tiempo para que el contenedor arranque antes de empezar a chequear
 
 # ####################################################################################################################
 #   # microservicio-principal - 8081 - 48.2s
@@ -159,9 +160,9 @@ services:
 
     restart: always
 
-    depends_on:
-      config-server:
-        condition: service_healthy
+    # depends_on:
+    #   config-server:
+    #     condition: service_healthy
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
@@ -169,10 +170,6 @@ services:
       timeout: 5s           # Espera máximo 3 segundos para la respuesta
       retries: 10            # Considera fallida la prueba tras 5 intentos fallidos
       start_period: 60s     # Tiempo para que el contenedor arranque antes de empezar a chequear
-    
-    # volumes:
-    #   - ./scripts:/scripts
-    # entrypoint: ["/scripts/wait-for-config-server.sh"]
 
 # ####################################################################################################################
 #   # microservicio-razas - 8082 - 48.2s
@@ -202,9 +199,9 @@ services:
 
     restart: always
 
-    depends_on:
-      config-server:
-        condition: service_healthy
+    # depends_on:
+    #   config-server:
+    #     condition: service_healthy
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
@@ -247,9 +244,9 @@ services:
 
     restart: always
 
-    depends_on:
-      config-server:
-        condition: service_healthy
+    # depends_on:
+    #   config-server:
+    #     condition: service_healthy
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
@@ -284,9 +281,9 @@ services:
 
     restart: always
 
-    depends_on:
-      config-server:
-        condition: service_healthy
+    # depends_on:
+    #   config-server:
+    #     condition: service_healthy
       # microservicio-principal:
       #   condition: service_healthy
       # microservicio-razas:
