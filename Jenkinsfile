@@ -1,6 +1,15 @@
 // =================================================================================================================================
 // FUNCIONES
 // =================================================================================================================================
+def BASE_SERVICES = ['db-granja', 'grafana']
+def BASE_IMAGES = [
+    'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
+    'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
+    ]
+
+// =================================================================================================================================
+// FUNCIONES
+// =================================================================================================================================
 
 def showLastLogs(service) {
     echo "********** 🔍 Mostrando últimos 50 logs del servicio: ${service} **********"
@@ -83,7 +92,7 @@ def rollback(images, stableTag) {
     removeUnstableImages(images, stableTag)
 
     // 3️⃣ Levantar servicios básicos
-    startBaseServices()
+    startBaseServices(BASE_SERVICES)
 
     // 4️⃣ Levantar ultima version estable de cada imagen
     startLatestStableImages(images, stableTag)
@@ -197,8 +206,9 @@ pipeline {
         stage('🧱 Start Base Services'){
             steps{
                 script{
-                    def services = ['db-granja', 'grafana']
-                    startBaseServices(services)
+                    startBaseServices(BASE_SERVICES)
+                    // def services = ['db-granja', 'grafana']
+                    // startBaseServices(services)
                 }
             }
         }
