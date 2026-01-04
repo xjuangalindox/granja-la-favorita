@@ -279,6 +279,8 @@ pipeline {
         stage('🐇 Start Microservicio-Razas'){
             steps{
                 script{
+                    throw new Exception("Fallo forzado")
+
                     try{
                         sh """
                             SPRING_PROFILES_ACTIVE=${env.ENV} \
