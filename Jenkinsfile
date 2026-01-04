@@ -38,7 +38,7 @@ def removeUnstableImages(images, stableTag){
     images.each{ image -> // granja/config-server
         sh """
             docker images ${image} --format '{{.Repository}}:{{.Tag}}' \
-            | grep '${stableTag}\$' \
+            | grep -v '${stableTag}\$' \
             | xargs -r docker rmi || true
         """
     }
