@@ -87,6 +87,7 @@ def rollback(images, services, stableTag) {
 
     // 1️⃣ Bajar todos los contenedores
     sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+    sh 'docker ps'
 
     // 2️⃣ Remove unstable images
     removeUnstableImages(images, stableTag)
@@ -108,10 +109,6 @@ pipeline {
     agent any // Ejecuta el pipeline en cualquier agente (nodo Jenkins disponible)
 
     environment {
-        // PROFILE = "${env.PROFILE}" // parameterized
-        // BRANCH_PIPELINE = "${env.BRANCH_PIPELINE}" // parameterized
-        // ENV = ''
-
         APP_VERSION = "${env.BUILD_NUMBER}"
         STABLE_TAG = "stable"
     }
@@ -128,11 +125,6 @@ pipeline {
             steps{
                 script{
                     env.DO_DEPLOY = (env.DEPLOY_TARGET == 'VPS' && env.BRANCH_NAME == 'master') ? 'true' : 'false'
-                    
-                    // (
-                    //     (env.DEPLOY_TARGET == 'VPS' && env.BRANCH_NAME == 'master') || 
-                    //     (env.DEPLOY_TARGET == 'LOCAL' && env.BRANCH_NAME != 'master')
-                    // ).toString()
 
                     echo "DEPLOY_TARGET: ${env.DEPLOY_TARGET}" // "VPS" o "LOCAL"
                     echo "BRANCH_NAME  : ${env.BRANCH_NAME}"
@@ -207,26 +199,9 @@ pipeline {
             steps{
                 script{
                     startBaseServices(BASE_SERVICES)
-                    // def services = ['db-granja', 'grafana']
-                    // startBaseServices(services)
                 }
             }
         }
-        
-        // stage('📊 Start Grafana'){
-        //     steps{
-        //         script{
-        //             try{
-        //                 sh "docker-compose --env-file credentials/.env.${env.ENV} up -d grafana"
-        //                 sh 'docker ps'
-
-        //             }catch(Exception e){
-        //                 showLastLogs('grafana')
-        //                 throw e
-        //             }
-        //         }
-        //     }
-        // }
 
         stage('⚙️ Start Config-Server'){
             steps{
@@ -268,8 +243,6 @@ pipeline {
         stage('🧠 Start Microservicio-Principal'){
             steps{
                 script{
-                    // throw new Exception("Fallo forzado")
-
                     try{
                         sh """
                             SPRING_PROFILES_ACTIVE=${env.ENV} \
@@ -374,29 +347,28 @@ pipeline {
             echo '********** ⛔ POST: ABORTED **********'
             echo 'El pipeline fue cancelado por el usuario o excedió el tiempo máximo permitido (30 minutos).'   
 
+            // 1️⃣ Bajar todos los contenedores
             sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
             sh 'docker ps'
+
+            script{
+                // 2️⃣ Remove unstable images
+                removeUnstableImages(BASE_IMAGES, env.STABLE_TAG)
+            }
         }
 
         success {   
             echo '********** ✅ POST: SUCCESS **********'
 
-            script {               
-                def images = [
-                    'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
-                    'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
-                    ]
-                    
+            script {                                   
                 // 1️⃣ Marcar como stable
-                tagAsStable(images, env.APP_VERSION, env.STABLE_TAG)
+                tagAsStable(BASE_IMAGES, env.APP_VERSION, env.STABLE_TAG)
 
                 // 2️⃣ Remover imágenes inestables
-                removeUnstableImages(images, env.STABLE_TAG)
+                removeUnstableImages(BASE_IMAGES, env.STABLE_TAG)
                 
                 // 3️⃣ Enviar success mail
-                if(env.DO_DEPLOY == 'true'){
-                    sendSuccessMail()
-                }
+                if(env.DO_DEPLOY == 'true'){ sendSuccessMail() }
             }
         }
 
@@ -404,19 +376,11 @@ pipeline {
             echo '********** 💥 POST: FAILURE **********'
 
             script {
-                // def images = [
-                //     'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
-                //     'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
-                //     ]
-                
-                // 1️⃣ Levantar versiones estables
+                // 1️⃣ Bajar todos los contenedores, Remove unstable images, Levantar servicios básicos, Levantar ultima version estable de cada imagen                
                 rollback(BASE_IMAGES, BASE_SERVICES, env.STABLE_TAG)
-                // rollback(images, env.STABLE_TAG)
                 
                 // 2️⃣ Enviar failure mail
-                if(env.DO_DEPLOY == 'true'){
-                    sendFailureMail()
-                }
+                if(env.DO_DEPLOY == 'true'){ sendFailureMail() }
             }
         }
     }
