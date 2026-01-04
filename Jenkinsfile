@@ -82,7 +82,7 @@ def startLatestStableImages(images, stableTag){
     }
 }
 
-def rollback(images, stableTag) {
+def rollback(images, services, stableTag) {
     echo '********** 🔄 Rollback a última versión estable **********'
 
     // 1️⃣ Bajar todos los contenedores
@@ -92,7 +92,7 @@ def rollback(images, stableTag) {
     removeUnstableImages(images, stableTag)
 
     // 3️⃣ Levantar servicios básicos
-    startBaseServices(BASE_SERVICES)
+    startBaseServices(services)
 
     // 4️⃣ Levantar ultima version estable de cada imagen
     startLatestStableImages(images, stableTag)
@@ -404,13 +404,14 @@ pipeline {
             echo '********** 💥 POST: FAILURE **********'
 
             script {
-                def images = [
-                    'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
-                    'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
-                    ]
+                // def images = [
+                //     'granja/config-server', 'granja/eureka-server', 'granja/microservicio-principal', 
+                //     'granja/microservicio-razas', 'granja/microservicio-articulos', 'granja/gateway-service', 'granja/nginx'
+                //     ]
                 
                 // 1️⃣ Levantar versiones estables
-                rollback(images, env.STABLE_TAG)
+                rollback(BASE_IMAGES, BASE_SERVICES, env.STABLE_TAG)
+                // rollback(images, env.STABLE_TAG)
                 
                 // 2️⃣ Enviar failure mail
                 if(env.DO_DEPLOY == 'true'){
