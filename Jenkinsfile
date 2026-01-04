@@ -258,7 +258,7 @@ pipeline {
         stage('🧠 Start Microservicio-Principal'){
             steps{
                 script{
-                    throw new Exception("Fallo forzado")
+                    // throw new Exception("Fallo forzado")
 
                     try{
                         sh """
