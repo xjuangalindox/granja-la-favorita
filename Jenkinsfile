@@ -379,7 +379,7 @@ pipeline {
                 tagAsStable(images, env.APP_VERSION, env.STABLE_TAG)
 
                 // 2️⃣ Remover imágenes inestables
-                removeUnstableImages(images, stableTag)
+                removeUnstableImages(images, env.STABLE_TAG)
                 
                 // 3️⃣ Enviar success mail
                 if(env.DO_DEPLOY == 'true'){
