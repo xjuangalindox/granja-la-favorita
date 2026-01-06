@@ -253,6 +253,8 @@ pipeline {
         stage('🧠 Start Microservicio-Principal'){
             steps{
                 script{
+                    throw new Exception("Force Exception")
+
                     try{
                         sh """
                             SPRING_PROFILES_ACTIVE=${env.ENV} \
