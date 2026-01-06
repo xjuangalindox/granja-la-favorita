@@ -11,6 +11,13 @@ def BASE_IMAGES = [
 // FUNCIONES
 // =================================================================================================================================
 
+def shutdownContainers(profile){
+    echo "********** 🛑 Bajando todos los contenedores, perfil: ${profile} **********"
+
+    sh "docker-compose --env-file credentials/.env.${profile} down --remove-orphans || true"
+    sh 'docker ps'
+}
+
 def showLastLogs(service) {
     echo "********** 🔍 Mostrando últimos 50 logs del servicio: ${service} **********"
     
@@ -82,12 +89,13 @@ def startLatestStableImages(images, stableTag){
     }
 }
 
-def rollback(images, services, stableTag) {
+def rollback(images, services, stableTag, profile) {
     echo '********** 🔄 Rollback a última versión estable **********'
 
     // 1️⃣ Bajar todos los contenedores
-    sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
-    sh 'docker ps'
+    shutdownContainers(profile)
+    // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+    // sh 'docker ps'
 
     // 2️⃣ Remove unstable images
     removeUnstableImages(images, stableTag)
@@ -152,8 +160,10 @@ pipeline {
 
         stage('⬇️ Stop running containers') {
             steps{
-                sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
-                sh 'docker ps'
+                shutdownContainers(env.ENV)
+
+                // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+                // sh 'docker ps'
             }
         }
 
@@ -346,10 +356,13 @@ pipeline {
             echo 'El pipeline fue cancelado por el usuario o excedió el tiempo máximo permitido (30 minutos).'   
 
             // 1️⃣ Bajar todos los contenedores
-            sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
-            sh 'docker ps'
+            // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
+            // sh 'docker ps'
 
             script{
+                // 1️⃣ Bajar todos los contenedores
+                shutdownContainers(env.ENV)
+
                 // 2️⃣ Remove unstable images
                 removeUnstableImages(BASE_IMAGES, env.STABLE_TAG)
             }
@@ -375,7 +388,7 @@ pipeline {
 
             script {
                 // 1️⃣ Bajar todos los contenedores, Remove unstable images, Levantar servicios básicos, Levantar ultima version estable de cada imagen                
-                rollback(BASE_IMAGES, BASE_SERVICES, env.STABLE_TAG)
+                rollback(BASE_IMAGES, BASE_SERVICES, env.STABLE_TAG, env.ENV)
                 
                 // 2️⃣ Enviar failure mail
                 if(env.DO_DEPLOY == 'true'){ sendFailureMail() }
