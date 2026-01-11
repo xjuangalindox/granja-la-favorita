@@ -300,11 +300,13 @@ services:
   nginx:
     container_name: nginx
     image: granja/nginx:${TAG_VERSION}
-    
+    networks:
+      - infra-net
     build: 
       context: ./nginx # Directorio donde está el Dockerfile
       args:
         NGINX_CONF_FILE: ${NGINX_CONF_FILE} # Pasar la variable de entorno al Dockerfile
+
 
     ports:
       - "80:80"
@@ -338,6 +340,14 @@ volumes:
   grafana_data:
     external: true
     name: ${GRAFANA_VOLUME_NAME}
+
+####################################################################################################################
+  # networks
+####################################################################################################################
+
+networks:
+  infra-net:
+    external: true
 
 ####################################################################################################################
   # testing
