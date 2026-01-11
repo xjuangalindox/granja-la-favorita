@@ -34,6 +34,8 @@ services:
   grafana:
     container_name: grafana
     image: grafana/grafana:latest
+    networks:
+      - infra-net
     ports:
       - "3000:3000" # Puerto expuesto para acceder a grafana
     environment:
@@ -263,6 +265,8 @@ services:
   gateway-service:
     container_name: gateway-service
     image: granja/gateway-service:${TAG_VERSION}
+    networks:
+      - infra-net
     build: ./gateway-service
     # mem_limit: 256m
 
