@@ -37,7 +37,7 @@ def startBaseServices(services){
 
     services.each{ service ->
         try{
-            sh "docker-compose --env-file credentials/.env.${env.ENV} up -d ${service}"
+            sh "docker-compose --env-file credentials/.env.${env.ENV} up -d ${service} || true"
 
         }catch(Exception e){
             showLastLogs(service)
@@ -95,8 +95,6 @@ def rollback(images, services, stableTag, profile) {
 
     // 1️⃣ Bajar todos los contenedores
     shutdownContainers(profile)
-    // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
-    // sh 'docker ps'
 
     // 2️⃣ Remove unstable images
     removeUnstableImages(images, stableTag)
@@ -149,9 +147,12 @@ pipeline {
                     if(env.DO_DEPLOY == 'true'){
                         env.ENV = 'prod'
                         env.DOCKER_COMPOSE = "-f docker-compose.yml -f docker-compose.${env.ENV}.yml"
+                        env.GIT_CREDS = '2dd51f03-81cf-4c7d-9a92-2a888b94fc72'
+
                     }else{
                         env.ENV = 'dev'
                         env.DOCKER_COMPOSE = ''
+                        env.GIT_CREDS = 'fa04f023-0db3-44fa-941c-0efdae20b429'
                     }
                 }
 
@@ -163,9 +164,6 @@ pipeline {
         stage('⬇️ Stop running containers') {
             steps{
                 shutdownContainers(env.ENV)
-
-                // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
-                // sh 'docker ps'
             }
         }
 
@@ -200,7 +198,8 @@ pipeline {
                 dir('credentials') {
                     git url: 'https://github.com/xjuangalindox/credentials.git',
                         branch: 'profiles',
-                        credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
+                        credentialsId: env.GIT_CREDS
+                        // credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
                 }
 
                 sh 'ls'
