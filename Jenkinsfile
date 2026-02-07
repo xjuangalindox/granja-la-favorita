@@ -129,6 +129,14 @@ pipeline {
     }
 
     stages {
+        stage('🔑 Docker Login') {
+            steps {
+                script{
+                    sh "echo ${env.DOCKER_PASSWORD} | docker login -u ${env.DOCKER_USER} --password-stdin"
+                }
+            }
+        }
+
         stage('🧠 Decide deploy'){
             steps{
                 script{
