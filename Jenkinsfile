@@ -199,7 +199,6 @@ pipeline {
                     git url: 'https://github.com/xjuangalindox/credentials.git',
                         branch: 'profiles',
                         credentialsId: env.GIT_CREDS
-                        // credentialsId: 'fa04f023-0db3-44fa-941c-0efdae20b429'
                 }
 
                 sh 'ls'
