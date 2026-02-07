@@ -80,6 +80,7 @@ def startLatestStableImages(images, stableTag){
         if(stableImage){
             def tag = stableImage.split(':')[1] // 10-stable
             sh """
+                SPRING_PROFILES_ACTIVE=${env.ENV} \
                 TAG_VERSION=${tag} \
                 docker-compose --env-file credentials/.env.${env.ENV} up -d ${serviceName}
             """
