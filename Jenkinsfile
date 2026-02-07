@@ -120,6 +120,7 @@ pipeline {
     environment {
         APP_VERSION = "${env.BUILD_NUMBER}"
         STABLE_TAG = "stable"
+        COMPOSE_PROJECT_NAME = "granja_favorita"
     }
 
     options {
