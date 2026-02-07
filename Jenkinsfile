@@ -254,7 +254,7 @@ pipeline {
         stage('🧠 Start Microservicio-Principal'){
             steps{
                 script{
-                    throw new Exception("Force Exception")
+                    // throw new Exception("Force Exception")
 
                     try{
                         sh """
