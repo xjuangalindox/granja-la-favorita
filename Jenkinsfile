@@ -170,9 +170,9 @@ pipeline {
         stage('🧹 Prune Docker images (VPS)'){
             steps{
                 script{
-                    // if(env.DO_DEPLOY == 'true'){
+                    if(env.DO_DEPLOY == 'true'){
                         sh 'docker image prune -af'
-                    // }
+                    }
                 }
 
                 sh 'docker images'
@@ -253,7 +253,7 @@ pipeline {
         stage('🧠 Start Microservicio-Principal'){
             steps{
                 script{
-                    // throw new Exception("Force Exception")
+                    throw new Exception("Force Exception")
 
                     try{
                         sh """
