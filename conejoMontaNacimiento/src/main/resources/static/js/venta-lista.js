@@ -27,8 +27,8 @@ function mostrarDetalleVenta(ventaId){
             // Articulos
             if(detalle.articulos && detalle.articulos.length > 0){
                 html += `
-                    <h5 class="fw-bold mb-3">Artículos</h5>
-                    <div class="row g-3 mb-4"> 
+                    <h5 class="fw-bold mb-3 text-center">Artículos</h5>
+                    <div class="row g-3 mb-4 justify-content-center"> 
                 `;
 
                 detalle.articulos.forEach(art => {
@@ -57,20 +57,43 @@ function mostrarDetalleVenta(ventaId){
             // Ejemplares
             if(detalle.ejemplares && detalle.ejemplares.length > 0){
                 html += `
-                    <h5 class="fw-bold mb-3">Ejemplares</h5>
-                    <div class="row g-3 mb-4">
+                    <h5 class="fw-bold mb-3 text-center">Ejemplares</h5>
+                    <div class="row g-3 mb-4 justify-content-center">
                 `;
 
-                detalle.ejemplares.forEach(ej => {
+                detalle.ejemplares.forEach((ej, indexEj) => {
                     // Tomamos la primera imagen si existe, o una placeholder
-                    const imgUrl = (ej.imagenes && ej.imagenes.length > 0) ? ej.imagenes[0].secureUrl : '/img/placeholder.png';
+                    const imagenes = (ej.imagenes && ej.imagenes.length > 0) ? ej.imagenes : [{ secureUrl: '/img/placeholder.png' }];
+                    const carouselId = `carouselEj${indexEj}`; // ID único para cada carrusel
+
+                    // Carrusel de imágenes
+                    let carouselInner = '';
+                    imagenes.forEach((img, idx) => {
+                        carouselInner += `
+                            <div class="carousel-item ${idx === 0 ? 'active' : ''}">
+                                <img src="${img.secureUrl}" class="d-block w-100" style="height:150px; object-fit:cover;">
+                            </div>
+                        `; 
+                    });
 
                     html += `
                         <div class="col-md-4">
                             <div class="card h-100 text-center">
-                                <img src="${imgUrl}"
-                                    class="card-img-top"
-                                    style="height:150px; object-fit:cover;">
+
+                                <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        ${carouselInner}
+                                    </div>
+                                    ${imagenes.length > 1 ? `
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>` : ''}
+                                </div>
 
                                 <div class="card-body">
                                     <h6 class="card-title">Ejemplar</h6>
