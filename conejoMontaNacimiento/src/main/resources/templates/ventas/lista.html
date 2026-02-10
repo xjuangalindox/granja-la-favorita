@@ -67,11 +67,31 @@
 </form>
 <!-- FIN FILTRADO -->
 
+<!-- MODAL DETALLE VENTA -->
+<div class="modal fade" id="modalDetalle" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalDetalleTitle">Detalle de la venta</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body" id="modalDetalleBody">
+        <!-- Se llena dinámicamente con JS -->
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- FIN MODAL DETALLE VENTA -->
+
       <div class="col-12">
         <div class="table-responsive">
           <table class="table table-bordered table-hover align-middle">
             <thead>
               <tr class="text-center">
+                <th scope="col">Detalle</th>
                 <th scope="col">Cliente</th>
                 <th scope="col" class="col-hide-mobile">Contacto</th>
                 <th scope="col" class="col-hide-mobile">Teléfono</th>
@@ -95,20 +115,21 @@
                   (${item.estatus.name == 'REGISTRADO'} ? 'table-secondary' : 'table-light')))) : 
                   'table-light'">
 
-                <!-- visible -->
-                <!-- Si tiene teléfono, muestra el nombre con enlace a WhatsApp -->
-                <!-- <td th:if="${item.telefono != null}">
-                  <a th:href="'https://wa.me/52' + ${item.telefono}"
-                      target="_blank"
-                      class="text-success text-decoration-none">
-                      <i class="bi bi-whatsapp"></i>
-                      <span th:text="${item.nombreCliente}"></span>
-                  </a>
-                </td> -->
+                <!-- Detalle -->
+                <!-- th:onclick="|mostrarDetalleVenta(${item.id})|" -->
+                <td>
+                  <button 
+                    type="button" 
+                    class="btn btn-link p-0" 
+                    title="Ver detalle de la venta" 
+                    th:onclick="|mostrarDetalleVenta(${item.id})|">
 
-                <!-- Si no tiene teléfono, muestra solo el nombre -->
-                <!-- <td th:if="${item.telefono == null}" th:text="${item.nombreCliente}"></td> -->
-                
+                    <!-- <i class="fa fa-eye"></i> -->
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </td>
+
+                <!-- Cliente -->
                 <td>
                   <!-- Si tiene teléfono, muestra el nombre con enlace a WhatsApp -->
                   <a th:if="${item.telefono != null and item.telefono != ''}"
@@ -238,6 +259,8 @@
       </div>
     </div>
   </div>
+
+  <script th:src="@{/js/venta-lista.js}"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
