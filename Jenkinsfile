@@ -129,6 +129,22 @@ pipeline {
     }
 
     stages {
+        stage('Release Gate 🚧'){
+            steps{
+                echo "🚀 Rama pusheada: ${env.BRANCH_NAME}"
+
+                script{
+                    if(env.BRANCH_NAME != 'master'){
+                        currentBuild.result = 'ABORTED'
+                        error('STOP_PIPELINE')
+                        // catchError(buildResult: 'ABORTED', stageResult: 'ABORTED') {
+                            // error('')
+                        // }
+                    }
+                }
+            }
+        }
+
         stage('🔑 Docker Login') {
             steps {
                 script{
@@ -140,7 +156,7 @@ pipeline {
         stage('🧠 Decide deploy'){
             steps{
                 script{
-                    env.DO_DEPLOY = (env.DEPLOY_TARGET == 'VPS' && env.BRANCH_NAME == 'master') ? 'true' : 'false'
+                    env.DO_DEPLOY = (env.DEPLOY_TARGET == 'VPS') ? 'true' : 'false'
 
                     echo "DEPLOY_TARGET: ${env.DEPLOY_TARGET}" // "VPS" o "LOCAL"
                     echo "BRANCH_NAME  : ${env.BRANCH_NAME}"
@@ -363,19 +379,19 @@ pipeline {
 
         aborted {
             echo '********** ⛔ POST: ABORTED **********'
-            echo 'El pipeline fue cancelado por el usuario o excedió el tiempo máximo permitido (30 minutos).'   
+            echo "🚫 Deploy bloqueado: Solo 'master' puede realizar despliegues."
 
             // 1️⃣ Bajar todos los contenedores
             // sh "docker-compose --env-file credentials/.env.${env.ENV} down --remove-orphans || true"
             // sh 'docker ps'
 
-            script{
+            // script{
                 // 1️⃣ Bajar todos los contenedores
-                shutdownContainers(env.ENV)
+                // shutdownContainers(env.ENV)
 
                 // 2️⃣ Remove unstable images
-                removeUnstableImages(BASE_IMAGES, env.STABLE_TAG)
-            }
+                // removeUnstableImages(BASE_IMAGES, env.STABLE_TAG)
+            // }
         }
 
         success {   
@@ -463,7 +479,7 @@ def sendSuccessMail() {
 
     mail(
         from: 'Jenkins <xjuangalindox@gmail.com>',
-        to: 'xjuangalindox@gmail.com',
+        to: 'xjuangalindox@gmail.com, romannancynayely@gmail.com',
         subject: "🚀 Nueva versión disponible - Granja La Favorita",
         body: 
 """
@@ -494,7 +510,7 @@ def sendFailureMail() {
 
     mail(
         from: 'Jenkins <xjuangalindox@gmail.com>',
-        to: 'xjuangalindox@gmail.com',
+        to: 'xjuangalindox@gmail.com, romannancynayely@gmail.com',
         subject: "❌ Error en despliegue - Granja La Favorita",
         body: 
 """

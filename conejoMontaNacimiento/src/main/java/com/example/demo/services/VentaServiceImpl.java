@@ -1,6 +1,8 @@
 package com.example.demo.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -14,13 +16,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import com.example.demo.clients.ArticuloClient;
+import com.example.demo.clients.RazaClient;
 import com.example.demo.controllers.VentaController;
+import com.example.demo.controllers.dto.ArticuloDTO;
+import com.example.demo.controllers.dto.ArticuloVendidoDTO;
 import com.example.demo.controllers.dto.ArticuloVentaDTO;
 import com.example.demo.controllers.dto.EjemplarDTO;
+import com.example.demo.controllers.dto.EjemplarVendidoDTO;
 import com.example.demo.controllers.dto.EjemplarVentaDTO;
+import com.example.demo.controllers.dto.ImagenDTO;
+import com.example.demo.controllers.dto.ProgenitorDTO;
+import com.example.demo.controllers.dto.RazaDTO;
 import com.example.demo.controllers.dto.VentaDTO;
+import com.example.demo.controllers.dto.VentaDetalleDTO;
 import com.example.demo.models.ArticuloVentaModel;
+import com.example.demo.models.ConejoModel;
 import com.example.demo.models.EjemplarModel;
 import com.example.demo.models.EjemplarVentaModel;
 import com.example.demo.models.VentaModel;
@@ -29,6 +42,8 @@ import com.example.demo.repositories.ArticuloVentaRepository;
 import com.example.demo.repositories.EjemplarRepository;
 import com.example.demo.repositories.EjemplarVentaRepository;
 import com.example.demo.repositories.VentaRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class VentaServiceImpl implements IVentaService {
@@ -339,6 +354,82 @@ public class VentaServiceImpl implements IVentaService {
         }
 
         return true;
+    }
+
+    @Autowired
+    private ArticuloClient articuloClient;
+
+    @Autowired
+    private RazaClient razaClient;
+
+    @Override
+    @Transactional(readOnly = true)
+    public VentaDetalleDTO obtenerVentaDetalle(Long ventaId) {
+        VentaModel venta = ventaRepository.findById(ventaId)
+            .orElseThrow(() -> new EntityNotFoundException("Venta no encontrada"));
+        
+        VentaDetalleDTO ventaDetalleDTO = new VentaDetalleDTO();
+
+        // Articulos
+        if(!CollectionUtils.isEmpty(venta.getArticulosVenta())){            
+            List<ArticuloVendidoDTO> articulos = venta.getArticulosVenta()
+                .stream()
+                .map(av -> {
+                    ArticuloVendidoDTO dto = new ArticuloVendidoDTO();
+                    dto.setCantidad(av.getCantidad());
+
+                    ArticuloDTO art = articuloClient.obtenerArticuloPorId(av.getArticuloId());
+                    dto.setNombre(art.getNombre());
+                    dto.setSecureUrl(art.getSecureUrl());
+                    dto.setPresentacion(art.getPresentacion());
+
+                    return dto;
+                })
+                .toList();
+
+            ventaDetalleDTO.setArticulos(articulos);
+        }
+
+        // Ejemplares
+        if(!CollectionUtils.isEmpty(venta.getEjemplaresVenta())){
+            List<EjemplarVendidoDTO> ejemplares = venta.getEjemplaresVenta()
+                .stream()
+                .map(ev -> {
+                    EjemplarVendidoDTO ejemplar = new EjemplarVendidoDTO();
+                    ejemplar.setSexo(ev.getEjemplar().getSexo());
+                    ejemplar.setFechaNacimiento(ev.getEjemplar().getNacimiento().getFechaNacimiento());
+
+                    if(!CollectionUtils.isEmpty(ev.getEjemplar().getFotos())){
+                        List<ImagenDTO> imagenes = ev.getEjemplar().getFotos()
+                            .stream()
+                            .map(f -> new ImagenDTO(f.getSecureUrl()))
+                            .toList();
+                        
+                        ejemplar.setImagenes(imagenes);
+                    }
+                    
+                    ejemplar.setPadre(crearProgenitorDTO(ev.getEjemplar().getNacimiento().getMonta().getMacho()));
+                    ejemplar.setMadre(crearProgenitorDTO(ev.getEjemplar().getNacimiento().getMonta().getHembra()));
+
+                    return ejemplar;
+                })
+                .toList();
+
+            ventaDetalleDTO.setEjemplares(ejemplares);
+        }
+
+        return ventaDetalleDTO;
+    }
+
+    private ProgenitorDTO crearProgenitorDTO(ConejoModel conejoModel){
+        ProgenitorDTO progenitorDTO = new ProgenitorDTO();
+
+        progenitorDTO.setNombre(conejoModel.getNombre());
+        progenitorDTO.setSecureUrl(conejoModel.getSecureUrl());
+        RazaDTO raza = razaClient.obtenerRazaPorId(conejoModel.getRazaId());
+        progenitorDTO.setRaza(raza.getNombre());
+
+        return progenitorDTO;
     }
 
 /* 
