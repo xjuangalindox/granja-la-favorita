@@ -139,7 +139,7 @@ pipeline {
                         error('STOP_PIPELINE')
                         // catchError(buildResult: 'ABORTED', stageResult: 'ABORTED') {
                             // error('')
-                        }
+                        // }
                     }
                 }
             }
