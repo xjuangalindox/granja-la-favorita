@@ -13,4 +13,5 @@ public class ArticuloVendidoDTO {
     private String nombre;
     private String secureUrl;
     private Integer cantidad;
+    private String presentacion;
 }

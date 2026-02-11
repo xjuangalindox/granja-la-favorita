@@ -35,14 +35,16 @@ function mostrarDetalleVenta(ventaId){
                     html += `
                         <div class="col-md-4">
                             <div class="card h-100 text-center">
-                                <img src="${art.secureUrl}"
-                                     class="card-img-top"
-                                     style="height:150px; object-fit:cover;">
+                                <a href="${art.secureUrl}" target="_blank">
+                                    <img src="${art.secureUrl}"
+                                        class="card-img-top"
+                                        style="height:150px; object-fit:cover;">
+                                </a>
 
                                 <div class="card-body">
                                     <h6 class="card-title">${art.nombre}</h6>
                                     <span class="badge bg-primary">
-                                        Cantidad: ${art.cantidad}
+                                        Cantidad: ${art.cantidad} ${art.presentacion}
                                     </span>
                                 </div>
 
@@ -71,7 +73,9 @@ function mostrarDetalleVenta(ventaId){
                     imagenes.forEach((img, idx) => {
                         carouselInner += `
                             <div class="carousel-item ${idx === 0 ? 'active' : ''}">
-                                <img src="${img.secureUrl}" class="d-block w-100" style="height:150px; object-fit:cover;">
+                                <a href="${img.secureUrl}" target="_blank">
+                                    <img src="${img.secureUrl}" class="d-block w-100" style="height:150px; object-fit:cover;">
+                                </a>
                             </div>
                         `; 
                     });
@@ -96,10 +100,9 @@ function mostrarDetalleVenta(ventaId){
                                 </div>
 
                                 <div class="card-body">
-                                    <h6 class="card-title">Ejemplar</h6>
-                                    <span class="badge bg-info me-1">Sexo: ${ej.sexo || '-'}</span>
+                                    <h6 class="card-title">${ej.sexo || '-'}</h6>
                                     <span class="badge bg-secondary">Nacimiento: ${ej.fechaNacimiento || '-'}</span>
-                                    <br><br>
+                                    <br>
                                     <span class="badge bg-success me-1">Padre: ${ej.padre ? ej.padre.nombre : '-'}</span>
                                     <span class="badge bg-danger">Madre: ${ej.madre ? ej.madre.nombre : '-'}</span>
                                 </div>

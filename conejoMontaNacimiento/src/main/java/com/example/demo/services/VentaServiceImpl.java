@@ -381,6 +381,7 @@ public class VentaServiceImpl implements IVentaService {
                     ArticuloDTO art = articuloClient.obtenerArticuloPorId(av.getArticuloId());
                     dto.setNombre(art.getNombre());
                     dto.setSecureUrl(art.getSecureUrl());
+                    dto.setPresentacion(art.getPresentacion());
 
                     return dto;
                 })
