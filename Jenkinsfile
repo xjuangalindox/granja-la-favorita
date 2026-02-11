@@ -135,8 +135,10 @@ pipeline {
 
                 script{
                     if(env.BRANCH_NAME != 'master'){
-                        catchError(buildResult: 'ABORTED', stageResult: 'ABORTED') {
-                            error('')
+                        currentBuild.result = 'ABORTED'
+                        error('STOP_PIPELINE')
+                        // catchError(buildResult: 'ABORTED', stageResult: 'ABORTED') {
+                            // error('')
                         }
                     }
                 }
