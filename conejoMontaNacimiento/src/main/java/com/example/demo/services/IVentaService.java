@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 
 import com.example.demo.controllers.dto.VentaDTO;
+import com.example.demo.controllers.dto.VentaDetalleDTO;
 import com.example.demo.models.enums.EstatusVenta;
 
 public interface IVentaService {
@@ -26,4 +27,6 @@ public interface IVentaService {
 
     public boolean eliminarVenta(Long id);
     // public boolean eliminarVenta(VentaDTO ventaDTO);
+
+    VentaDetalleDTO obtenerVentaDetalle(Long ventaId);
 }
