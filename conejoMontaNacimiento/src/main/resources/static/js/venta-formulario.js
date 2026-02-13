@@ -237,9 +237,9 @@ function agregarNacimientoEliminado(boton){
     }
 }
 
-function onCheckboxChange(checkbox) {
-    actualizarTotalVenta(); // Actualizar el total de la venta
-}
+// function onCheckboxChange(checkbox) {
+    // actualizarTotalVenta(); // Actualizar el total de la venta
+// }
 
 //*************************************************************************************************************************
 
@@ -331,58 +331,148 @@ function agregarNacimiento() {
     });
 }
 
+function toggleSeleccion(card){
+    const input = card.querySelector(".vendido-input");
+
+    if(input.value === "true"){
+        input.value = "false";
+        card.classList.remove("selected");
+    }else{
+        input.value = "true";
+        card.classList.add("selected")
+    }
+
+    actualizarTotalVenta();
+}
+
 function mostrarEjemplares(nacimientoId, nacimientoIndex) {
+    const nacimientoDTO = listaNacimientos.find(nac => nac.id == nacimientoId);
+    if(!nacimientoDTO) return;
+
     const contenedor = document.getElementById(`ejemplares-${nacimientoIndex}`);
     contenedor.innerHTML = ''; // Limpiar contenido anterior
 
     const row = document.createElement('div');
     row.classList.add('row', 'g-3'); // g-3 para espacio entre columnas
 
-    const nacimientoDTO = listaNacimientos.find(nac => nac.id == nacimientoId);
-    if(!nacimientoDTO) return;
-
-    nacimientoDTO.ejemplares.forEach(ejemplar => {
+    ///////////////////////////////////////////////////////////////////////////////
+    // INICIO CAMBIOS
+    ///////////////////////////////////////////////////////////////////////////////
+    
+    // nacimientoDTO.ejemplares.forEach(ejemplar => { // original
+    nacimientoDTO.ejemplares.forEach((ejemplar, indexEj) => {
         const col = document.createElement('div');
-        col.classList.add('col-md-6', 'col-lg-4'); // 2 o 3 columnas dependiendo del tamaño de pantalla
+        col.classList.add(
+        "col-12",   // celular
+        "col-sm-6", // tablet chica
+        "col-md-4", // tablet grande
+        "col-lg-3"  // desktop
+        );
 
-        // Primera foto de cada ejemplar
-        const primeraFoto = (ejemplar.fotos && ejemplar.fotos.length > 0) ?
-            ejemplar.fotos[0].secureUrl : 'default.jpg';
+        const imagenes = (ejemplar.fotos && ejemplar.fotos.length > 0) ? ejemplar.fotos : [{ secureUrl: '/img/placeholder.png' }];
+        const carouselId = `carouselEj${nacimientoIndex}_${indexEj}`; // ID único para cada carrucel
 
-        // Mostrar tipo de precio (normal u oferta)
-        let tipoPrecio = (ejemplar.precio != null && ejemplar.precioOferta == null) ?
-            "Precio" : "Oferta";    
-
-        // Obtener precio a mostrar
-        let precio = (ejemplar.precio != null && ejemplar.precioOferta == null) ?
-                ejemplar.precio : ejemplar.precioOferta;
-
-        col.innerHTML = `
-            <div class="p-2 border rounded">
-                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplar.id}">
-
-                <input class="form-check-input mb-2" 
-                    type="checkbox" 
-                    name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" 
-                    onchange="onCheckboxChange(this)">
-
-                <a href="${primeraFoto}"  target="_blank">
-                    <img src="${primeraFoto}"  
-                        class="img-thumbnail vista-previa" 
-                        style="max-width: 100px; max-height: 100px; object-fit: cover;"/>
-                </a>
-
-                <div>
-                    <p class="mb-1"><strong>Sexo: </strong>${ejemplar.sexo}</p>
-                    <p class="mb-1"><strong>${tipoPrecio}: </strong>$${precio}</p>
-
-                    <input type="hidden"
-                        class="precio-input"
-                        name="ejemplaresVenta[${contEjemplar}].precio"
-                        value="${precio}">
+        // Carrusel de imágenes
+        let carouselInner = '';
+        imagenes.forEach((img, idx) => {
+            carouselInner += `
+                <div class="carousel-item ${idx === 0 ? 'active' : ''}">
+                    <a href="${img.secureUrl}" target="_blank">
+                        <img src="${img.secureUrl}" class="d-block w-100" style="height:150px; object-fit:cover;">
+                    </a>
                 </div>
+            `;
+        });
+
+        // <div class="card h-100 text-center" onclick="toggleSeleccion(this)">
+        let html = `
+            <div class="card h-100 text-center">
+                <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        ${carouselInner}
+                    </div>
+                
+                    ${imagenes.length > 1 ? 
+                        `<button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>` 
+                        : 
+                        ''}
+                </div>
+
+                <div class="card-body">
+                    <h6 class="card-title">${ejemplar.sexo}</h6>
+                    <span class="badge bg-success me-1">Precio: $${ejemplar.precio} MXM</span>
+                    ${ejemplar.precioOferta ? `<span class="badge bg-danger">Oferta: $${ejemplar.precioOferta} MXM</span>` : ''}
+                </div>
+
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplar.id}">
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precio" value="${ejemplar.precio}" class="precio-input">
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precioOferta" value="${ejemplar.precioOferta ?? ''}" class="oferta-input">
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" value="false" class="vendido-input">
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].precio" value="${ejemplar.precioOferta ? ejemplar.precioOferta : ejemplar.precio}">
             </div>
         `;
+
+        col.innerHTML = html;
+
+        const card = col.querySelector(".card");
+        card.addEventListener("click", e => {
+            // si el click fue dentro del carousel -> ignorar
+            if (e.target.closest(".carousel"))
+                return;
+
+            // si el click fue fuera del carousel -> selected/unselected
+            toggleSeleccion(card)
+        });
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // FIN CAMBIOS
+        ///////////////////////////////////////////////////////////////////////////////
+
+        // // Primera foto de cada ejemplar
+        // const primeraFoto = (ejemplar.fotos && ejemplar.fotos.length > 0) ?
+        //     ejemplar.fotos[0].secureUrl : 'default.jpg';
+
+        // // Mostrar tipo de precio (normal u oferta)
+        // let tipoPrecio = (ejemplar.precio != null && ejemplar.precioOferta == null) ?
+        //     "Precio" : "Oferta";    
+
+        // // Obtener precio a mostrar
+        // let precio = (ejemplar.precio != null && ejemplar.precioOferta == null) ?
+        //         ejemplar.precio : ejemplar.precioOferta;
+
+        // col.innerHTML = `
+        //     <div class="p-2 border rounded">
+        //         <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplar.id}">
+
+        //         <input class="form-check-input mb-2" 
+        //             type="checkbox" 
+        //             name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" 
+        //             onchange="onCheckboxChange(this)">
+
+        //         <a href="${primeraFoto}"  target="_blank">
+        //             <img src="${primeraFoto}"  
+        //                 class="img-thumbnail vista-previa" 
+        //                 style="max-width: 100px; max-height: 100px; object-fit: cover;"/>
+        //         </a>
+
+        //         <div>
+        //             <p class="mb-1"><strong>Sexo: </strong>${ejemplar.sexo}</p>
+        //             <p class="mb-1"><strong>${tipoPrecio}: </strong>$${precio}</p>
+
+        //             <input type="hidden"
+        //                 class="precio-input"
+        //                 name="ejemplaresVenta[${contEjemplar}].precio"
+        //                 value="${precio}">
+        //         </div>
+        //     </div>
+        // `;
         row.appendChild(col);
         contEjemplar++;
     });
@@ -457,106 +547,182 @@ function agregarNacimientosUtilizados(nacimientoId) {
 }
 
 function mostrarEjemplaresExistentes(nacimientoId, nacimientoIndex) {
-    console.log("id nacimiento con ejemplares vendidos: ", nacimientoId);
-
-    const contenedor = document.getElementById(`ejemplares-${nacimientoIndex}`);
-    contenedor.innerHTML = ''; // Limpiar contenido anterior
-
-    const row = document.createElement('div');
-    row.classList.add('row', 'g-3'); // g-3 para espacio entre columnas
-
-    // Obtener nacimiento
+    // ¿Existe nacimiento?
     const nacimiento = listaNacimientos.find(nac => nac.id == nacimientoId);
     if(!nacimiento) return;
 
-    // Mostrar o crear ejemplares venta del nacimiento
-    nacimiento.ejemplares.forEach(ejemplar => {
-        const col = document.createElement('div');
-        col.classList.add('col-md-6', 'col-lg-4'); // 2 o 3 columnas dependiendo del tamaño de pantalla
+    // Contenedor de ejemplares
+    const contenedor = document.getElementById(`ejemplares-${nacimientoIndex}`);
+    contenedor.innerHTML = '';
 
-        // Primera foto de cada ejemplar
-        const primeraFoto = (ejemplar.fotos && ejemplar.fotos.length > 0) ?
-            ejemplar.fotos[0].secureUrl : 'default.jpg';
+    // Espacio entre columnas
+    const row = document.createElement('div');
+    row.classList.add('row', 'g-3');
 
-        // Mostrar tipo de precio (normal u oferta)
-        let tipoPrecio = (ejemplar.precio != null && ejemplar.precioOferta == null) ?
-            "Precio" : "Oferta";    
+    // Ejemplares del nacimiento
+    nacimiento.ejemplares.forEach((ejemplar, indexEj) => {
 
-        // Obtener precio a mostrar
-        let precio = (ejemplar.precio != null && ejemplar.precioOferta == null) ?
-                ejemplar.precio : ejemplar.precioOferta;
-
-        // ¿El ejemplar esta vendido?
+        // ¿Ejemplar vendido?
         const ejemplarVenta = ejemplaresVenta.find(ejeV => ejeV.ejemplar.id == ejemplar.id);
 
-        // Mostrar ejemplar vendido
+        // celular, tablet chica / grande y desktop
+        const col = document.createElement('div');
+        col.classList.add("col-12", "col-sm-6", "col-md-4", "col-lg-3");
+
+        // Imagenes / defaults
+        const imagenes = (ejemplar.fotos && ejemplar.fotos.length > 0) ? ejemplar.fotos : [{ secureUrl: '/img/placeholder.png'}];
+        const carouselId = `carouselEj${nacimientoIndex}_${indexEj}`;
+
+        // Carrusel de imagenes
+        let carouselInner = '';
+        imagenes.forEach((img, idx) => {
+            carouselInner += `
+                <div class="carousel-item ${idx === 0 ? 'active' : ''}">
+                    <a href="${img.secureUrl}" target="_blank">
+                        <img src="${img.secureUrl}" class="d-block w-100" style="height:150px; object-fit:cover;">
+                    </a>
+                </div>
+            `;
+        });
+
+        let html = `
+            <div class="card h-100 text-center ${ejemplarVenta ? "selected" : ""}">
+                <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        ${carouselInner}
+                    </div>
+                
+                    ${imagenes.length > 1 ? 
+                        `<button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>` 
+                        : 
+                        ''}
+                </div>
+
+                <div class="card-body">
+                    <h6 class="card-title">${ejemplar.sexo}</h6>
+                    <span class="badge bg-success me-1">Precio: $${ejemplar.precio} MXM</span>
+                    ${ejemplar.precioOferta ? `<span class="badge bg-danger">Oferta: $${ejemplar.precioOferta} MXM</span>` : ''}
+                </div>
+
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplar.id}">
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precio" value="${ejemplar.precio}" class="precio-input">
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precioOferta" value="${ejemplar.precioOferta ?? ''}" class="oferta-input">
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" value="${ejemplarVenta ? "true" : "false"}" class="vendido-input">
+
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].precio" value="${ejemplar.precioOferta ? ejemplar.precioOferta : ejemplar.precio}">
+        `;
+
         if(ejemplarVenta){
-            col.innerHTML = `
-                <div class="p-2 border rounded">
-                    <input type="hidden" name="ejemplaresVenta[${contEjemplar}].id" value="${ejemplarVenta.id}">
-                    <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplarVenta.ejemplar.id}">
-
-                    <input class="form-check-input mb-2" 
-                        type="checkbox" 
-                        name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" 
-                        ${ejemplarVenta.ejemplar.vendido ? 'checked' : ''}
-                        onchange="onCheckboxChange(this)">
-
-                    <a href="${primeraFoto}"  target="_blank">
-                        <img src="${primeraFoto}"  
-                            class="img-thumbnail vista-previa" 
-                            style="max-width: 100px; max-height: 100px; object-fit: cover;"/>
-                    </a>
-
-                    <div>
-                        <p class="mb-1"><strong>Sexo:</strong> ${ejemplarVenta.ejemplar.sexo}</p>
-                        <p class="mb-1"><strong>${tipoPrecio}: </strong>$${ejemplarVenta.precio ?? ''}</p>
-
-                        <input type="hidden"
-                            class="precio-input"
-                            name="ejemplaresVenta[${contEjemplar}].precio"
-                            value="${ejemplarVenta.precio ?? ''}">
-                    </div>
-                </div>
-            `;
-
-        // Mostrar ejemplar disponible
-        }else{
-            col.innerHTML = `
-                <div class="p-2 border rounded">
-                    <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplar.id}">
-
-                    <input class="form-check-input mb-2" 
-                        type="checkbox" 
-                        name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" 
-                        value="true"
-                        onchange="onCheckboxChange(this)"
-                        ${ejemplar.vendido ? 'checked' : ''}>
-
-                    <a href="${primeraFoto}"  target="_blank">
-                        <img src="${primeraFoto}"  
-                            class="img-thumbnail vista-previa" 
-                            style="max-width: 100px; max-height: 100px; object-fit: cover;"/>
-                    </a>
-
-                    <div>
-                        <p class="mb-1"><strong>Sexo:</strong> ${ejemplar.sexo}</p>
-                        <p class="mb-1"><strong>${tipoPrecio}: </strong>$${precio}</p>
-
-                        <input type="hidden"
-                            class="precio-input"
-                            name="ejemplaresVenta[${contEjemplar}].precio"
-                            value="${precio}">
-                    </div>
-                </div>
-            `;
+            html += `<input type="hidden" name="ejemplaresVenta[${contEjemplar}].id" value="${ejemplarVenta.id}">`;
         }
+
+        html += `</div>`;
+        // //////////////////////////////////////////////////////////////////////////////
+        // //////////////////////////////////////////////////////////////////////////////
+
+        // // Primera foto de cada ejemplar
+        // const primeraFoto = (ejemplar.fotos && ejemplar.fotos.length > 0) ?
+        //     ejemplar.fotos[0].secureUrl : 'default.jpg';
+
+        // // Mostrar tipo de precio (normal u oferta)
+        // let tipoPrecio = (ejemplar.precio != null && ejemplar.precioOferta == null) ?
+        //     "Precio" : "Oferta";    
+
+        // // Obtener precio a mostrar
+        // let precio = (ejemplar.precio != null && ejemplar.precioOferta == null) ?
+        //         ejemplar.precio : ejemplar.precioOferta;
+
+        // // ¿El ejemplar esta vendido?
+        // // const ejemplarVenta = ejemplaresVenta.find(ejeV => ejeV.ejemplar.id == ejemplar.id);
+
+        // // Mostrar ejemplar vendido
+        // if(ejemplarVenta){
+        //     col.innerHTML = `
+        //         <div class="p-2 border rounded">
+        //             <input type="hidden" name="ejemplaresVenta[${contEjemplar}].id" value="${ejemplarVenta.id}">
+        //             <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplarVenta.ejemplar.id}">
+
+        //             <input class="form-check-input mb-2" 
+        //                 type="checkbox" 
+        //                 name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" 
+        //                 ${ejemplarVenta.ejemplar.vendido ? 'checked' : ''}
+        //                 onchange="onCheckboxChange(this)">
+
+        //             <a href="${primeraFoto}"  target="_blank">
+        //                 <img src="${primeraFoto}"  
+        //                     class="img-thumbnail vista-previa" 
+        //                     style="max-width: 100px; max-height: 100px; object-fit: cover;"/>
+        //             </a>
+
+        //             <div>
+        //                 <p class="mb-1"><strong>Sexo:</strong> ${ejemplarVenta.ejemplar.sexo}</p>
+        //                 <p class="mb-1"><strong>${tipoPrecio}: </strong>$${ejemplarVenta.precio ?? ''}</p>
+
+        //                 <input type="hidden"
+        //                     class="precio-input"
+        //                     name="ejemplaresVenta[${contEjemplar}].precio"
+        //                     value="${ejemplarVenta.precio ?? ''}">
+        //             </div>
+        //         </div>
+        //     `;
+
+        // // Mostrar ejemplar disponible
+        // }else{
+        //     col.innerHTML = `
+        //         <div class="p-2 border rounded">
+        //             <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplar.id}">
+
+        //             <input class="form-check-input mb-2" 
+        //                 type="checkbox" 
+        //                 name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" 
+        //                 value="true"
+        //                 onchange="onCheckboxChange(this)"
+        //                 ${ejemplar.vendido ? 'checked' : ''}>
+
+        //             <a href="${primeraFoto}"  target="_blank">
+        //                 <img src="${primeraFoto}"  
+        //                     class="img-thumbnail vista-previa" 
+        //                     style="max-width: 100px; max-height: 100px; object-fit: cover;"/>
+        //             </a>
+
+        //             <div>
+        //                 <p class="mb-1"><strong>Sexo:</strong> ${ejemplar.sexo}</p>
+        //                 <p class="mb-1"><strong>${tipoPrecio}: </strong>$${precio}</p>
+
+        //                 <input type="hidden"
+        //                     class="precio-input"
+        //                     name="ejemplaresVenta[${contEjemplar}].precio"
+        //                     value="${precio}">
+        //             </div>
+        //         </div>
+        //     `;
+        // }
+
+        col.innerHTML = html;
+
+        const card = col.querySelector(".card");
+        card.addEventListener("click", e => {
+            // si el click fue dentro del carousel -> ignorar
+            if (e.target.closest(".carousel"))
+                return;
+
+            // si el click fue fuera del carousel -> selected/unselected
+            toggleSeleccion(card)
+        });
 
         row.appendChild(col);
         contEjemplar++;
     });
 
-    contenedor.appendChild(row); // Agrega la fila completa
+    contenedor.appendChild(row);
+    actualizarTotalVenta();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -623,17 +789,31 @@ function actualizarTotalVenta() {
     // Sumar precios solo de ejemplares seleccionados
     const contenedorEjemplares = document.getElementById('nacimientosContainer');
     if (contenedorEjemplares) {
-        // Selecciona cada col que contiene un ejemplar (según tu código sería div con clase col-md-6 dentro de un div.row)
-        contenedorEjemplares.querySelectorAll('div.col-md-6').forEach(col => {
-            const checkbox = col.querySelector('input[type="checkbox"]');
-            const precioInput = col.querySelector('input.precio-input');
-            if (checkbox && checkbox.checked && precioInput) {
-                total += parseFloat(precioInput.value) || 0;
+        // contenedorEjemplares.querySelectorAll('div.col-md-6').forEach(col => { // origial
+        contenedorEjemplares.querySelectorAll('.card').forEach(card => {
+            const vendido = card.querySelector('.vendido-input');
+            const precio = card.querySelector('.precio-input');
+            const oferta = card.querySelector('.oferta-input');
+            
+            console.log(vendido.value);
+            console.log(precio.value);
+            console.log(oferta.value, typeof oferta.value);
+
+            if(vendido?.value == "true"){
+                const costo = oferta.value !== '' ? oferta.value : precio.value;
+                total += parseFloat(costo) || 0;
             }
+            // const checkbox = col.querySelector('input[type="checkbox"]'); // original
+            // const precioInput = col.querySelector('input.precio-input'); // original
+            // if (checkbox && checkbox.checked && precioInput) { // original
+                // total += parseFloat(precioInput.value) || 0;  // original
+            // }
         });
     }
-
-    document.querySelector('input[name="totalVenta"]').value = total.toFixed(2);
+    
+    total != 0 ? document.getElementById('totalVenta').value = total.toFixed(2) : document.getElementById('totalVenta').value = '';
+    // total != 0 ? document.querySelector('input[name="totalVenta"]').value = total.toFixed(2) :
+    // document.querySelector('input[name="totalVenta"]').value = '';
 
     // Calcular restante
     calcularRestante();
@@ -645,10 +825,11 @@ function calcularRestante() {
     const adelanto = parseFloat(document.getElementById('adelanto').value) || 0;
     const restante = total - adelanto;
 
-    document.getElementById('restante').value = restante.toFixed(2);
+    restante != 0 ? document.getElementById('restante').value = restante.toFixed(2) : document.getElementById('restante').value = '';
+    // document.getElementById('restante').value = restante.toFixed(2);
 }
 
 // Calcular restante al abrir el formulario o input del adelanto
 window.addEventListener('DOMContentLoaded', calcularRestante);
 document.getElementById('adelanto').addEventListener('input', calcularRestante);
-document.getElementById('totalVenta').addEventListener('input', calcularRestante); // sin uso porque input = readonly
+// document.getElementById('totalVenta').addEventListener('input', calcularRestante); // sin uso porque input = readonly
