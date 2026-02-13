@@ -413,7 +413,7 @@ function mostrarEjemplares(nacimientoId, nacimientoIndex) {
 
                 <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplar.id}">
                 <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precio" value="${ejemplar.precio}" class="precio-input">
-                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precioOferta" value="${ejemplar.precioOferta}" class="oferta-input">
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precioOferta" value="${ejemplar.precioOferta ?? ''}" class="oferta-input">
                 <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" value="false" class="vendido-input">
                 <input type="hidden" name="ejemplaresVenta[${contEjemplar}].precio" value="${ejemplar.precioOferta ? ejemplar.precioOferta : ejemplar.precio}">
             </div>
@@ -613,7 +613,7 @@ function mostrarEjemplaresExistentes(nacimientoId, nacimientoIndex) {
 
                 <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.id" value="${ejemplar.id}">
                 <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precio" value="${ejemplar.precio}" class="precio-input">
-                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precioOferta" value="${ejemplar.precioOferta}" class="oferta-input">
+                <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.precioOferta" value="${ejemplar.precioOferta ?? ''}" class="oferta-input">
                 <input type="hidden" name="ejemplaresVenta[${contEjemplar}].ejemplar.vendido" value="${ejemplarVenta ? "true" : "false"}" class="vendido-input">
 
                 <input type="hidden" name="ejemplaresVenta[${contEjemplar}].precio" value="${ejemplar.precioOferta ? ejemplar.precioOferta : ejemplar.precio}">
@@ -800,7 +800,7 @@ function actualizarTotalVenta() {
             console.log(oferta.value, typeof oferta.value);
 
             if(vendido?.value == "true"){
-                const costo = oferta.value !== "null" ? oferta.value : precio.value;
+                const costo = oferta.value !== '' ? oferta.value : precio.value;
                 total += parseFloat(costo) || 0;
             }
             // const checkbox = col.querySelector('input[type="checkbox"]'); // original
@@ -832,4 +832,4 @@ function calcularRestante() {
 // Calcular restante al abrir el formulario o input del adelanto
 window.addEventListener('DOMContentLoaded', calcularRestante);
 document.getElementById('adelanto').addEventListener('input', calcularRestante);
-document.getElementById('totalVenta').addEventListener('input', calcularRestante); // sin uso porque input = readonly
+// document.getElementById('totalVenta').addEventListener('input', calcularRestante); // sin uso porque input = readonly
