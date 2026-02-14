@@ -33,7 +33,7 @@ function mostrarDetalleVenta(ventaId){
 
                 detalle.articulos.forEach(art => {
                     html += `
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="col-6 col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100 text-center">
                                 <a href="${art.secureUrl}" target="_blank">
                                     <img src="${art.secureUrl}"
@@ -81,7 +81,7 @@ function mostrarDetalleVenta(ventaId){
                     });
 
                     html += `
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="col-6 col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100 text-center">
 
                                 <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
