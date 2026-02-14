@@ -117,7 +117,7 @@
                 class="text-center align-middle" 
                 th:each="item : ${listaVentas}" 
                 th:attr="data-id=${item.id}, data-nombre=${item.nombreCliente}"
-                onclick="mostrarDetalleVenta(this)"
+                onclick="if(!event.target.closest('a,button')) mostrarDetalleVenta(this)"
                 th:classappend="
                   ${item.estatus != null} ?
                   (${item.estatus.name == 'PENDIENTE'} ? 'table-danger' : 
@@ -154,8 +154,7 @@
                   <a th:if="${item.telefono != null and item.telefono != ''}"
                       th:href="'https://wa.me/52' + ${item.telefono}"
                       target="_blank"
-                      class="text-success text-decoration-none"
-                      onclick="event.stopPropagation()">
+                      class="text-success text-decoration-none">
                       
                       <i class="bi bi-whatsapp"></i>
                       <span th:text="${item.nombreCliente}"></span>
@@ -175,8 +174,8 @@
                 <td th:text="${item.lugarEntrega}"></td>
                 
                 <!-- totalVenta -->
-                <td th:text="${item.totalVenta != null} ? 
-                  '$' + ${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')} : ''"></td>
+                <td th:text="${item.totalVenta == null} ? '' : 
+                  '$' + ${#numbers.formatDecimal((item.totalVenta ?: 0) + (item.extra ?: 0), 1, 'COMMA', 2, 'POINT')}"></td>
 
                 <!-- adelanto -->
                 <td th:text="${item.adelanto != null} ? 
@@ -184,7 +183,7 @@
 
                 <!-- restante -->
                 <td th:text="${item.totalVenta == null} ? '' :
-                    '$' + ${#numbers.formatDecimal((item.totalVenta ?: 0) + (item.extra ?: 0) - (item.adelanto ?: 0), 1, 'COMMA', 2, 'POINT')}"></td>
+                  '$' + ${#numbers.formatDecimal((item.totalVenta ?: 0) + (item.extra ?: 0) - (item.adelanto ?: 0), 1, 'COMMA', 2, 'POINT')}"></td>
 
                 <!-- nota -->
                 <td th:text="${item.nota}" class="col-hide-mobile"></td>
@@ -193,14 +192,13 @@
                 <td>
                   <div class="d-flex flex-column flex-md-row gap-1 justify-content-center">
                     <a th:href="@{/ventas/editar/{id}(id=${item.id})}" 
-                      class="btn btn-info btn-sm"
-                      onclick="event.stopPropagation()">
+                      class="btn btn-info btn-sm">
 
                       <i class="bi bi-pencil"></i> <span class="d-none d-md-inline">Editar</span>
                     </a>
                     <a th:href="@{/ventas/eliminar/{id}(id=${item.id}, estatusFiltro=${estatusFiltro})}" 
                       class="btn btn-danger btn-sm"
-                      onclick="event.stopPropagation(); return confirm('¿Seguro que deseas eliminar esta venta?')">
+                      onclick="return confirm('¿Seguro que deseas eliminar esta venta?')">
 
                       <i class="bi bi-trash"></i> <span class="d-none d-md-inline">Eliminar</span>
                     </a>
@@ -217,8 +215,7 @@
       <button type="button" 
         class="btn btn-sm dropdown-toggle" 
         data-bs-toggle="dropdown" 
-        aria-expanded="false"
-        onclick="event.stopPropagation()"
+        aria-expanded="false" 
         th:classappend="
           ${item.estatus != null} ?
           (${item.estatus.name == 'PENDIENTE'} ? 'btn-danger' : 
@@ -232,16 +229,12 @@
       
       <ul class="dropdown-menu">
         <li><a class="dropdown-item" 
-              onclick="event.stopPropagation()"
               th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='PENDIENTE', estatusFiltro=${estatusFiltro})}" th:text="'Pendiente'"></a></li>
         <li><a class="dropdown-item" 
-              onclick="event.stopPropagation()"
               th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='APARTADO', estatusFiltro=${estatusFiltro})}" th:text="'Apartado'"></a></li>
         <li><a class="dropdown-item" 
-              onclick="event.stopPropagation()"
               th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='ENTREGADO', estatusFiltro=${estatusFiltro})}" th:text="'Entregado'"></a></li>
         <li><a class="dropdown-item" 
-              onclick="event.stopPropagation()"
               th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='REGISTRADO', estatusFiltro=${estatusFiltro})}" th:text="'Registrado'"></a></li>
       </ul>
     </div>
@@ -250,9 +243,8 @@
     <a th:if="${item.estatus != null}" 
       th:href="@{/ventas/actualizarEstatus/{id}(id=${item.id}, estatusNuevo='', estatusFiltro=${estatusFiltro})}" 
       class="btn btn-sm btn-outline-secondary" 
-      title="Quitar estatus"
-      onclick="event.stopPropagation()">
-      
+      title="Quitar estatus">
+
       <i class="bi bi-x-circle"></i>
     </a>
 

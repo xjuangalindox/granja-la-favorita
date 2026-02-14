@@ -1,12 +1,23 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //MOSTRAR DETALLE DE LA VENTA
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// function mostrarDetalleVenta(ventaId, nombreCliente){
+
+function formatearFecha(fechaISO){
+    if(!fechaISO) return '';
+    return new Intl.DateTimeFormat('es-MX', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+    })
+    .format(new Date(fechaISO))
+    .replace(/ de /g, ' ');
+}
+
 function mostrarDetalleVenta(row){
     const ventaId = row.dataset.id;
     const nombre = row.dataset.nombre;
 
-    document.getElementById("modalDetalleTitle").textContent = `Detalle venta - ${nombre}`;
+    document.getElementById("modalDetalleTitle").textContent = `Detalle - ${nombre}`;
     
     const body = document.getElementById("modalDetalleBody");
     
@@ -107,7 +118,7 @@ function mostrarDetalleVenta(row){
 
                                 <div class="card-body">
                                     <h6 class="card-title">${ej.sexo || '-'}</h6>
-                                    <span class="badge bg-secondary">Nacimiento: ${ej.fechaNacimiento || '-'}</span>
+                                    <span class="badge bg-secondary">Nac: ${formatearFecha(ej.fechaNacimiento) || '-'}</span>
                                     <br>
                                     <span class="badge bg-success me-1">Padre: ${ej.padre ? ej.padre.nombre : '-'}</span>
                                     <span class="badge bg-danger">Madre: ${ej.madre ? ej.madre.nombre : '-'}</span>
