@@ -118,7 +118,10 @@ public class VentaServiceImpl implements IVentaService {
         ventaModel.setAdelanto(ventaDTO.getAdelanto());
         ventaModel.setExtra(ventaDTO.getExtra());
         ventaModel.setNota(ventaDTO.getNota());
-        // ventaModel.setEstatus(ventaDTO.getEstatus());
+        
+        ventaModel.setEstatus(
+            ventaDTO.getAdelanto() != null && ventaDTO.getAdelanto() > 0 
+            ? EstatusVenta.APARTADO : EstatusVenta.PENDIENTE);
 
         // Persistir informacion general de la venta
         ventaRepository.save(ventaModel);
@@ -243,7 +246,13 @@ public class VentaServiceImpl implements IVentaService {
         ventaOriginal.setAdelanto(ventaDTO.getAdelanto());
         ventaOriginal.setExtra(ventaDTO.getExtra());
         ventaOriginal.setNota(ventaDTO.getNota());
-        // ventaOriginal.setEstatus(ventaDTO.getEstatus());
+
+        EstatusVenta estatusActual = ventaOriginal.getEstatus();
+        if(estatusActual != EstatusVenta.ENTREGADO && estatusActual != EstatusVenta.REGISTRADO){
+            ventaOriginal.setEstatus(
+                ventaDTO.getAdelanto() != null && ventaDTO.getAdelanto() > 0 
+                ? EstatusVenta.APARTADO : EstatusVenta.PENDIENTE);
+        }
 
         ventaOriginal = ventaRepository.save(ventaOriginal);
         VentaDTO venta = modelMapper.map(ventaOriginal, VentaDTO.class);
