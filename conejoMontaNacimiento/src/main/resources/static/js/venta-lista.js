@@ -1,9 +1,26 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //MOSTRAR DETALLE DE LA VENTA
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function mostrarDetalleVenta(ventaId){
-    const body = document.getElementById("modalDetalleBody");
 
+function formatearFecha(fechaISO){
+    if(!fechaISO) return '';
+    return new Intl.DateTimeFormat('es-MX', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+    })
+    .format(new Date(fechaISO))
+    .replace(/ de /g, ' ');
+}
+
+function mostrarDetalleVenta(row){
+    const ventaId = row.dataset.id;
+    const nombre = row.dataset.nombre;
+
+    document.getElementById("modalDetalleTitle").textContent = `Detalle - ${nombre}`;
+    
+    const body = document.getElementById("modalDetalleBody");
+    
     body.innerHTML = `
         <div class="text-center py-4">
             <div class="spinner-border text-primary"></div>
@@ -33,7 +50,7 @@ function mostrarDetalleVenta(ventaId){
 
                 detalle.articulos.forEach(art => {
                     html += `
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="col-6 col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100 text-center">
                                 <a href="${art.secureUrl}" target="_blank">
                                     <img src="${art.secureUrl}"
@@ -81,7 +98,7 @@ function mostrarDetalleVenta(ventaId){
                     });
 
                     html += `
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="col-6 col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100 text-center">
 
                                 <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
@@ -101,7 +118,7 @@ function mostrarDetalleVenta(ventaId){
 
                                 <div class="card-body">
                                     <h6 class="card-title">${ej.sexo || '-'}</h6>
-                                    <span class="badge bg-secondary">Nacimiento: ${ej.fechaNacimiento || '-'}</span>
+                                    <span class="badge bg-secondary">Nac: ${formatearFecha(ej.fechaNacimiento) || '-'}</span>
                                     <br>
                                     <span class="badge bg-success me-1">Padre: ${ej.padre ? ej.padre.nombre : '-'}</span>
                                     <span class="badge bg-danger">Madre: ${ej.madre ? ej.madre.nombre : '-'}</span>
