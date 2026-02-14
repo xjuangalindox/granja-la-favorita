@@ -1,9 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //MOSTRAR DETALLE DE LA VENTA
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function mostrarDetalleVenta(ventaId){
-    const body = document.getElementById("modalDetalleBody");
+// function mostrarDetalleVenta(ventaId, nombreCliente){
+function mostrarDetalleVenta(row){
+    const ventaId = row.dataset.id;
+    const nombre = row.dataset.nombre;
 
+    document.getElementById("modalDetalleTitle").textContent = `Detalle venta - ${nombre}`;
+    
+    const body = document.getElementById("modalDetalleBody");
+    
     body.innerHTML = `
         <div class="text-center py-4">
             <div class="spinner-border text-primary"></div>
