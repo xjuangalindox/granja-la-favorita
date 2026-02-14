@@ -361,13 +361,9 @@ function mostrarEjemplares(nacimientoId, nacimientoIndex) {
     
     // nacimientoDTO.ejemplares.forEach(ejemplar => { // original
     nacimientoDTO.ejemplares.forEach((ejemplar, indexEj) => {
+        
         const col = document.createElement('div');
-        col.classList.add(
-        "col-12",   // celular
-        "col-sm-6", // tablet chica
-        "col-md-4", // tablet grande
-        "col-lg-3"  // desktop
-        );
+        col.classList.add("col-6", "col-sm-6", "col-md-4", "col-lg-3");
 
         const imagenes = (ejemplar.fotos && ejemplar.fotos.length > 0) ? ejemplar.fotos : [{ secureUrl: '/img/placeholder.png' }];
         const carouselId = `carouselEj${nacimientoIndex}_${indexEj}`; // ID único para cada carrucel
@@ -567,7 +563,7 @@ function mostrarEjemplaresExistentes(nacimientoId, nacimientoIndex) {
 
         // celular, tablet chica / grande y desktop
         const col = document.createElement('div');
-        col.classList.add("col-12", "col-sm-6", "col-md-4", "col-lg-3");
+        col.classList.add("col-6", "col-sm-6", "col-md-4", "col-lg-3");
 
         // Imagenes / defaults
         const imagenes = (ejemplar.fotos && ejemplar.fotos.length > 0) ? ejemplar.fotos : [{ secureUrl: '/img/placeholder.png'}];
@@ -822,14 +818,19 @@ function actualizarTotalVenta() {
 // Calcular restante
 function calcularRestante() {
     const total = parseFloat(document.getElementById('totalVenta').value) || 0;
+    const extra = parseFloat(document.getElementById('extra').value) || 0;
     const adelanto = parseFloat(document.getElementById('adelanto').value) || 0;
-    const restante = total - adelanto;
+    const restante = (total + extra) - adelanto;
 
-    restante != 0 ? document.getElementById('restante').value = restante.toFixed(2) : document.getElementById('restante').value = '';
+    document.getElementById('restante').value = 
+        restante !== 0 ? restante.toFixed(2) : '';
+
+    // restante != 0 ? document.getElementById('restante').value = restante.toFixed(2) : document.getElementById('restante').value = '';
     // document.getElementById('restante').value = restante.toFixed(2);
 }
 
 // Calcular restante al abrir el formulario o input del adelanto
 window.addEventListener('DOMContentLoaded', calcularRestante);
 document.getElementById('adelanto').addEventListener('input', calcularRestante);
+document.getElementById('extra').addEventListener('input', calcularRestante);
 // document.getElementById('totalVenta').addEventListener('input', calcularRestante); // sin uso porque input = readonly

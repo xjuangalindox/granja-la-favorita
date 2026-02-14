@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.example.demo.models.NacimientoModel;
 import com.example.demo.models.enums.EstatusVenta;
 
 import jakarta.persistence.EnumType;
@@ -29,6 +28,7 @@ public class VentaDTO {
     private String lugarEntrega;
     private Double totalVenta;
     private Double adelanto;
+    private Double extra;
     private String nota;
     
     @Enumerated(EnumType.STRING)

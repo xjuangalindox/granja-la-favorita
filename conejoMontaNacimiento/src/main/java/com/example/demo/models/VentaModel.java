@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.example.demo.models.enums.EstatusVenta;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -45,6 +44,7 @@ public class VentaModel {
     @Column(name = "total_venta")
     private Double totalVenta;
     private Double adelanto;
+    private Double extra;
     private String nota;
 
     @Enumerated(EnumType.STRING)
