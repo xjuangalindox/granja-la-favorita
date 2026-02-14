@@ -155,20 +155,15 @@
                 
                 <!-- totalVenta -->
                 <td th:text="${item.totalVenta != null} ? 
-                  '$' + ${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')} : 
-                  ''"></td>
+                  '$' + ${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')} : ''"></td>
 
                 <!-- adelanto -->
                 <td th:text="${item.adelanto != null} ? 
-                  '$' + ${#numbers.formatDecimal(item.adelanto, 1, 'COMMA', 2, 'POINT')} : 
-                  ''"></td>
+                  '$' + ${#numbers.formatDecimal(item.adelanto, 1, 'COMMA', 2, 'POINT')} : ''"></td>
 
                 <!-- restante -->
-                <td th:text="${item.totalVenta == null} ? '' : (
-                  ${item.adelanto != null} ? 
-                  '$' + ${#numbers.formatDecimal(item.totalVenta - item.adelanto, 1, 'COMMA', 2, 'POINT')} : 
-                  '$' + ${#numbers.formatDecimal(item.totalVenta, 1, 'COMMA', 2, 'POINT')}
-                  )"></td>
+                <td th:text="${item.totalVenta == null} ? '' :
+                    '$' + ${#numbers.formatDecimal((item.totalVenta ?: 0) + (item.extra ?: 0) - (item.adelanto ?: 0), 1, 'COMMA', 2, 'POINT')}"></td>
 
                 <!-- nota -->
                 <td th:text="${item.nota}" class="col-hide-mobile"></td>

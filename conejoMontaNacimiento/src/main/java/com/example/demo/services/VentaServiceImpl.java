@@ -116,6 +116,7 @@ public class VentaServiceImpl implements IVentaService {
         ventaModel.setLugarEntrega(ventaDTO.getLugarEntrega());
         ventaModel.setTotalVenta(ventaDTO.getTotalVenta());
         ventaModel.setAdelanto(ventaDTO.getAdelanto());
+        ventaModel.setExtra(ventaDTO.getExtra());
         ventaModel.setNota(ventaDTO.getNota());
         // ventaModel.setEstatus(ventaDTO.getEstatus());
 
@@ -240,6 +241,7 @@ public class VentaServiceImpl implements IVentaService {
         ventaOriginal.setLugarEntrega(ventaDTO.getLugarEntrega());
         ventaOriginal.setTotalVenta(ventaDTO.getTotalVenta());
         ventaOriginal.setAdelanto(ventaDTO.getAdelanto());
+        ventaOriginal.setExtra(ventaDTO.getExtra());
         ventaOriginal.setNota(ventaDTO.getNota());
         // ventaOriginal.setEstatus(ventaDTO.getEstatus());
 
