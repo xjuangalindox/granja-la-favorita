@@ -176,7 +176,7 @@ pipeline {
                     }else{
                         env.ENV = 'dev'
                         env.DOCKER_COMPOSE = ''
-                        env.GIT_CREDS = 'fa04f023-0db3-44fa-941c-0efdae20b429'
+                        env.GIT_CREDS = '2dd51f03-81cf-4c7d-9a92-2a888b94fc72'
                     }
                 }
 
