@@ -479,7 +479,7 @@ def sendSuccessMail() {
 
     mail(
         from: 'Jenkins <xjuangalindox@gmail.com>',
-        to: 'xjuangalindox@gmail.com, romannancynayely@gmail.com',
+        to: 'xjuangalindox@gmail.com, rodriguezromannancynayely@gmail.com',
         subject: "🚀 Nueva versión disponible - Granja La Favorita",
         body: 
 """
@@ -510,7 +510,7 @@ def sendFailureMail() {
 
     mail(
         from: 'Jenkins <xjuangalindox@gmail.com>',
-        to: 'xjuangalindox@gmail.com, romannancynayely@gmail.com',
+        to: 'xjuangalindox@gmail.com, rodriguezromannancynayely@gmail.com',
         subject: "❌ Error en despliegue - Granja La Favorita",
         body: 
 """
