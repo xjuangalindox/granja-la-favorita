@@ -221,15 +221,15 @@ pipeline {
 
         stage('🔐 Fetch credentials') {
             steps {
-                // dir('credentials') {
-                dir('GranjaLaFavorita/granja-la-favorita/credentials') {
+                dir('credentials') {
+                // dir('GranjaLaFavorita/granja-la-favorita/credentials') {
                     git url: 'https://github.com/xjuangalindox/credentials.git',
                         branch: 'profiles',
                         credentialsId: env.GIT_CREDS
                 }
 
-                // sh 'ls'
-                sh 'ls GranjaLaFavorita/granja-la-favorita/credentials'
+                sh 'ls'
+                // sh 'ls GranjaLaFavorita/granja-la-favorita/credentials'
             }
         }
 
