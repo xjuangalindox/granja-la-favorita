@@ -35,6 +35,7 @@ def tagAsStable(images, appVersion, stableTag) {
 def startBaseServices(services){
     echo '********** 🧱 Start Base Services **********'
 
+    dir('GranjaLaFavorita/granja-la-favorita') {
     services.each{ service ->
         try{
             sh "docker-compose --env-file credentials/.env.${env.ENV} up -d ${service} || true"
@@ -43,6 +44,7 @@ def startBaseServices(services){
             showLastLogs(service)
             throw e
         }
+    }
     }
 
     sh 'docker ps'
