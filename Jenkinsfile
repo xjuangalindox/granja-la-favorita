@@ -35,7 +35,7 @@ def tagAsStable(images, appVersion, stableTag) {
 def startBaseServices(services){
     echo '********** 🧱 Start Base Services **********'
 
-    dir('GranjaLaFavorita/granja-la-favorita') {
+    // dir('GranjaLaFavorita/granja-la-favorita') {
     services.each{ service ->
         try{
             sh "docker-compose --env-file credentials/.env.${env.ENV} up -d ${service} || true"
@@ -45,7 +45,7 @@ def startBaseServices(services){
             throw e
         }
     }
-    }
+    // }
 
     sh 'docker ps'
 }
@@ -221,13 +221,15 @@ pipeline {
 
         stage('🔐 Fetch credentials') {
             steps {
-                dir('credentials') {
+                // dir('credentials') {
+                dir('GranjaLaFavorita/granja-la-favorita/credentials') {
                     git url: 'https://github.com/xjuangalindox/credentials.git',
                         branch: 'profiles',
                         credentialsId: env.GIT_CREDS
                 }
 
-                sh 'ls'
+                // sh 'ls'
+                sh 'ls GranjaLaFavorita/granja-la-favorita/credentials'
             }
         }
 
